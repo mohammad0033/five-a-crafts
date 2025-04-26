@@ -1,1 +1,31 @@
+@use '@angular/material' as mat;
+@use 'app/core/theme/theme_theme-colors' as custom-theme; // Use an alias like 'custom-theme'
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+$five-a-crafts-light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: custom-theme.$primary-palette,
+    tertiary: custom-theme.$tertiary-palette
+  )
+));
+
+html {
+  @include mat.core(); // Include Angular Material core styles
+  @include mat.all-component-themes($five-a-crafts-light-theme);
+}
+
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --primary-color: #eaa665;
+  --secondary-color: #f4e1ba;
+  --background-color: #f8f4e9;
+}
+html, body { height: 100%; }
+body { margin: 0;
+  font-family: Poppins, Roboto, "Helvetica Neue", sans-serif;
+}
+
+.fs-08 {
+  font-size: 0.8rem;
+}
