@@ -1,0 +1,111 @@
+<footer class="footer py-5 px-3 position-fixed bottom-0 w-100">
+  <div class="container-fluid">
+    <div class="row align-items-start" *ngIf="!isHandset">
+      <div class="col-md-3 mb-4 mb-md-0 text-center text-md-start">
+        <div class="logo mb-3">
+          <img src="images/logo.jpg" alt="Five A Crafts Logo" class="img-fluid">
+        </div>
+
+        <h6 class="fw-light text-secondary text-uppercase">Follow Us</h6>
+        <section class="social-media d-flex justify-content-center justify-content-md-start gap-3">
+          <a href="#" aria-label="Instagram" class="text-secondary-emphasis">
+            <fa-icon [icon]="faInstagram"></fa-icon></a>
+          <a href="#" aria-label="Facebook" class="text-secondary-emphasis">
+            <fa-icon [icon]="faFacebook"></fa-icon></a>
+          <a href="#" aria-label="Twitter" class="text-secondary-emphasis">
+            <fa-icon [icon]="faTwitter"></fa-icon></a>
+        </section>
+      </div>
+
+      <nav class="col-md-3 mb-4 mb-md-0" aria-label="Categories">
+        <h6 class="fw-bold mb-4">Categories</h6>
+        <ul class="list-unstyled d-flex flex-column gap-3">
+          <li><a href="#" class="text-decoration-none text-dark">Candles</a></li>
+          <li><a href="#" class="text-decoration-none text-dark">Concrete</a></li>
+          <li><a href="#" class="text-decoration-none text-dark">Wood</a></li>
+          <li><a href="#" class="text-decoration-none text-dark">Candles & Concrete</a></li>
+        </ul>
+      </nav>
+
+      <nav class="col-md-3 mb-4 mb-md-0" aria-label="About us">
+        <h6 class="fw-bold mb-4">About Us</h6>
+        <ul class="list-unstyled d-flex flex-column gap-3">
+          <li><a href="#" class="text-decoration-none text-dark">About Five A Crafts</a></li>
+          <li><a href="#" class="text-decoration-none text-dark">Reviews</a></li>
+          <li><a href="#" class="text-decoration-none text-dark">News</a></li>
+        </ul>
+      </nav>
+
+      <nav class="col-md-3" aria-label="Contact">
+        <h6 class="fw-bold mb-3">Contact</h6>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-decoration-none text-dark">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="mb-3" *ngIf="isHandset">
+      <div class="accordion accordion-flush" id="accordionFlushExample">
+        <div class="accordion-item py-3 bg-transparent">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+              Categories
+            </button>
+          </h2>
+          <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">
+              <ul class="list-unstyled d-flex flex-column gap-3">
+                <li><a href="#" class="text-decoration-none text-dark">Candles</a></li>
+                <li><a href="#" class="text-decoration-none text-dark">Concrete</a></li>
+                <li><a href="#" class="text-decoration-none text-dark">Wood</a></li>
+                <li><a href="#" class="text-decoration-none text-dark">Candles & Concrete</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item py-3 bg-transparent">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+              About Us
+            </button>
+          </h2>
+          <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">
+              <ul class="list-unstyled d-flex flex-column gap-3">
+                <li><a href="#" class="text-decoration-none text-dark">About Five A Crafts</a></li>
+                <li><a href="#" class="text-decoration-none text-dark">Reviews</a></li>
+                <li><a href="#" class="text-decoration-none text-dark">News</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item py-3 bg-transparent">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+              Contact
+            </button>
+          </h2>
+          <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">
+              <ul class="list-unstyled d-flex flex-column gap-3">
+                <li><a href="#" class="text-decoration-none text-dark">Contact Us</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex flex-column align-items-start mt-4">
+        <h6 class="fw-light text-secondary text-uppercase">Follow Us</h6>
+        <section class="social-media d-flex justify-content-center justify-content-md-start gap-3">
+          <a href="#" aria-label="Instagram" class="text-secondary-emphasis">
+            <fa-icon [icon]="faInstagram"></fa-icon></a>
+          <a href="#" aria-label="Facebook" class="text-secondary-emphasis">
+            <fa-icon [icon]="faFacebook"></fa-icon></a>
+          <a href="#" aria-label="Twitter" class="text-secondary-emphasis">
+            <fa-icon [icon]="faTwitter"></fa-icon></a>
+        </section>
+      </div>
+    </div>
+
+    <p class="copyright mt-3 fs-08 text-secondary m-0">&copy; Five A Crafts 2025. All rights reserved.</p>
+  </div>
+</footer>
