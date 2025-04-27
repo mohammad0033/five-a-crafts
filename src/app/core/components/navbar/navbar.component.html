@@ -48,9 +48,15 @@
             <a class="nav-link" routerLink="/about" routerLinkActive="active">{{ 'aboutUs' | translate }}</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" routerLink="/categories" routerLinkActive="active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              {{ 'categories' | translate }}
-            </a>
+              <a class="nav-link dropdown-toggle"
+                 [routerLink]="isDesktop ? '/categories' : null"
+                 routerLinkActive="active"
+                 [routerLinkActiveOptions]="{ exact: false }"
+                 role="button"
+                 [attr.data-bs-toggle]="!isDesktop ? 'dropdown' : null"
+                 [attr.aria-expanded]="!isDesktop ? 'false' : null">
+                  {{ 'categories' | translate }}
+              </a>
             <!-- Mega Menu Structure -->
             <div class="dropdown-menu mega-menu p-4">
               <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 ">
