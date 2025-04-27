@@ -58,73 +58,23 @@
                   {{ 'categories' | translate }}
               </a>
             <!-- Mega Menu Structure -->
-            <div class="dropdown-menu mega-menu p-0 p-md-4">
+            <div class="dropdown-menu mega-menu p-0 p-md-4" *ngIf="megaMenuColumns">
               <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-3 my-md-0 px-3 px-md-0">
-                <!-- Column 1: Candles -->
-                <div class="col mb-3">
-                  <h5 class="mb-3">Candles</h5>
+                <div class="col mb-3" *ngFor="let column of megaMenuColumns">
+                  <h5 class="mb-3">{{ column.header }}</h5>
                   <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#">Scented Jar Candles</a></li>
-                    <li><a class="dropdown-item" href="#">Pillar Candles</a></li>
-                    <li><a class="dropdown-item" href="#">Votive Candles</a></li>
-                    <li><a class="dropdown-item" href="#">Tealight Candles</a></li>
-                    <li><a class="dropdown-item" href="#">Taper Candles</a></li>
-                    <li><hr class="dropdown-divider d-lg-none"></li>
-                    <li><a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" href="#">
-                      <span>Shop All Candles</span>
-                      <fa-icon [icon]="faArrowRight"></fa-icon>
-                    </a></li>
-                  </ul>
-                </div>
-
-                <!-- Column 2: Gifts -->
-                <div class="col mb-3">
-                  <h5 class="mb-3">Gifts</h5>
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#">Gift Sets</a></li>
-                    <li><a class="dropdown-item" href="#">Personalized Gifts</a></li>
-                    <li><a class="dropdown-item" href="#">Gifts Under $25</a></li>
-                    <li><a class="dropdown-item" href="#">Corporate Gifts</a></li>
-                    <li><a class="dropdown-item" href="#">Occasion Gifts</a></li>
-                    <li><hr class="dropdown-divider d-lg-none"></li>
-                    <li><a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" href="#">
-                      <span>Shop All Gifts</span>
-                      <fa-icon [icon]="faArrowRight"></fa-icon>
-                    </a></li>
-                  </ul>
-                </div>
-
-                <!-- Column 3: Decor -->
-                <div class="col mb-3">
-                  <h5 class="mb-3">Home Decor</h5>
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#">Wall Art</a></li>
-                    <li><a class="dropdown-item" href="#">Vases</a></li>
-                    <li><a class="dropdown-item" href="#">Figurines</a></li>
-                    <li><a class="dropdown-item" href="#">Photo Frames</a></li>
-                    <li><a class="dropdown-item" href="#">Decorative Bowls</a></li>
-                    <li><hr class="dropdown-divider d-lg-none"></li>
-                    <li><a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" href="#">
-                      <span>Shop All Decor</span>
-                      <fa-icon [icon]="faArrowRight"></fa-icon>
-                    </a></li>
-                  </ul>
-                </div>
-
-                <!-- Column 4: Craft Supplies -->
-                <div class="col mb-3">
-                  <h5 class="mb-3">Craft Supplies</h5>
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#">Beads & Jewelry</a></li>
-                    <li><a class="dropdown-item" href="#">Yarn & Needlecraft</a></li>
-                    <li><a class="dropdown-item" href="#">Painting Supplies</a></li>
-                    <li><a class="dropdown-item" href="#">Paper Crafts</a></li>
-                    <li><a class="dropdown-item" href="#">Wood Crafts</a></li>
-                    <li><hr class="dropdown-divider d-lg-none"></li>
-                    <li><a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" href="#">
-                      <span>Shop All Craft Supplies</span>
-                      <fa-icon [icon]="faArrowRight"></fa-icon>
-                    </a></li>
+                    <ng-container *ngFor="let item of column.items">
+                      <li *ngIf="!item.isShopAll">
+                        <a class="dropdown-item" [href]="item.link">{{ item.label }}</a>
+                      </li>
+                      <li *ngIf="item.isShopAll">
+                        <hr class="dropdown-divider d-lg-none">
+                        <a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" [href]="item.link">
+                          <span>{{ item.label | translate }}</span>
+                          <fa-icon [icon]="faArrowRight"></fa-icon>
+                        </a>
+                      </li>
+                    </ng-container>
                   </ul>
                 </div>
               </div>

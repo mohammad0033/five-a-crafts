@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
-import {isPlatformBrowser} from '@angular/common';
+import {isPlatformBrowser, NgForOf, NgIf} from '@angular/common';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 import {faHeart, faUser} from '@fortawesome/free-regular-svg-icons';
@@ -8,16 +8,19 @@ import {RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {map} from "rxjs";
+import {ContentService, MegaMenuData} from '../../services/content.service';
 
 @UntilDestroy()
 @Component({
   selector: 'app-navbar',
-    imports: [
-        FaIconComponent,
-        TranslatePipe,
-        RouterLink,
-        RouterLinkActive
-    ],
+  imports: [
+    FaIconComponent,
+    TranslatePipe,
+    RouterLink,
+    RouterLinkActive,
+    NgIf,
+    NgForOf
+  ],
   templateUrl: './navbar.component.html',
   standalone: true,
   styleUrl: './navbar.component.scss',
@@ -32,29 +35,54 @@ export class NavbarComponent implements OnInit{
   // Screen size tracking
   isDesktop: boolean = false;
   private readonly desktopBreakpoint = '(min-width: 768px)';
+  // Property to hold the mega menu data
+  megaMenuColumns: MegaMenuData | null = null;
 
     constructor(
         private breakpointObserver: BreakpointObserver,
         @Inject(PLATFORM_ID) private platformId: Object,
-        private cdRef: ChangeDetectorRef
+        private cdRef: ChangeDetectorRef,
+        private contentService: ContentService // Inject ContentService
     ) {}
 
     ngOnInit(): void {
-        // Only run BreakpointObserver in the browser
-        if (isPlatformBrowser(this.platformId)) {
-            this.breakpointObserver
-                .observe([this.desktopBreakpoint])
-                .pipe(
-                    map(result => result.matches), // Get the boolean value directly
-                    untilDestroyed(this) // Use untilDestroyed operator
-                )
-                .subscribe(matches => {
-                    this.isDesktop = matches;
-                    this.cdRef.markForCheck(); // Trigger change detection when the value updates
-                });
-        } else {
-            // Default behavior for SSR/prerendering
-            this.isDesktop = false;
-        }
+
+      this.trackScreenSize();
+      this.loadMegaMenuData();
     }
+
+  private trackScreenSize(): void {
+    // Only run BreakpointObserver in the browser
+    if (isPlatformBrowser(this.platformId)) {
+      this.breakpointObserver
+        .observe([this.desktopBreakpoint])
+        .pipe(
+          map(result => result.matches), // Get the boolean value directly
+          untilDestroyed(this) // Auto-unsubscribe when component is destroyed
+        )
+        .subscribe(matches => {
+          this.isDesktop = matches;
+          this.cdRef.markForCheck(); // Trigger change detection for OnPush
+        });
+    } else {
+      // Default server-side behavior (or handle differently if needed)
+      this.isDesktop = false; // Or true, depending on desired SSR default
+    }
+  }
+
+  private loadMegaMenuData(): void {
+    this.contentService.getMegaMenuData()
+      .pipe(
+        untilDestroyed(this) // Auto-unsubscribe when component is destroyed
+      )
+      .subscribe({
+        next: (data) => {
+          this.megaMenuColumns = data;
+          this.cdRef.markForCheck(); // Trigger change detection for OnPush
+        },
+        error: (error) => {
+          console.error('Error loading mega menu data:', error);
+        }
+      });
+  }
 }
