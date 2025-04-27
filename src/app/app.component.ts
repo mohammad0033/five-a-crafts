@@ -12,6 +12,7 @@ import {isPlatformBrowser} from '@angular/common';
 })
 export class AppComponent implements OnInit{
   title = 'five-a-crafts';
+  private readonly langCookieName = 'five-a-crafts-lang';
   constructor(private translate: TranslateService,
               @Inject(PLATFORM_ID) private platformId: Object) {
     // Get saved language from cookies
@@ -34,7 +35,9 @@ export class AppComponent implements OnInit{
   // Function to get the saved language from cookies
   private getSavedLanguage(): string {
     if (isPlatformBrowser(this.platformId)) {
-      const matches = document.cookie.match(/(^| )lang=([^;]+)/);
+      // Use a dynamic regex to match the specific cookie name
+      const cookieRegex = new RegExp(`(^| )${this.langCookieName}=([^;]+)`);
+      const matches = document.cookie.match(cookieRegex);
       return matches ? decodeURIComponent(matches[2]) : 'en'; // Default to 'en'
     }
     return 'en'; // Default if running on the server
@@ -43,7 +46,8 @@ export class AppComponent implements OnInit{
   // Function to save the selected language in cookies
   private saveLanguage(lang: string): void {
     if (isPlatformBrowser(this.platformId)) {
-      document.cookie = `lang=${lang}; path=/; max-age=31536000`; // 1-year expiration
+      // Use the unique cookie name when setting the cookie
+      document.cookie = `${this.langCookieName}=${lang}; path=/; max-age=31536000`; // 1-year expiration
     }
   }
 }
