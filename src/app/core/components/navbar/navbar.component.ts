@@ -4,14 +4,17 @@ import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 import {faHeart, faUser} from '@fortawesome/free-regular-svg-icons';
 import {TranslatePipe} from '@ngx-translate/core';
+import {RouterLink, RouterLinkActive} from "@angular/router";
 
 @Component({
   selector: 'app-navbar',
-  imports: [
-    NgIf,
-    FaIconComponent,
-    TranslatePipe
-  ],
+    imports: [
+        NgIf,
+        FaIconComponent,
+        TranslatePipe,
+        RouterLink,
+        RouterLinkActive
+    ],
   templateUrl: './navbar.component.html',
   standalone: true,
   styleUrl: './navbar.component.scss'

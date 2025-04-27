@@ -1,7 +1,7 @@
 <header class="navbar-wrapper">
   <nav class="navbar navbar-expand-md z-1">
     <!-- Add flex utilities for mobile layout control -->
-    <div class="container-fluid mx-2 mx-md-5 d-flex d-md-block justify-content-between align-items-center">
+    <div class="container-fluid mx-2 mx-lg-5 d-flex d-md-block justify-content-between align-items-center">
 
       <!-- === Mobile Only: Left Group (Toggler + Search) === -->
       <div class="d-flex align-items-center d-md-none">
@@ -18,7 +18,7 @@
 
       <!-- === Mobile Only: Logo (Centered) === -->
       <!-- This will be centered between the left/right mobile groups due to justify-content-between on the parent -->
-      <a class="navbar-brand d-md-none" href="#">
+      <a class="navbar-brand d-md-none" routerLink="/">
         <img src="images/logo.png" alt="Five A Crafts Logo">
       </a>
 
@@ -36,19 +36,19 @@
       <!-- On mobile, this collapses below. On desktop, it's inline. -->
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <!-- === Desktop Only: Logo (appears left by default) === -->
-        <a class="navbar-brand d-none d-md-block me-auto" href="#"> <!-- me-auto pushes collapse content right on desktop -->
+        <a class="navbar-brand d-none d-md-block me-auto" routerLink="/"> <!-- me-auto pushes collapse content right on desktop -->
           <img src="images/logo.png" alt="Five A Crafts Logo">
         </a>
         <!-- Nav Links (Centered on Desktop, Full Width on Mobile) -->
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-3">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">{{ 'home' | translate }}</a>
+            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'home' | translate }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">{{ 'aboutUs' | translate }}</a>
+            <a class="nav-link" routerLink="/about" routerLinkActive="active">{{ 'aboutUs' | translate }}</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" routerLink="/categories" routerLinkActive="active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {{ 'categories' | translate }}
             </a>
             <!-- Mega Menu Structure -->
@@ -126,10 +126,10 @@
             <!-- End Mega Menu Structure -->
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">{{ 'contactUs' | translate }}</a>
+            <a class="nav-link" routerLink="/contact" routerLinkActive="active">{{ 'contactUs' | translate }}</a>
           </li>
           <li class="nav-item d-block d-md-none">
-            <a class="nav-link" href="#">{{ 'profile' | translate }}</a>
+            <a class="nav-link" routerLink="/profile" routerLinkActive="active">{{ 'profile' | translate }}</a>
           </li>
         </ul>
 
@@ -139,12 +139,12 @@
           <button type="button" class="btn rounded-circle"> <!-- Desktop Search -->
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
-          <button type="button" class="btn rounded-circle"> <!-- Desktop Heart -->
+          <a type="button" class="btn rounded-circle" routerLink="/favorites"> <!-- Desktop Heart -->
             <fa-icon [icon]="faHeart"></fa-icon>
-          </button>
-          <button type="button" class="btn rounded-circle"> <!-- User Icon -->
+          </a>
+          <a type="button" class="btn rounded-circle" routerLink="/profile"> <!-- User Icon -->
             <fa-icon [icon]="faUser"></fa-icon>
-          </button>
+          </a>
           <button type="button" class="btn rounded-circle"> <!-- Desktop Bag -->
             <fa-icon [icon]="faShoppingBag"></fa-icon>
           </button>
