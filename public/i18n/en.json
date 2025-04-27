@@ -1,0 +1,16 @@
+{
+  "home": "Home",
+  "categories": "Categories",
+  "aboutUs": "About Us",
+  "contactUs": "Contact Us",
+  "login": "Login",
+  "register": "Register",
+  "logout": "Logout",
+  "cart": "Cart",
+  "search": "Search",
+  "favorite": "Favorite",
+  "profile": "Profile",
+  "language": "Language",
+  "arabic": "Arabic",
+  "english": "English"
+}
