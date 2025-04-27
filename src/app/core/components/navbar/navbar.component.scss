@@ -36,16 +36,18 @@
     .dropdown-menu {
       opacity: 0;
       visibility: hidden;
-      transform: translateY(10px);
+      transform: translateY(-10px);
       transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
       margin-top: 0;
+      display: block;
+      height: 0;
 
       /* Keep general appearance styles */
-      border: 1px solid rgba(0,0,0,.15);
+      border: 1px solid var(--primary-color);
       border-radius: .5rem;
       background-clip: padding-box;
       background-color: #fff;
-      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+      box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,.175);
 
       /* Keep mega-menu specific styles */
       &.mega-menu {
@@ -71,7 +73,8 @@
       &.show {
         opacity: 1;
         visibility: visible;
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
+        height: auto;
       }
     }
 
@@ -81,19 +84,17 @@
 
       .dropdown-menu {
         position: absolute;
+        height: auto;
         top: 100%;
         left: 50%;
-        transform: translateX(-50%) translateY(10px);
-
-        /* Reset potential mobile overrides */
-        display: none; // Explicitly hide initially on desktop (hover will show)
+        transform: translateX(-50%) translateY(-10px);
         opacity: 0;
         visibility: hidden;
         width: auto; // Reset mobile width
         max-width: 900px; // Restore desktop max-width
         margin-top: 0; // Reset mobile margin
-        border: 1px solid rgba(0,0,0,.15); // Restore border
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175); // Restore shadow
+        border: 1px solid var(--primary-color); // Restore border
+        box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,.175); // Restore shadow
 
         &.mega-menu {
           width: 60vw;
@@ -105,7 +106,6 @@
 
       /* Show dropdown on hover */
       &:hover > .dropdown-menu {
-        display: block; // Use display block for hover
         opacity: 1;
         visibility: visible;
         transform: translateX(-50%) translateY(0);
@@ -120,16 +120,18 @@
       .dropdown-menu {
         /* Keep mobile layout adjustments */
         position: static;
-        width: 100%;
+        border: 1px solid var(--primary-color);
         max-width: none;
-        transform: translateY(10px);
+        transform: translateY(-10px);
         margin-top: 0.5rem;
-        border: none;
         box-shadow: none;
         max-height: 70vh;
         overflow-y: auto;
+        overflow-x: hidden;
+        height: 0;
         &.show {
           transform: translateY(0);
+          height: auto;
         }
       }
     }
