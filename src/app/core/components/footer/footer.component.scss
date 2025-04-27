@@ -1,9 +1,10 @@
 .footer {
   background: linear-gradient(to right, #ffffff, #f4a261);
   color: #333;
+  z-index: -1;
 
   .logo img {
-    max-width: 120px;
+    max-width: 7.0625rem;
   }
 
   nav ul li a {

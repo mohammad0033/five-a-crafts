@@ -1,0 +1,73 @@
+.navbar-wrapper {
+  background-color: var(--nav-background-color);
+  z-index: 1;
+}
+.navbar-brand img {
+   max-width: 4.1875rem;
+ }
+.nav-link{
+  &.active {
+    color: var(--primary-color);
+    font-weight: bold;
+    border-bottom: 2px solid var(--primary-color);
+  }
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
+// Inside navbar.component.scss
+
+.nav-item.dropdown {
+
+  .mega-menu {
+    // Default state for smaller screens (acts more like a standard dropdown)
+    max-height: 70vh; // Example max-height for mobile
+    overflow-y: auto; // Allow scrolling on mobile if needed
+
+    @media (min-width: 768px) { // Apply specific styles for large screens (Bootstrap lg breakpoint)
+      width: 60vw; // Example width - adjust as needed (e.g., 800px, 70%)
+      max-width: 900px; // Optional max-width
+      left: 50%; // Center the mega menu
+      transform: translateX(-50%); // Correct centering
+      max-height: 400px; // Your desired fixed height for PC
+      overflow-y: auto; // Enable vertical scrolling ONLY if content exceeds max-height
+    }
+
+    // Style the links within the mega menu if needed
+    .dropdown-item {
+      padding-top: 0.4rem;
+      padding-bottom: 0.4rem;
+      // Add other specific styles for mega menu items
+    }
+
+    h5 {
+      color: var(--primary-color); // Example: Use your primary color for headings
+      font-weight: bold;
+    }
+  }
+}
+
+// Ensure dropdown toggle works correctly with mega menu positioning
+.navbar-expand-lg .navbar-nav .dropdown-menu {
+  @media (min-width: 768px) {
+    position: absolute; // Needed for positioning like left/transform
+  }
+
+  @media (max-width: 767.98px) { /* Below md breakpoint */
+    /* Ensure collapse takes full width and adds some padding */
+    .navbar-collapse {
+      width: 100%;
+      padding-top: 0.5rem; /* Adjust as needed */
+      padding-bottom: 0.5rem; /* Adjust as needed */
+    }
+    /* Center items in mobile collapse if desired */
+    .navbar-collapse .navbar-nav {
+      align-items: center; /* Center nav links horizontally */
+    }
+    /* Reduce logo size slightly on mobile if needed */
+    .navbar-brand.d-md-none img {
+      max-width: 3.5rem; /* Example: Adjust as needed */
+    }
+  }
+}
