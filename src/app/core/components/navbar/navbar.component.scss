@@ -18,56 +18,127 @@
 
 // Inside navbar.component.scss
 
-.nav-item.dropdown {
+.navbar-nav {
+  .nav-item.dropdown {
 
-  .mega-menu {
-    // Default state for smaller screens (acts more like a standard dropdown)
-    max-height: 70vh; // Example max-height for mobile
-    overflow-y: auto; // Allow scrolling on mobile if needed
-
-    @media (min-width: 768px) { // Apply specific styles for large screens (Bootstrap lg breakpoint)
-      width: 60vw; // Example width - adjust as needed (e.g., 800px, 70%)
-      max-width: 900px; // Optional max-width
-      left: 50%; // Center the mega menu
-      transform: translateX(-50%); // Correct centering
-      max-height: 400px; // Your desired fixed height for PC
-      overflow-y: auto; // Enable vertical scrolling ONLY if content exceeds max-height
+    /* Keep the dropdown toggle arrow style */
+    .dropdown-toggle::after {
+      display: inline-block;
+      margin-left: 0.255em;
+      vertical-align: 0.255em;
+      content: "";
+      border-top: 0.3em solid;
+      border-right: 0.3em solid transparent;
+      border-bottom: 0;
+      border-left: 0.3em solid transparent;
     }
 
-    // Style the links within the mega menu if needed
-    .dropdown-item {
-      padding-top: 0.4rem;
-      padding-bottom: 0.4rem;
-      // Add other specific styles for mega menu items
+    .dropdown-menu {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+      margin-top: 0;
+
+      /* Keep general appearance styles */
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: .5rem;
+      background-clip: padding-box;
+      background-color: #fff;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+
+      /* Keep mega-menu specific styles */
+      &.mega-menu {
+        padding: 1.5rem;
+        h5 {
+          color: var(--primary-color);
+        }
+        .dropdown-item {
+          padding-top: 0.4rem;
+          padding-bottom: 0.4rem;
+          white-space: normal; // Allow text wrapping in mega menu items
+          transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+          &:hover, &:focus {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+          }
+        }
+        .list-unstyled {
+          margin-bottom: 0; // Remove default bottom margin if needed
+        }
+      }
+
+      &.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
     }
 
-    h5 {
-      color: var(--primary-color); // Example: Use your primary color for headings
-      font-weight: bold;
+    /* --- Desktop Hover Behavior (>= 768px) --- */
+    @media (min-width: 768px) {
+      position: relative;
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+
+        /* Reset potential mobile overrides */
+        display: none; // Explicitly hide initially on desktop (hover will show)
+        opacity: 0;
+        visibility: hidden;
+        width: auto; // Reset mobile width
+        max-width: 900px; // Restore desktop max-width
+        margin-top: 0; // Reset mobile margin
+        border: 1px solid rgba(0,0,0,.15); // Restore border
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175); // Restore shadow
+
+        &.mega-menu {
+          width: 60vw;
+          max-width: 900px;
+          max-height: 400px;
+          overflow-y: auto;
+        }
+      }
+
+      /* Show dropdown on hover */
+      &:hover > .dropdown-menu {
+        display: block; // Use display block for hover
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    /* --- Mobile Click Behavior (< 768px) --- */
+    @media (max-width: 767.98px) {
+      /* Keep position static for mobile */
+      position: static;
+
+      .dropdown-menu {
+        /* Keep mobile layout adjustments */
+        position: static;
+        width: 100%;
+        max-width: none;
+        transform: translateY(10px);
+        margin-top: 0.5rem;
+        border: none;
+        box-shadow: none;
+        max-height: 70vh;
+        overflow-y: auto;
+        &.show {
+          transform: translateY(0);
+        }
+      }
     }
   }
 }
 
-// Ensure dropdown toggle works correctly with mega menu positioning
-.navbar-expand-lg .navbar-nav .dropdown-menu {
-  @media (min-width: 768px) {
-    position: absolute; // Needed for positioning like left/transform
-  }
-
-  @media (max-width: 767.98px) { /* Below md breakpoint */
-    /* Ensure collapse takes full width and adds some padding */
-    .navbar-collapse {
-      width: 100%;
-      padding-top: 0.5rem; /* Adjust as needed */
-      padding-bottom: 0.5rem; /* Adjust as needed */
-    }
-    /* Center items in mobile collapse if desired */
-    .navbar-collapse .navbar-nav {
-      align-items: center; /* Center nav links horizontally */
-    }
-    /* Reduce logo size slightly on mobile if needed */
-    .navbar-brand.d-md-none img {
-      max-width: 3.5rem; /* Example: Adjust as needed */
-    }
+@media (max-width: 767.98px) {
+  .navbar-collapse {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 }
