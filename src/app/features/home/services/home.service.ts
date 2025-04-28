@@ -1,11 +1,23 @@
 import { Injectable } from '@angular/core';
+import {ContentService} from '../../../core/services/content.service';
+import {Observable} from 'rxjs';
+import {CarouselItem} from '../models/carousel-item';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HomeService {
 
-  constructor() { }
+  // Inject ContentService
+  constructor(private contentService: ContentService) { }
+
+  /**
+   * Gets the data needed for the hero carousel.
+   * Delegates the actual fetching/simulation to ContentService.
+   */
+  getHeroCarouselData(): Observable<CarouselItem[]> {
+    return this.contentService.getCarouselData();
+  }
 
   // getHomePageData(): Observable<HomePageData> {
   //   return forkJoin({
