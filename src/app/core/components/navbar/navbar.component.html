@@ -47,29 +47,32 @@
           <li class="nav-item">
             <a class="nav-link" routerLink="/about" routerLinkActive="active">{{ 'aboutUs' | translate }}</a>
           </li>
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown" ngbDropdown>
               <a class="nav-link dropdown-toggle"
+                 ngbDropdownToggle
                  [routerLink]="isDesktop ? '/categories' : null"
                  routerLinkActive="active"
                  [routerLinkActiveOptions]="{ exact: false }"
                  role="button"
-                 [attr.data-bs-toggle]="!isDesktop ? 'dropdown' : null"
-                 [attr.aria-expanded]="!isDesktop ? 'false' : null">
+                 id="navbarDropdownCategories">
                   {{ 'categories' | translate }}
               </a>
             <!-- Mega Menu Structure -->
-            <div class="dropdown-menu mega-menu p-0 p-md-4" *ngIf="megaMenuColumns">
+            <div class="dropdown-menu mega-menu p-0 p-md-4"
+                 *ngIf="megaMenuColumns"
+                 ngbDropdownMenu
+                 aria-labelledby="navbarDropdownCategories">
               <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-3 my-md-0 px-3 px-md-0">
                 <div class="col mb-3" *ngFor="let column of megaMenuColumns">
                   <h5 class="mb-3">{{ column.header }}</h5>
                   <ul class="list-unstyled">
                     <ng-container *ngFor="let item of column.items">
                       <li *ngIf="!item.isShopAll">
-                        <a class="dropdown-item" [href]="item.link">{{ item.label }}</a>
+                        <a class="dropdown-item" [href]="item.link" ngbDropdownItem>{{ item.label }}</a>
                       </li>
                       <li *ngIf="item.isShopAll">
                         <hr class="dropdown-divider d-lg-none">
-                        <a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" [href]="item.link">
+                        <a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" [href]="item.link" ngbDropdownItem>
                           <span>{{ item.label | translate }}</span>
                           <fa-icon [icon]="faArrowRight"></fa-icon>
                         </a>

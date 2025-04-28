@@ -9,6 +9,7 @@ import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {map} from "rxjs";
 import {ContentService, MegaMenuData} from '../../services/content.service';
+import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 
 @UntilDestroy()
 @Component({
@@ -19,7 +20,8 @@ import {ContentService, MegaMenuData} from '../../services/content.service';
     RouterLink,
     RouterLinkActive,
     NgIf,
-    NgForOf
+    NgForOf,
+    NgbDropdownModule
   ],
   templateUrl: './navbar.component.html',
   standalone: true,
