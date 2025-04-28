@@ -1,7 +1,14 @@
 @use '@angular/material' as mat;
 @use 'app/core/theme/theme_theme-colors' as custom-theme; // Use an alias like 'custom-theme'
+@use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
+@font-face {
+  font-family: 'ZapfHumnst';
+  src: url('/fonts/ZapfHumnstBT-Roman.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 $five-a-crafts-light-theme: mat.define-theme((
   color: (
     theme-type: light,
@@ -9,6 +16,10 @@ $five-a-crafts-light-theme: mat.define-theme((
     tertiary: custom-theme.$tertiary-palette
   )
 ));
+$primary-color-value: #eaa665;
+$secondary-color-value: #f4e1ba;
+$background-color-value: #f8f4e9;
+$nav-background-color-value: #f9fcf9;
 
 html {
   @include mat.core(); // Include Angular Material core styles
@@ -17,10 +28,10 @@ html {
 
 /* You can add global styles to this file, and also import other style files */
 :root {
-  --primary-color: #eaa665;
-  --secondary-color: #f4e1ba;
-  --background-color: #f8f4e9;
-  --nav-background-color: #f9fcf9;
+  --primary-color: #{$primary-color-value};
+  --secondary-color: #{$secondary-color-value};
+  --background-color: #{$background-color-value};
+  --nav-background-color: #{$nav-background-color-value};
 }
 html, body { height: 100%; }
 body { margin: 0;
@@ -29,4 +40,44 @@ body { margin: 0;
 
 .fs-08 {
   font-size: 0.8rem;
+}
+
+.fs-25 {
+  font-size: 2.5rem;
+}
+
+.zapf-font {
+  font-family: ZapfHumnst, sans-serif;
+}
+
+.bg-main-primary{
+  background-color: var(--primary-color);
+}
+
+.bg-main-secondary{
+  background-color: var(--secondary-color);
+}
+
+.border-main-primary{
+  border-color: var(--primary-color);
+}
+
+.border-main-secondary{
+  border-color: var(--secondary-color);
+}
+
+.btn-main-primary{
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out!important;
+}
+
+.btn-main-primary:hover{
+  background-color: color.adjust($primary-color-value, $lightness: -10%);
+  border-color: color.adjust($primary-color-value, $lightness: -10%);
+}
+
+.btn-main-primary:active{
+  background-color: color.adjust($primary-color-value, $lightness: -20%)!important;
+  border-color: color.adjust($primary-color-value, $lightness: -20%)!important;
 }

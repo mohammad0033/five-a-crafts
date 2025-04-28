@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {delay, Observable, of} from 'rxjs';
+import {CarouselItem} from '../../features/home/models/carousel-item';
 
 // Inside content.service.ts or types.ts
 export interface MegaMenuItem {
@@ -79,5 +80,41 @@ export class ContentService {
     // In a real scenario, this would be an HttpClient call:
     // return this.http.get<MegaMenuData>('/api/mega-menu-data');
     return of(mockData);
+  }
+
+  /**
+   * Simulates fetching hero carousel data from an API.
+   * Returns an Observable of CarouselItem array.
+   */
+  getCarouselData(): Observable<CarouselItem[]> {
+    // Mock data for the carousel
+    const mockCarouselData: CarouselItem[] = [
+      {
+        imageUrl: 'https://picsum.photos/id/944/1200/500', // Use larger images if needed
+        title: 'Artisan-made goods for your home and heart.',
+        title2: 'Discover Unique, Handcrafted Treasures',
+        description: 'We create beautiful, one-of-a-kind crafts using sustainable materials and traditional techniques. Each piece tells a story.',
+        altText: 'Artisan candles arranged beautifully'
+      },
+      {
+        imageUrl: 'https://picsum.photos/id/1011/1200/500',
+        title: 'Perfect Gifts for Every Occasion',
+        title2: 'Discover Unique, Handcrafted Treasures',
+        description: 'We create beautiful, one-of-a-kind crafts using sustainable materials and traditional techniques. Each piece tells a story.',
+        altText: 'Gift boxes wrapped elegantly'
+      },
+      {
+        imageUrl: 'https://picsum.photos/id/984/1200/500',
+        title: 'Spruce Up Your Home Decor',
+        title2: 'Discover Unique, Handcrafted Treasures',
+        description: 'We create beautiful, one-of-a-kind crafts using sustainable materials and traditional techniques. Each piece tells a story.',
+        altText: 'Modern home decor items on a shelf'
+      }
+    ];
+
+    // Use `of` and `delay` to simulate a network request
+    // In a real scenario, this would be an HttpClient call:
+    // return this.http.get<CarouselItem[]>('/api/carousel-data');
+    return of(mockCarouselData).pipe(delay(500)); // Simulate 500ms delay
   }
 }

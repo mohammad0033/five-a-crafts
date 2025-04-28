@@ -1,0 +1,38 @@
+<div class="custom-carousel-container">
+  <ngb-carousel *ngIf="carouselData.length > 0"> <!-- Only show carousel if data exists -->
+    <ng-container *ngFor="let item of carouselData; let i = index">
+      <ng-template ngbSlide>
+        <div class="picsum-img-wrapper">
+          <!-- Use the imageUrl and altText from the item -->
+          <img [src]="item.imageUrl" [alt]="item.altText || 'Carousel slide ' + (i + 1)" loading="lazy"/>
+        </div>
+        <div class="caption-container p-5">
+          <div class="container d-flex flex-column gap-3 gap-md-4 gap-lg-5 h-100 justify-content-center">
+
+            <!--            slide title-->
+            <p class="col-12 col-md-6 m-0" *ngIf="item.title">
+              {{item.title}}
+            </p>
+
+            <p class="col-12 col-md-6 zapf-font fs-25 m-0" *ngIf="item.title2">
+              {{item.title2}}
+            </p>
+
+            <!--            slide content-->
+            <p class="col-12 col-md-10 fs-2 m-0" *ngIf="item.description">
+              {{item.description}}
+            </p>
+
+            <a class="btn btn-main-primary col-12 col-md-4 col-lg-3 d-flex align-items-center
+            justify-content-center gap-2 text-light py-3" [routerLink]="['/categories']">
+              <span>{{'Check Our Categories' | translate}}</span>
+              <span>
+                <fa-icon [icon]="faArrowRight"></fa-icon>
+              </span>
+            </a>
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
+  </ngb-carousel>
+</div>
