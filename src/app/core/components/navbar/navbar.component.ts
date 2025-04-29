@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
-import {isPlatformBrowser, NgForOf, NgIf} from '@angular/common';
+import {isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import {faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 import {faHeart, faUser} from '@fortawesome/free-regular-svg-icons';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
@@ -21,7 +21,8 @@ import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
     RouterLinkActive,
     NgIf,
     NgForOf,
-    NgbDropdownModule
+    NgbDropdownModule,
+    NgClass
   ],
   templateUrl: './navbar.component.html',
   standalone: true,
@@ -39,18 +40,24 @@ export class NavbarComponent implements OnInit{
   private readonly desktopBreakpoint = '(min-width: 768px)';
   // Property to hold the mega menu data
   megaMenuColumns: MegaMenuData | null = null;
+  currentLang!: string;
 
     constructor(
         private breakpointObserver: BreakpointObserver,
         @Inject(PLATFORM_ID) private platformId: Object,
         private cdRef: ChangeDetectorRef,
-        private contentService: ContentService // Inject ContentService
-    ) {}
+        private contentService: ContentService, // Inject ContentService
+        private translate: TranslateService) {}
 
     ngOnInit(): void {
-
       this.trackScreenSize();
       this.loadMegaMenuData();
+
+      this.currentLang = this.translate.currentLang
+
+      this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event) => {
+        this.currentLang = event.lang
+      })
     }
 
   private trackScreenSize(): void {
@@ -87,4 +94,11 @@ export class NavbarComponent implements OnInit{
         }
       });
   }
+
+  changeLanguage(lang: string) {
+    this.translate.use(lang);
+    console.log(lang);
+  }
+
+  protected readonly faArrowLeft = faArrowLeft;
 }

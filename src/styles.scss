@@ -37,6 +37,12 @@ html, body { height: 100%; }
 body { margin: 0;
   font-family: Poppins, Roboto, "Helvetica Neue", sans-serif;
 }
+body.ar {
+  font-family: Cairo, sans-serif;
+  direction: rtl;
+}
+
+.cursor-pointer { cursor: pointer; }
 
 .fs-08 {
   font-size: 0.8rem;

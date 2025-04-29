@@ -1,4 +1,20 @@
 <header class="navbar-wrapper">
+  <div class="bg-light-subtle">
+    <div class="container-fluid container-md position-relative">
+      <div class="d-flex justify-content-end py-2">
+        <div class="d-flex gap-3">
+          <a class="d-flex gap-2 link-primary link-underline-opacity-0 link-underline-opacity-100-hover cursor-pointer" (click)="changeLanguage('en')">
+            <img src="images/english-flag.png" alt="english language">
+            <span class="d-none d-md-block">English</span>
+          </a>
+          <a class="d-flex gap-2 link-primary link-underline-opacity-0 link-underline-opacity-100-hover cursor-pointer" (click)="changeLanguage('ar')">
+            <img src="images/arabic-flag.png" alt="arabic language">
+            <span class="d-none d-md-block">العربيه</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
   <nav class="navbar navbar-expand-md z-1">
     <!-- Add flex utilities for mobile layout control -->
     <div class="container-fluid mx-2 mx-lg-5 d-flex d-md-block justify-content-between align-items-center">
@@ -63,9 +79,9 @@
                  ngbDropdownMenu
                  aria-labelledby="navbarDropdownCategories">
               <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-3 my-md-0 px-3 px-md-0">
-                <div class="col mb-3" *ngFor="let column of megaMenuColumns">
+                <div class="col mb-3 d-flex flex-column align-items-start" *ngFor="let column of megaMenuColumns">
                   <h5 class="mb-3">{{ column.header }}</h5>
-                  <ul class="list-unstyled">
+                  <ul class="list-unstyled p-0 w-100" [ngClass]="currentLang === 'ar' ? 'text-end' : 'text-start'">
                     <ng-container *ngFor="let item of column.items">
                       <li *ngIf="!item.isShopAll">
                         <a class="dropdown-item" [href]="item.link" ngbDropdownItem>{{ item.label }}</a>
@@ -74,7 +90,8 @@
                         <hr class="dropdown-divider d-lg-none">
                         <a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" [href]="item.link" ngbDropdownItem>
                           <span>{{ item.label | translate }}</span>
-                          <fa-icon [icon]="faArrowRight"></fa-icon>
+                          <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
+                          <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
                         </a>
                       </li>
                     </ng-container>

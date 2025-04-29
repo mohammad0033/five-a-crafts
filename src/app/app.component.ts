@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
+import {Component, Inject, OnInit, PLATFORM_ID, Renderer2} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {isPlatformBrowser} from '@angular/common';
@@ -14,20 +14,28 @@ export class AppComponent implements OnInit{
   title = 'five-a-crafts';
   private readonly langCookieName = 'five-a-crafts-lang';
   constructor(private translate: TranslateService,
-              @Inject(PLATFORM_ID) private platformId: Object) {
+              @Inject(PLATFORM_ID) private platformId: Object,
+              private renderer: Renderer2) {
     // Get saved language from cookies
     const savedLang = this.getSavedLanguage();
 
     // Set the default language and initialize translation
     this.translate.setDefaultLang('en');
     this.translate.use(savedLang);
+    this.setDirection(savedLang);
   }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.translate.onLangChange.subscribe(event => {
-        document?.body?.classList.toggle('ar', event.lang === 'ar');
-        this.saveLanguage(event.lang); // Save language when changed
+        this.renderer.removeClass(document.body, 'ar');
+        this.renderer.removeClass(document.body, 'en'); // Optional: remove previous lang class
+        this.renderer.addClass(document.body, event.lang); // Add current lang class
+
+        // Set direction attribute on <html> element
+        this.setDirection(event.lang);
+
+        this.saveLanguage(event.lang);
       });
     }
   }
@@ -48,6 +56,13 @@ export class AppComponent implements OnInit{
     if (isPlatformBrowser(this.platformId)) {
       // Use the unique cookie name when setting the cookie
       document.cookie = `${this.langCookieName}=${lang}; path=/; max-age=31536000`; // 1-year expiration
+    }
+  }
+
+  private setDirection(lang: string): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const direction = lang === 'ar' ? 'rtl' : 'ltr';
+      this.renderer.setAttribute(document.documentElement, 'dir', direction);
     }
   }
 }
