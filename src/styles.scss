@@ -53,7 +53,7 @@ body.ar {
 }
 
 .zapf-font {
-  font-family: ZapfHumnst, sans-serif;
+  font-family: ZapfHumnst, Cairo ,sans-serif;
 }
 
 .bg-main-primary{
@@ -86,4 +86,30 @@ body.ar {
 .btn-main-primary:active{
   background-color: color.adjust($primary-color-value, $lightness: -20%)!important;
   border-color: color.adjust($primary-color-value, $lightness: -20%)!important;
+}
+
+.btn-outline-main-primary{
+  border-color: var(--primary-color);
+  color: black;
+  background: transparent;
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.btn-outline-main-primary:hover{
+  color: white;
+  background-color: color.adjust($primary-color-value, $lightness: -10%);
+  border-color: color.adjust($primary-color-value, $lightness: -10%);
+}
+
+.btn-outline-main-primary:active{
+  color: white!important;
+  background-color: color.adjust($primary-color-value, $lightness: -20%)!important;
+  border-color: color.adjust($primary-color-value, $lightness: -20%)!important;
+}
+
+//move slider button to top so that it doesnt overlap favorite icon
+.products-slider{
+  .splide__arrow{
+    top: 45% !important;
+  }
 }
