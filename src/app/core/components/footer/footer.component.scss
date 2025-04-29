@@ -1,5 +1,11 @@
+:host-context([dir="rtl"]) {
+  .accordion-button::after {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
+
 .footer {
-  background: linear-gradient(to right, #ffffff, #f4a261);
   color: #333;
   z-index: -1;
 

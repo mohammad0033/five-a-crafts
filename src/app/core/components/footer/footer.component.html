@@ -1,12 +1,14 @@
-<footer class="footer py-5 px-3 bottom-0 w-100">
+<footer class="footer py-5 px-3 bottom-0 w-100"
+        [style]="currentLang === 'en' ? 'background: linear-gradient(to right, #ffffff, #f4a261);' :
+        'background: linear-gradient(to left, #ffffff, #f4a261);'">
   <div class="container-fluid">
     <div class="row align-items-start" *ngIf="!isHandset">
       <div class="col-md-3 mb-4 mb-md-0 text-center text-md-start">
-        <div class="logo mb-3">
+        <div class="logo mb-3 d-flex">
           <img src="images/logo.png" alt="Five A Crafts Logo" class="img-fluid">
         </div>
 
-        <h6 class="fw-light text-secondary text-uppercase">Follow Us</h6>
+        <h6 class="fw-light text-secondary text-uppercase d-flex">Follow Us</h6>
         <section class="social-media d-flex justify-content-center justify-content-md-start gap-3">
           <a href="#" aria-label="Instagram" class="text-secondary-emphasis">
             <fa-icon [icon]="faInstagram"></fa-icon></a>
@@ -19,7 +21,7 @@
 
       <nav class="col-md-3 mb-4 mb-md-0" aria-label="Categories">
         <h6 class="fw-bold mb-4">Categories</h6>
-        <ul class="list-unstyled d-flex flex-column gap-3">
+        <ul class="list-unstyled p-0 d-flex flex-column gap-3">
           <li><a href="#" class="text-decoration-none text-dark">Candles</a></li>
           <li><a href="#" class="text-decoration-none text-dark">Concrete</a></li>
           <li><a href="#" class="text-decoration-none text-dark">Wood</a></li>
@@ -29,7 +31,7 @@
 
       <nav class="col-md-3 mb-4 mb-md-0" aria-label="About us">
         <h6 class="fw-bold mb-4">About Us</h6>
-        <ul class="list-unstyled d-flex flex-column gap-3">
+        <ul class="list-unstyled p-0 d-flex flex-column gap-3">
           <li><a href="#" class="text-decoration-none text-dark">About Five A Crafts</a></li>
           <li><a href="#" class="text-decoration-none text-dark">Reviews</a></li>
           <li><a href="#" class="text-decoration-none text-dark">News</a></li>
@@ -38,7 +40,7 @@
 
       <nav class="col-md-3" aria-label="Contact">
         <h6 class="fw-bold mb-3">Contact</h6>
-        <ul class="list-unstyled">
+        <ul class="list-unstyled p-0">
           <li><a href="#" class="text-decoration-none text-dark">Contact Us</a></li>
         </ul>
       </nav>
@@ -53,7 +55,7 @@
           </h2>
           <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
             <div class="accordion-body">
-              <ul class="list-unstyled d-flex flex-column gap-3">
+              <ul class="list-unstyled p-0 d-flex flex-column gap-3">
                 <li><a href="#" class="text-decoration-none text-dark">Candles</a></li>
                 <li><a href="#" class="text-decoration-none text-dark">Concrete</a></li>
                 <li><a href="#" class="text-decoration-none text-dark">Wood</a></li>
@@ -70,7 +72,7 @@
           </h2>
           <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
             <div class="accordion-body">
-              <ul class="list-unstyled d-flex flex-column gap-3">
+              <ul class="list-unstyled p-0 d-flex flex-column gap-3">
                 <li><a href="#" class="text-decoration-none text-dark">About Five A Crafts</a></li>
                 <li><a href="#" class="text-decoration-none text-dark">Reviews</a></li>
                 <li><a href="#" class="text-decoration-none text-dark">News</a></li>
@@ -86,7 +88,7 @@
           </h2>
           <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
             <div class="accordion-body">
-              <ul class="list-unstyled d-flex flex-column gap-3">
+              <ul class="list-unstyled p-0 d-flex flex-column gap-3">
                 <li><a href="#" class="text-decoration-none text-dark">Contact Us</a></li>
               </ul>
             </div>
