@@ -12,5 +12,10 @@
   "profile": "الملف الشخصي",
   "language": "اللغة",
   "arabic": "العربية",
-  "english": "الانجليزية"
+  "english": "الانجليزية",
+  "home.checkCategories": "استكشف التصنيفات",
+  "home.ourProducts": "منتجاتنا",
+  "home.bestSeller": "المنتجات الأكثر مبيعاً",
+  "home.discover": "استكشف منتجاتنا المميزة والأكثر مبيعاً.",
+  "product.moreDetails": "المزيد من التفاصيل"
 }

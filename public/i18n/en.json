@@ -12,5 +12,10 @@
   "profile": "Profile",
   "language": "Language",
   "arabic": "Arabic",
-  "english": "English"
+  "english": "English",
+  "home.checkCategories": "Check our categories",
+  "home.ourProducts": "Our Products",
+  "home.bestSeller": "Best Seller Products",
+  "home.discover": "Discover our potent unique and best seller products.",
+  "product.moreDetails": "More Details"
 }
