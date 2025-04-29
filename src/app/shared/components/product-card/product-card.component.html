@@ -1,0 +1,30 @@
+<article class="card product-card border-0 shadow-sm rounded-3" (mouseenter)="hover = true" (mouseleave)="hover = false" [ngClass]="{ 'hovered': hover }">
+  <figure class="m-0 rounded-3 overflow-hidden">
+    <img [src]="product.imageUrl" class="card-img-top" [alt]="product.altText" loading="lazy">
+  </figure>
+  <section class="card-body d-flex flex-column justify-content-between">
+    <header class="d-flex align-items-center justify-content-between">
+      <h2 class="card-title fw-bold h5">{{ product.name }}</h2>
+      <fa-icon
+        [icon]="product.isFavorite ? faHeartSolid : faHeartRegular"
+        class="favorite-icon cursor-pointer"
+        [ngClass]="{
+          'favorite': product.isFavorite,
+          'animate-heartbeat': isAnimating
+        }"
+        (click)="toggleFavorite($event)"
+        [title]="product.isFavorite ? 'Remove from favorites' : 'Add to favorites'">
+      </fa-icon>
+    </header>
+    <p class="card-text text-muted" *ngIf="product.description">
+      {{ product.description | slice:0:70 }}{{ product.description.length! > 70 ? '...' : '' }}
+    </p>
+    <div>
+      <p class="fw-semibold" aria-label="Product price">{{ product.price }} LE</p>
+      <div class="button-placeholder">
+        <a class="btn btn-outline-main-primary more-details-btn w-100 py-2"
+           [attr.aria-label]="'View more details about ' + product.name">{{'product.moreDetails' | translate}}</a>
+      </div>
+    </div>
+  </section>
+</article>
