@@ -1,6 +1,6 @@
 <section class="custom-carousel-container" aria-labelledby="hero-carousel-heading">
   <!-- Added an h1 for screen readers/SEO, visually hidden -->
-  <h1 id="hero-carousel-heading" class="visually-hidden">Featured Content Carousel</h1>
+  <h2 id="hero-carousel-heading" class="visually-hidden">Featured Content Carousel</h2>
 
   <ngb-carousel *ngIf="carouselData.length > 0">
     <ng-container *ngFor="let item of carouselData; let i = index">
@@ -14,14 +14,14 @@
           <div class="container d-flex flex-column gap-3 gap-md-4 gap-lg-5 h-100 justify-content-center">
 
             <!-- slide title - Use heading tags for importance -->
-            <h2 class="col-12 col-md-6 m-0 fs-6" *ngIf="item.title">
+            <h3 class="col-12 col-md-6 m-0 fs-6" *ngIf="item.title">
               {{item.title}}
-            </h2>
+            </h3>
 
             <!-- Secondary title/subtitle -->
-            <h3 class="col-12 col-md-6 zapf-font fs-25 m-0 fs-1" *ngIf="item.title2">
+            <h4 class="col-12 col-md-6 zapf-font fs-25 m-0 fs-1" *ngIf="item.title2">
               {{item.title2}}
-            </h3>
+            </h4>
 
             <!-- slide content - Paragraph is appropriate here -->
             <p class="col-12 col-md-10 col-lg-6 fs-2 m-0" *ngIf="item.description">
@@ -31,7 +31,7 @@
             <!-- Call to action - Anchor tag is correct -->
             <a class="btn btn-main-primary col-12 col-md-4 col-lg-3 d-flex align-items-center
             justify-content-center gap-2 text-light py-3" [routerLink]="['/categories']">
-              <span>{{'Check Our Categories' | translate}}</span>
+              <span>{{'checkCategories' | translate}}</span>
               <span>
                 <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
                 <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
