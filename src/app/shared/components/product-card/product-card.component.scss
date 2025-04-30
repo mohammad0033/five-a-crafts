@@ -5,7 +5,7 @@
   background-color: #fff;
 
   &.hovered {
-    background-color: #fffaf5;
+    background-color: var(--background2-color);
     border: 1px solid #fcd9b6;
 
     .more-details-btn {
