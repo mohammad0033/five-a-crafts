@@ -1,0 +1,25 @@
+// src/app/features/home/styles/_category-card.scss
+
+.category-card {
+  background-size: cover;
+  background-position: center;
+  height: 15.625rem;
+  border-radius: 1rem;
+  transition: all 0.4s ease-in-out;
+  position: relative;
+}
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  padding: 1rem;
+  border-radius: 1rem;
+  transition: opacity 0.4s ease-in-out;
+  // Note: Opacity is left out here as it differs between the two components
+}

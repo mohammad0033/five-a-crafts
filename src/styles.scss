@@ -19,6 +19,7 @@ $five-a-crafts-light-theme: mat.define-theme((
 $primary-color-value: #eaa665;
 $secondary-color-value: #f4e1ba;
 $background-color-value: #f8f4e9;
+$background2-color-value: #faf6ea;
 $nav-background-color-value: #f9fcf9;
 
 html {
@@ -31,6 +32,7 @@ html {
   --primary-color: #{$primary-color-value};
   --secondary-color: #{$secondary-color-value};
   --background-color: #{$background-color-value};
+  --background2-color: #{$background2-color-value};
   --nav-background-color: #{$nav-background-color-value};
 }
 html, body { height: 100%; }
@@ -62,6 +64,14 @@ body.ar {
 
 .bg-main-secondary{
   background-color: var(--secondary-color);
+}
+
+.bg-main-background{
+  background-color: var(--background-color);
+}
+
+.bg-main-background2{
+  background-color: var(--background2-color);
 }
 
 .border-main-primary{

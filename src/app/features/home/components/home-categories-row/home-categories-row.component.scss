@@ -1,0 +1,18 @@
+@use '../styles/category-card';
+.category-card {
+  width: 50%;
+  cursor: pointer;
+
+  &:hover {
+    z-index: 2;
+    width: 100%;
+
+    .overlay {
+      opacity: 1; // Show overlay on hover
+    }
+  }
+}
+
+.overlay {
+  opacity: 0;
+}

@@ -1,0 +1,48 @@
+<section class="p-5 bg-main-background2" aria-labelledby="home-categories-heading">
+  <h2 id="home-categories-heading" class="visually-hidden">Categories</h2>
+  <h3 class="fs-2 mb-3 mt-5 text-center zapf-font">{{'home.categories' | translate}}</h3>
+  <p class="text-center">{{'home.creativeCorners' | translate}}</p>
+
+  <div *ngIf="categoryRows.length > 0">
+    <div class="container d-none d-sm-flex flex-column py-2 gap-3 rows-container" *ngFor="let row of categoryRows">
+      <app-home-categories-row [categories]="row"></app-home-categories-row>
+    </div>
+  </div>
+
+  <div class="mb-5 d-flex d-sm-none justify-content-center categories-mobile-container" *ngIf="categories.length > 0">
+    <splide [options]="splideOptions" class="col-12" *ngIf="currentLang === 'en'">
+      <splide-slide *ngFor="let category of categories">
+        <div class="card category-card text-white text-center position-relative overflow-hidden mx-2"
+          [ngStyle]="{'background-image': 'url(' + category?.image + ')'}">
+          <div class="overlay d-flex align-items-center justify-content-center">
+            <h5 class="mb-0">{{ category?.name }}</h5>
+          </div>
+        </div>
+      </splide-slide>
+    </splide>
+
+    <splide [options]="rtlSplideOptions" class="col-12" *ngIf="currentLang === 'ar'">
+      <splide-slide *ngFor="let category of categories">
+        <div class="card category-card text-white text-center position-relative overflow-hidden mx-2"
+          [ngStyle]="{'background-image': 'url(' + category?.image + ')'}">
+          <div class="overlay d-flex align-items-center justify-content-center">
+            <h5 class="mb-0">{{ category?.name }}</h5>
+          </div>
+        </div>
+      </splide-slide>
+    </splide>
+  </div>
+
+  <div class="d-flex justify-content-center my-3 my-md-4">
+    <a type="button" class="btn btn-main-primary d-flex align-items-center gap-2 p-3 text-light" routerLink="/categories">
+      <span>
+        {{'home.allCategories' | translate}}
+      </span>
+      <span>
+        <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
+        <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
+      </span>
+    </a>
+  </div>
+</section>
+
