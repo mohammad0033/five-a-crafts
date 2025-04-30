@@ -1,6 +1,6 @@
 <div class="d-flex">
   <div class="card category-card text-white text-center position-relative overflow-hidden mx-2"
-       *ngFor="let category of categories; let i = index"
+       *ngFor="let category of categories"
        [ngStyle]="{'background-image': 'url(' + category?.image + ')'}">
     <div class="overlay d-flex align-items-center justify-content-center">
       <h5 class="mb-0">{{ category?.name }}</h5>
