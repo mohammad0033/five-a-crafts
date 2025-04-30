@@ -30,3 +30,7 @@
     }
   }
 }
+
+.accordion-button:active, .accordion-button:focus {
+  box-shadow: none !important;
+}
