@@ -117,4 +117,31 @@ export class ContentService {
     // return this.http.get<CarouselItem[]>('/api/carousel-data');
     return of(mockCarouselData).pipe(delay(500)); // Simulate 500ms delay
   }
+
+  getCategoriesData(): Observable<any[]> {
+
+    const mockCategoriesData: any[] = [
+      {
+        name: 'Candles',
+        image: 'https://picsum.photos/id/1063/300/300'
+      },
+      {
+        name: 'Decor',
+        image: 'https://picsum.photos/id/1064/300/300'
+      },
+      {
+        name: 'Ramadan',
+        image: 'https://picsum.photos/id/1065/300/300'
+      },
+      {
+        name: 'Gifts',
+        image: 'https://picsum.photos/id/1066/300/300'
+      }
+    ]
+
+    // Use `of` and `delay` to simulate a network request
+    // In a real scenario, this would be an HttpClient call:
+    // return this.http.get<CategoriesItem[]>('/api/carousel-data');
+    return of(mockCategoriesData).pipe(delay(500)); // Simulate 500ms delay
+  }
 }
