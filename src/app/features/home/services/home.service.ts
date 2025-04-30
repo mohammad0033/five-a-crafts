@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {ContentService} from '../../../core/services/content.service';
 import {Observable} from 'rxjs';
 import {CarouselItem} from '../models/carousel-item';
+import {CategoryItem} from '../models/category-item';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,10 @@ export class HomeService {
    */
   getHeroCarouselData(): Observable<CarouselItem[]> {
     return this.contentService.getCarouselData();
+  }
+
+  getCategoriesData(): Observable<CategoryItem[]> {
+    return this.contentService.getCategoriesData();
   }
 
   // getHomePageData(): Observable<HomePageData> {
