@@ -4,6 +4,9 @@
 }
 .navbar-brand img {
    max-width: 4.1875rem;
+  @media (max-width: 380px) {
+    max-width: 3.1875rem;
+  }
  }
 .nav-link{
   &.active {
