@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {NgForOf, NgIf, NgStyle} from '@angular/common';
 import {HomeCategoriesRowComponent} from '../home-categories-row/home-categories-row.component';
-import {HomeService} from '../../services/home.service';
+import {HomeService} from '../../../../services/home.service';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {NgxSplideModule} from 'ngx-splide';
 import {RouterLink} from '@angular/router';

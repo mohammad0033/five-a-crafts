@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {NgForOf, NgStyle} from '@angular/common';
-import {CategoryItem} from '../../models/category-item';
+import {CategoryItem} from '../../../../models/category-item';
 
 @Component({
   selector: 'app-home-categories-row',
