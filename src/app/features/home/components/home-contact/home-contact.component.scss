@@ -1,0 +1,31 @@
+.home-contact-section {
+  // Optional: Add specific section styles if needed
+}
+
+.contact-details-list {
+  dt {
+    flex-shrink: 0; // Prevent icon from shrinking
+  }
+  dd strong {
+    font-weight: 600; // Or your desired weight
+  }
+}
+
+.social-links-list {
+  .social-icon-wrapper {
+    height: 40.5px; // Consider using rem or em if possible
+    width: 40.5px;
+  }
+}
+
+.contact-image-wrapper {
+  height: 600px; // Or use aspect-ratio if appropriate
+}
+
+.contact-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// Add Bootstrap's text-decoration-none if not globally available/imported
+// .text-decoration-none { text-decoration: none !important; }
