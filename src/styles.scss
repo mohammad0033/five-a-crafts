@@ -20,6 +20,7 @@ $primary-color-value: #eaa665;
 $secondary-color-value: #f4e1ba;
 $background-color-value: #f8f4e9;
 $background2-color-value: #faf6ea;
+$background3-color-value: #f0f1eb;
 $nav-background-color-value: #f9fcf9;
 
 html {
@@ -33,6 +34,7 @@ html {
   --secondary-color: #{$secondary-color-value};
   --background-color: #{$background-color-value};
   --background2-color: #{$background2-color-value};
+  --background3-color: #{$background3-color-value};
   --nav-background-color: #{$nav-background-color-value};
 }
 html, body { height: 100%; }
@@ -72,6 +74,10 @@ body.ar {
 
 .bg-main-background2{
   background-color: var(--background2-color);
+}
+
+.bg-main-background3{
+  background-color: var(--background3-color);
 }
 
 .border-main-primary{
@@ -115,6 +121,14 @@ body.ar {
   color: white!important;
   background-color: color.adjust($primary-color-value, $lightness: -20%)!important;
   border-color: color.adjust($primary-color-value, $lightness: -20%)!important;
+}
+
+.text-main-primary{
+  color: var(--primary-color);
+}
+
+.text-main-secondary{
+  color: var(--secondary-color);
 }
 
 //move slider button to top so that it doesnt overlap favorite icon
