@@ -1,4 +1,9 @@
 import { Routes } from '@angular/router';
+import {homePageMetaResolver} from './features/home/resolver/home-page-meta.resolver';
+import {aboutPageMetaResolver} from './features/about/resolver/about-page-meta.resolver';
+import {categoriesPageMetaResolver} from './features/categories/reslover/categories-page-meta.resolver';
+import {contactPageMetaResolver} from './features/contact/reslover/contact-page-meta.resolver';
+import {productDetailsResolver} from './features/product-details/resolver/product-details.resolver';
 
 export const routes: Routes = [
   {
@@ -7,39 +12,93 @@ export const routes: Routes = [
       import('./core/components/container/container.component').then((m) => m.ContainerComponent),
     children: [
       {
-        path: '',
+        path: '', // This is the home route
         loadComponent: () =>
           import('./features/home/components/container/home.component').then(
             (m) => m.HomeComponent
           ),
+        // Add the resolve property here
+        resolve: {
+          // 'metaData' is the key you'll use in HomeComponent to access the resolved data
+          metaData: homePageMetaResolver
+        },
+        // (Optional but Recommended) Add static fallbacks for title and description
+        // These are used by Angular TitleStrategy, and potentially if the resolver fails catastrophically
+        title: 'Five A Crafts | Artisan Handcrafted & Sustainable Goods', // Fallback title
+        data: {
+          // Fallback description (can be accessed via route.snapshot.data['description'])
+          description: 'Discover Five A Crafts – an e-commerce platform dedicated to artisan-crafted,' +
+            ' sustainable goods.' + ' Shop unique, handcrafted items that bring warmth to your home and heart.'
+        }
       },
       {
         path: 'about',
         loadComponent: () =>
           import('./features/about/components/container/about.component').then(
-            (m) => m.AboutComponent
-          ),
+            (m) => m.AboutComponent),
+        resolve: {
+          metaData: aboutPageMetaResolver
+        },
+        title: 'About Us | Five A Crafts',
+        data: {
+          description: 'Learn more about the story, mission, and values of Five A Crafts.'
+        }
       },
       {
-        path: 'categories',
+        path: 'categories', // Category route
         loadComponent: () =>
           import('./features/categories/components/container/categories.component').then(
-            (m) => m.CategoriesComponent
-          ),
+            (m) => m.CategoriesComponent),
+        // 2. Add resolver and static fallbacks
+        resolve: {
+          metaData: categoriesPageMetaResolver // Use the category resolver
+        },
+        title: 'Product Categories | Five A Crafts', // Static fallback title
+        data: {
+          // Static fallback description
+          description: 'Explore all product categories offered by Five A Crafts.'
+        }
       },
       {
-        path: 'contact',
+        path: 'products/:productSlug', // Product details route
+        loadComponent: () =>
+          import('./features/product-details/components/container/product-details.component').then(
+            (m) => m.ProductDetailsComponent),
+        // 2. Use the new resolver and update the key
+        resolve: {
+          // Use a key like 'productData' to reflect the full data
+          productData: productDetailsResolver
+        },
+        // Static fallbacks remain useful for initial title strategy / catastrophic errors
+        title: 'Product Details | Five A Crafts',
+        data: {
+          description: 'View details for products available at Five A Crafts.'
+        }
+      },
+      {
+        path: 'contact', // Contact route
         loadComponent: () =>
           import('./features/contact/components/container/contact.component').then(
-            (m) => m.ContactComponent
-          ),
-      },
-      {
+            (m) => m.ContactComponent),
+        // 2. Add resolver and static fallbacks
+        resolve: {
+          metaData: contactPageMetaResolver // Use the contact resolver
+        },
+        title: 'Contact Us | Five A Crafts', // Static fallback title
+        data: {
+          // Static fallback description
+          description: 'Get in touch with Five A Crafts for support or inquiries.'
+        }
+      },{
         path: 'favorites',
         loadComponent: () =>
           import('./features/favorites/components/container/favorites.component').then(
             (m) => m.FavoritesComponent
           ),
+        // Add static title for UX
+        title: 'Your Favorites | Five A Crafts'
+        // No resolver needed
+        // No static description needed in data
       },
       {
         path: 'profile',
@@ -47,6 +106,9 @@ export const routes: Routes = [
           import('./features/profile/components/container/profile.component').then(
             (m) => m.ProfileComponent
           ),
+        // Add static title for UX
+        title: 'Your Profile | Five A Crafts'
+        // No resolver needed
       },
       {
         path: 'cart',
@@ -54,6 +116,9 @@ export const routes: Routes = [
           import('./features/cart/components/container/cart.component').then(
             (m) => m.CartComponent
           ),
+        // Add static title for UX
+        title: 'Your Cart | Five A Crafts'
+        // No resolver needed
       },
     ]
   },

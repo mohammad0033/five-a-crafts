@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import {delay, Observable, of} from 'rxjs';
+import {delay, Observable, of, throwError} from 'rxjs';
 import {Product} from '../models/product';
+import {ProductDetailsData} from '../../features/product-details/models/product-details-data';
 
 @Injectable({
   providedIn: 'root'
@@ -48,5 +49,76 @@ export class ProductsService {
     // In a real scenario, this would be an HttpClient call:
     // return this.http.get<Product[]>('/api/products/bestsellers');
     return of(mockCandlesCollection).pipe(delay(800)); // Simulate 800ms delay
+  }
+
+  // Rename method to reflect it fetches full details
+  getProductDetails(productSlug: string): Observable<ProductDetailsData> {
+    // --- Mock Data Simulation ---
+    // In a real app: return this.http.get<ProductDetailsData>(`/api/products/${productSlug}`);
+
+    let mockProductData: ProductDetailsData | null = null;
+
+    // Example specific product
+    if (productSlug === 'lavender-bliss-jar') {
+      mockProductData = {
+        id: 'prod_123',
+        slug: 'lavender-bliss-jar',
+        name: 'Lavender Bliss Jar Candle',
+        description: 'Experience tranquility with our Lavender Bliss Jar Candle. Hand-poured using sustainable soy wax and infused with pure lavender essential oil, this candle provides hours of calming aroma. Perfect for relaxation and creating a peaceful atmosphere in any room.',
+        price: 19.99,
+        sku: 'LBJC-01',
+        stockQuantity: 50,
+        images: [
+          { url: 'https://www.yourdomain.com/assets/images/lavender-candle-1.jpg', altText: 'Lavender Bliss Jar Candle front view' },
+          { url: 'https://www.yourdomain.com/assets/images/lavender-candle-2.jpg', altText: 'Lavender Bliss Jar Candle burning' }
+        ],
+        category: {
+          id: 'cat_01',
+          name: 'Candles',
+          slug: 'candles'
+        },
+        metadata: { // Nested metadata
+          title: 'Lavender Bliss Jar Candle | Five A Crafts', // More specific title
+          description: 'Shop the Lavender Bliss Jar Candle at Five A Crafts. Hand-poured, sustainable soy wax candle with calming lavender scent.', // SEO-focused description
+          ogImageUrl: 'https://www.yourdomain.com/assets/og-image-lavender-candle.jpg',
+          twitterImageUrl: 'https://www.yourdomain.com/assets/twitter-image-lavender-candle.jpg'
+        }
+      };
+    } else if (productSlug === 'rustic-wooden-bowl') {
+      // Add another mock product example
+      mockProductData = {
+        id: 'prod_456',
+        slug: 'rustic-wooden-bowl',
+        name: 'Rustic Wooden Bowl',
+        description: 'Add a touch of natural charm to your home with this beautiful rustic wooden bowl. Hand-carved from sustainably sourced mango wood, each bowl features unique grain patterns. Ideal for serving salads, fruits, or as a decorative centerpiece.',
+        price: 34.50,
+        sku: 'RWB-01',
+        stockQuantity: 25,
+        images: [
+          { url: 'https://www.yourdomain.com/assets/images/wooden-bowl-1.jpg', altText: 'Rustic Wooden Bowl top view' },
+          { url: 'https://www.yourdomain.com/assets/images/wooden-bowl-2.jpg', altText: 'Rustic Wooden Bowl side view' }
+        ],
+        category: {
+          id: 'cat_02',
+          name: 'Home Decor',
+          slug: 'home-decor'
+        },
+        metadata: {
+          title: 'Rustic Wooden Bowl | Hand-Carved Decor | Five A Crafts',
+          description: 'Discover our unique Rustic Wooden Bowl, hand-carved from sustainable mango wood. Perfect for serving or decoration. Shop now at Five A Crafts.',
+          ogImageUrl: 'https://www.yourdomain.com/assets/og-image-wooden-bowl.jpg',
+          twitterImageUrl: 'https://www.yourdomain.com/assets/twitter-image-wooden-bowl.jpg'
+        }
+      };
+    }
+
+    // Simulate API call result
+    if (mockProductData) {
+      return of(mockProductData).pipe(delay(800)); // Increase delay to see loading state
+    } else {
+      // Simulate a 'Not Found' scenario
+      console.error(`Mock product data not found for slug: ${productSlug}`);
+      return throwError(() => new Error('Product not found')); // Simulate HTTP 404
+    }
   }
 }
