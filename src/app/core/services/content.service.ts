@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {delay, Observable, of} from 'rxjs';
 import {CarouselItem} from '../../features/home/models/carousel-item';
 import {CategoryItem} from '../../features/home/models/category-item';
+import {PageMetadata} from '../models/page-meta-data';
 
 // Inside content.service.ts or types.ts
 export interface MegaMenuItem {
@@ -148,5 +149,49 @@ export class ContentService {
     // In a real scenario, this would be an HttpClient call:
     // return this.http.get<CategoriesItem[]>('/api/carousel-data');
     return of(mockCategoriesData).pipe(delay(500)); // Simulate 500ms delay
+  }
+
+  getHomePageMetadata(): Observable<PageMetadata> {
+    // Mock data - replace with actual API call eventually
+    const mockMetadata: PageMetadata = {
+      title: 'API: Five A Crafts | Handcrafted & Sustainable', // Example API title
+      description: 'API: Shop unique, artisan-crafted, sustainable goods at Five A Crafts. Bring warmth to your home.', // Example API description
+      // Optionally provide specific image URLs from API
+      // ogImageUrl: 'https://api.yourdomain.com/images/home-og.jpg',
+      // twitterImageUrl: 'https://api.yourdomain.com/images/home-twitter.jpg'
+    };
+
+    // Simulate network delay
+    // In a real scenario: return this.http.get<PageMetadata>('/api/metadata/home');
+    return of(mockMetadata).pipe(delay(300)); // Simulate 300ms delay
+  }
+
+  getAboutPageMetadata(): Observable<PageMetadata> {
+    const mockMetadata: PageMetadata = {
+      title: 'API: About Five A Crafts | Our Story & Mission',
+      description: 'API: Learn about Five A Crafts, our dedication to sustainable practices, and the artisans behind our unique products.',
+      // ogImageUrl: 'https://api.yourdomain.com/images/about-og.jpg', // Optional specific image
+    };
+    // Simulate network delay
+    return of(mockMetadata).pipe(delay(250)); // Simulate delay
+  }
+
+  getCategoriesPageMetadata(): Observable<PageMetadata> {
+    const mockMetadata: PageMetadata = {
+      title: 'API: Shop by Category | Five A Crafts',
+      description: 'API: Browse all product categories available at Five A Crafts, including candles, gifts, home decor, and craft supplies.',
+      // ogImageUrl: 'https://api.yourdomain.com/images/categories-og.jpg',// Optional specific image
+    };
+    return of(mockMetadata).pipe(delay(280)); //Simulate delay
+  }
+
+  getContactPageMetadata(): Observable<PageMetadata> {
+    const mockMetadata: PageMetadata = {
+      title: 'API: Contact Five A Crafts | Get in Touch',
+      description: 'API: Have questions or need support? Contact the Five A Crafts team via our contact form, email, or phone.',
+      // ogImageUrl: 'https://api.yourdomain.com/images/contact-og.jpg', // Optional specific image
+    };
+    // Simulate network delay
+    return of(mockMetadata).pipe(delay(200)); // Simulate delay
   }
 }
