@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {delay, Observable, of} from 'rxjs';
 import {CarouselItem} from '../../features/home/models/carousel-item';
+import {CategoryItem} from '../../features/home/models/category-item';
 
 // Inside content.service.ts or types.ts
 export interface MegaMenuItem {
@@ -120,20 +121,24 @@ export class ContentService {
 
   getCategoriesData(): Observable<any[]> {
 
-    const mockCategoriesData: any[] = [
+    const mockCategoriesData: CategoryItem[] = [
       {
+        id: 1,
         name: 'Candles',
         image: 'https://picsum.photos/id/1063/300/300'
       },
       {
+        id: 2,
         name: 'Decor',
         image: 'https://picsum.photos/id/1064/300/300'
       },
       {
+        id: 3,
         name: 'Ramadan',
         image: 'https://picsum.photos/id/1065/300/300'
       },
       {
+        id: 4,
         name: 'Gifts',
         image: 'https://picsum.photos/id/1066/300/300'
       }

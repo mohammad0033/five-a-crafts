@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {NgForOf, NgIf, NgStyle} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {HomeCategoriesRowComponent} from '../home-categories-row/home-categories-row.component';
 import {HomeService} from '../../../../services/home.service';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
@@ -14,7 +14,6 @@ import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
   selector: 'app-home-categories',
   imports: [
     TranslatePipe,
-    NgStyle,
     NgForOf,
     NgIf,
     HomeCategoriesRowComponent,

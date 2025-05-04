@@ -10,25 +10,47 @@
   </div>
 
   <div class="mb-5 d-flex d-sm-none justify-content-center categories-mobile-container" *ngIf="categories.length > 0">
+    <!-- English Splide -->
     <splide [options]="splideOptions" class="col-12" *ngIf="currentLang === 'en'">
       <splide-slide *ngFor="let category of categories">
-        <div class="card category-card text-white text-center position-relative overflow-hidden mx-2"
-          [ngStyle]="{'background-image': 'url(' + category?.image + ')'}">
-          <div class="overlay d-flex align-items-center justify-content-center">
-            <h5 class="mb-0">{{ category?.name }}</h5>
+        <a [routerLink]="['/category', category.id]"
+           class="card category-card text-white text-center position-relative overflow-hidden mx-2
+           text-decoration-none d-block"
+           [attr.aria-label]="'View category: ' + category?.name">
+          <!-- Image Tag -->
+          <img [src]="category?.image"
+               [alt]="category?.name || 'Category image'"
+               class="category-card-image"
+               loading="lazy">
+
+          <!-- Overlay for Text -->
+          <div class="overlay d-flex align-items-center justify-content-center p-2">
+            <!-- Heading for the category name -->
+            <h4 class="mb-0 category-card-title">{{ category?.name }}</h4>
           </div>
-        </div>
+        </a>
       </splide-slide>
     </splide>
 
+    <!-- Arabic Splide -->
     <splide [options]="rtlSplideOptions" class="col-12" *ngIf="currentLang === 'ar'">
       <splide-slide *ngFor="let category of categories">
-        <div class="card category-card text-white text-center position-relative overflow-hidden mx-2"
-          [ngStyle]="{'background-image': 'url(' + category?.image + ')'}">
-          <div class="overlay d-flex align-items-center justify-content-center">
-            <h5 class="mb-0">{{ category?.name }}</h5>
+        <a [routerLink]="['/category', category.id]"
+           class="card category-card text-white text-center position-relative overflow-hidden mx-2
+           text-decoration-none d-block"
+           [attr.aria-label]="'View category: ' + category?.name">
+          <!-- Image Tag -->
+          <img [src]="category?.image"
+               [alt]="category?.name || 'Category image'"
+               class="category-card-image"
+               loading="lazy">
+
+          <!-- Overlay for Text -->
+          <div class="overlay d-flex align-items-center justify-content-center p-2">
+            <!-- Heading for the category name -->
+            <h4 class="mb-0 category-card-title">{{ category?.name }}</h4>
           </div>
-        </div>
+        </a>
       </splide-slide>
     </splide>
   </div>

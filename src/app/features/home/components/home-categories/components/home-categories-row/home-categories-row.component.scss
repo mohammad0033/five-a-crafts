@@ -1,18 +1,65 @@
+// Import the shared category card styles
 @use '../../../styles/category-card';
-.category-card {
-  width: 50%;
-  cursor: pointer;
+
+.d-flex {
+  display: flex;
+  width: 100%;
+}
+
+.category-card-wrapper {
+  // --- Initial State ---
+  flex: 0 1 50%; // Each wrapper takes exactly 50% of the container width
+  transition: flex-basis 0.4s ease-in-out;
+  position: relative; // Needed for z-index stacking context
 
   &:hover {
-    z-index: 2;
-    width: 100%;
+    flex-basis: 66%; // Expand self to 66%
+    z-index: 2; // Bring self to front
 
-    .overlay {
-      opacity: 1; // Show overlay on hover
+    // Target the overlay within the card link inside the hovered wrapper
+    .category-card .overlay {
+      opacity: 1; // Show the overlay
     }
   }
 }
 
+// --- Hover effect using Parent Hover ---
+// This targets siblings more reliably in flexbox
+.d-flex:hover {
+  .category-card-wrapper:not(:hover) {
+    flex-basis: 33%; // Shrink the non-hovered item
+    z-index: 1; // Ensure shrunken item is behind expanded one
+  }
+}
+
+// --- Card Link Styles (a.category-card) ---
+.category-card {
+  // Base styles are applied via the class from _category-card.scss
+  // Ensure it fills the wrapper dimensions
+  height: 20.125rem; // Fill the wrapper height
+  width: 100%; // Fill the wrapper width
+  position: relative; // For overlay positioning
+  text-decoration: none; // Remove link underline
+  color: inherit; // Use surrounding text color
+}
+
 .overlay {
-  opacity: 0;
+  opacity: 0; // Initially hidden
+  z-index: 2; // Position above the image
+}
+
+.category-card-image {
+  // Styles to make the image fill the card area
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; // Cover the area, maintain aspect ratio
+  z-index: 1; // Position behind the overlay
+}
+
+.category-card-title {
+  // Optional: Add specific styles for the title if needed
+  // e.g., text-shadow for better readability
 }
