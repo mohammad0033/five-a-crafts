@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {NgForOf} from '@angular/common';
-import {CategoryItem} from '../../../features/home/models/category-item';
 import {RouterLink} from '@angular/router';
+import {Category} from '../../../core/models/category';
 
 @Component({
   selector: 'app-categories-row',
@@ -14,5 +14,5 @@ import {RouterLink} from '@angular/router';
   styleUrl: './categories-row.component.scss'
 })
 export class CategoriesRowComponent {
-@Input() categories!: CategoryItem[]
+@Input() categories!: Category[]
 }
