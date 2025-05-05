@@ -92,6 +92,12 @@ export class CategoriesComponent implements OnInit {
       untilDestroyed(this),
       tap(categories => {
         this.categories = categories;
+        // Split the data into chunks of 2
+        this.categoryRows = []; // Reset the rows array
+        for (let i = 0; i < categories.length; i += 2) {
+          // Slice the original array and push the chunk (pair) into categoryRows
+          this.categoryRows.push(categories.slice(i, i + 2));
+        }
       }),
       // Use switchMap to switch to the products observable *after* categories are processed
       switchMap(() => {
