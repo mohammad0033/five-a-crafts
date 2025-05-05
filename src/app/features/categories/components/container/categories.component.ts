@@ -14,7 +14,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {CategoriesService} from '../../services/categories.service';
 import {Category} from '../../../../core/models/category';
-import {CategoryCollectionComponent} from '../category-collection/category-collection.component';
+import {CategoryCollectionComponent} from '../../../../shared/components/category-collection/category-collection.component';
 import {Product} from '../../../../core/models/product';
 import {catchError, EMPTY, finalize, switchMap, tap, throwError} from 'rxjs';
 import {ProductsApiService} from '../../../../core/services/products-api.service';

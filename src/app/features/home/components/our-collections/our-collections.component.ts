@@ -7,7 +7,7 @@ import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {catchError, EMPTY, finalize, switchMap, tap, throwError} from 'rxjs';
 import {
   CategoryCollectionComponent
-} from '../../../categories/components/category-collection/category-collection.component';
+} from '../../../../shared/components/category-collection/category-collection.component';
 import {Category} from '../../../../core/models/category';
 import {NgIf} from '@angular/common';
 import {CategoriesService} from '../../../categories/services/categories.service';
