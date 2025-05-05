@@ -1,6 +1,6 @@
-<section class="p-3 p-md-5" [attr.aria-labelledby]="'our-' + category.name + '-collection-heading'">
+<section [attr.aria-labelledby]="'our-' + category.name + '-collection-heading'">
   <h2 [id]="'our-' + category.name + '-collection-heading'" class="visually-hidden">{{'home.ourCollections' | translate}}</h2>
-  <h3 class="fs-5 mb-3 mt-5">{{'home.ourCollections' | translate}}</h3>
+  <h3 class="fs-5 mb-3">{{'home.ourCollections' | translate}}</h3>
   <h4 class="zapf-font fs-2" *ngIf="currentLang === 'en'">{{category.name}} {{'category.collection' | translate}}</h4>
   <h4 class="zapf-font fs-2" *ngIf="currentLang === 'ar'">{{'category.collection' | translate}} {{category.name}}</h4>
   <p>{{category.description}}</p>

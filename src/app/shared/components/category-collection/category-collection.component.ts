@@ -1,11 +1,11 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Category} from '../../../../core/models/category';
+import {Category} from '../../../core/models/category';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {NgForOf, NgIf, SlicePipe} from '@angular/common';
-import {ProductCardComponent} from '../../../../shared/components/product-card/product-card.component';
+import {ProductCardComponent} from '../product-card/product-card.component';
 import {RouterLink} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {Product} from '../../../../core/models/product';
+import {Product} from '../../../core/models/product';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 
