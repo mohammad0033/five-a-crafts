@@ -16,13 +16,15 @@
         [title]="product.isFavorite ? 'Remove from favorites' : 'Add to favorites'">
       </fa-icon>
     </header>
-    <p class="card-text text-muted" *ngIf="product.description">
+    <p class="card-text text-muted d-none d-md-block" *ngIf="product.description">
       {{ product.description | slice:0:70 }}{{ product.description.length! > 70 ? '...' : '' }}
     </p>
     <div>
-      <p class="fw-semibold" aria-label="Product price">{{ product.price }} LE</p>
+      <p class="fw-semibold product-card-price" aria-label="Product price">{{ product.price }} LE</p>
       <div class="button-placeholder">
-        <a class="btn btn-outline-main-primary more-details-btn w-100 py-2"
+        <a class="btn btn-outline-main-primary more-details-btn w-100 py-2 d-none d-md-block"
+           [attr.aria-label]="'View more details about ' + product.name">{{'product.moreDetails' | translate}}</a>
+        <a class="btn btn-outline-main-primary w-100 py-2 d-md-none fs-08"
            [attr.aria-label]="'View more details about ' + product.name">{{'product.moreDetails' | translate}}</a>
       </div>
     </div>

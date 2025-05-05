@@ -63,6 +63,17 @@
   }
 }
 
+
+@media (max-width: 767px) {
+  .product-card{
+    height: 17.3125rem;
+  }
+
+  .card-title, .product-card-price{
+    font-size: 0.875rem;
+  }
+}
+
 // --- Heartbeat Animation Definition ---
 @keyframes heartbeat {
   0% {
