@@ -8,7 +8,7 @@
   <div *ngIf="isLoading" class="text-center my-5 d-flex justify-content-center gap-3">
     <!-- You could add a spinner here -->
     <span class="spinner-border spinner-border-sm border-main-primary" role="status" aria-hidden="true"></span>
-    <p>Loading products...</p>
+    <p>{{'product.loadingProducts' | translate}}</p>
   </div>
 
   <!-- Show slider only when not loading and products exist -->
@@ -32,6 +32,6 @@
 
   <!-- Optional: Show a message if no products are found after loading -->
   <div *ngIf="!isLoading && (!products || products.length === 0)" class="text-center my-5">
-    <p>No best-selling products found at this time.</p>
+    <p>{{'product.noProducts' | translate}}</p>
   </div>
 </section>
