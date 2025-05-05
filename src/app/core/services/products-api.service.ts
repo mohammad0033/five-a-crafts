@@ -6,7 +6,7 @@ import {ProductDetailsData} from '../../features/product-details/models/product-
 @Injectable({
   providedIn: 'root'
 })
-export class ProductsService {
+export class ProductsApiService {
 
   constructor() { }
 

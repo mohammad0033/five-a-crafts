@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import {delay, Observable, of} from 'rxjs';
 import {CarouselItem} from '../../features/home/models/carousel-item';
-import {CategoryItem} from '../../features/home/models/category-item';
 import {PageMetadata} from '../models/page-meta-data';
 
-// Inside content.service.ts or types.ts
+// Inside content-api.service.ts or types.ts
 export interface MegaMenuItem {
   label: string;
   link: string;
@@ -21,7 +20,7 @@ export type MegaMenuData = MegaMenuColumn[];
 @Injectable({
   providedIn: 'root'
 })
-export class ContentService {
+export class ContentApiService {
 
   constructor() { }
 
@@ -118,37 +117,6 @@ export class ContentService {
     // In a real scenario, this would be an HttpClient call:
     // return this.http.get<CarouselItem[]>('/api/carousel-data');
     return of(mockCarouselData).pipe(delay(500)); // Simulate 500ms delay
-  }
-
-  getCategoriesData(): Observable<any[]> {
-
-    const mockCategoriesData: CategoryItem[] = [
-      {
-        id: 1,
-        name: 'Candles',
-        image: 'https://picsum.photos/id/1063/300/300'
-      },
-      {
-        id: 2,
-        name: 'Decor',
-        image: 'https://picsum.photos/id/1064/300/300'
-      },
-      {
-        id: 3,
-        name: 'Ramadan',
-        image: 'https://picsum.photos/id/1065/300/300'
-      },
-      {
-        id: 4,
-        name: 'Gifts',
-        image: 'https://picsum.photos/id/1066/300/300'
-      }
-    ]
-
-    // Use `of` and `delay` to simulate a network request
-    // In a real scenario, this would be an HttpClient call:
-    // return this.http.get<CategoriesItem[]>('/api/carousel-data');
-    return of(mockCategoriesData).pipe(delay(500)); // Simulate 500ms delay
   }
 
   getHomePageMetadata(): Observable<PageMetadata> {
