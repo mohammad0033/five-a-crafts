@@ -2,13 +2,13 @@ import {ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot} from '@angular/r
 import {inject} from '@angular/core';
 import {PageMetadata} from '../../../core/models/page-meta-data';
 import {catchError, map, Observable, of} from 'rxjs';
-import {ContentService} from '../../../core/services/content.service';
+import {ContentApiService} from '../../../core/services/content-api.service';
 
 export const contactPageMetaResolver: ResolveFn<PageMetadata | null> = (
   _route: ActivatedRouteSnapshot,
   _state: RouterStateSnapshot
 ): Observable<PageMetadata | null> => {
-  const contentService = inject(ContentService);
+  const contentService = inject(ContentApiService);
 
   return contentService.getContactPageMetadata().pipe(
     map(metadata => metadata),

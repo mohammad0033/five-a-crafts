@@ -8,7 +8,7 @@ import {RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {map} from "rxjs";
-import {ContentService, MegaMenuData} from '../../services/content.service';
+import {ContentApiService, MegaMenuData} from '../../services/content-api.service';
 import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 
 @UntilDestroy()
@@ -46,7 +46,7 @@ export class NavbarComponent implements OnInit{
         private breakpointObserver: BreakpointObserver,
         @Inject(PLATFORM_ID) private platformId: Object,
         private cdRef: ChangeDetectorRef,
-        private contentService: ContentService, // Inject ContentService
+        private contentService: ContentApiService, // Inject ContentApiService
         private translate: TranslateService) {}
 
     ngOnInit(): void {

@@ -1,27 +1,29 @@
 import { Injectable } from '@angular/core';
-import {ContentService} from '../../../core/services/content.service';
+import {ContentApiService} from '../../../core/services/content-api.service';
 import {Observable} from 'rxjs';
 import {CarouselItem} from '../models/carousel-item';
-import {CategoryItem} from '../models/category-item';
+import {CategoriesApiService} from '../../../core/services/categories-api.service';
+import {Category} from '../../../core/models/category';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HomeService {
 
-  // Inject ContentService
-  constructor(private contentService: ContentService) { }
+  // Inject ContentApiService
+  constructor(private contentApiService: ContentApiService,
+              private categoriesApiService: CategoriesApiService) { }
 
   /**
    * Gets the data needed for the hero carousel.
-   * Delegates the actual fetching/simulation to ContentService.
+   * Delegates the actual fetching/simulation to ContentApiService.
    */
   getHeroCarouselData(): Observable<CarouselItem[]> {
-    return this.contentService.getCarouselData();
+    return this.contentApiService.getCarouselData();
   }
 
-  getCategoriesData(): Observable<CategoryItem[]> {
-    return this.contentService.getCategoriesData();
+  getCategoriesData(): Observable<Category[]> {
+    return this.categoriesApiService.getCategoriesData();
   }
 
   // getHomePageData(): Observable<HomePageData> {

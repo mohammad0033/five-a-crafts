@@ -2,15 +2,15 @@ import {ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot} from '@angular/r
 import {inject} from '@angular/core';
 import {ProductDetailsData} from '../models/product-details-data';
 import {catchError, Observable, of} from 'rxjs';
-import {ProductsService} from '../../../core/services/products.service';
+import {ProductsApiService} from '../../../core/services/products-api.service';
 
 export const productDetailsResolver: ResolveFn<ProductDetailsData | null> = (
   route: ActivatedRouteSnapshot, // We need the route to access parameters
   _state: RouterStateSnapshot   // State is often unused but required by the signature
 ): Observable<ProductDetailsData | null> => {
 
-  // Inject the ProductsService
-  const productsService = inject(ProductsService);
+  // Inject the ProductsApiService
+  const productsService = inject(ProductsApiService);
 
   // Get the product slug from the route parameters
   const productSlug = route.paramMap.get('productSlug');

@@ -3,7 +3,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
 import {NgForOf, NgIf, SlicePipe} from '@angular/common';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
-import {ProductsService} from '../../../../core/services/products.service';
+import {ProductsApiService} from '../../../../core/services/products-api.service';
 import {Product} from '../../../../core/models/product';
 import {finalize} from 'rxjs';
 import {ProductCardComponent} from '../../../../shared/components/product-card/product-card.component';
@@ -33,7 +33,7 @@ export class OurProductsComponent implements OnInit {
   isLoading: boolean = true;
   currentLang!: string
 
-  constructor(private productsService: ProductsService,
+  constructor(private productsApiService: ProductsApiService,
               private translate: TranslateService) {
   }
 
@@ -44,7 +44,7 @@ export class OurProductsComponent implements OnInit {
       this.currentLang = event.lang
     })
     this.isLoading = true;
-    this.productsService.getBestSellingProducts()
+    this.productsApiService.getBestSellingProducts()
       .pipe(
         untilDestroyed(this), // Use the untilDestroyed operator
         finalize(() => (this.isLoading = false)) // Set isLoading to false when the observable completes
