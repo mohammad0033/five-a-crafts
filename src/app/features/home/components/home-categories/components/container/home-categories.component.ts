@@ -1,13 +1,16 @@
 import {Component, OnInit} from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {NgForOf, NgIf} from '@angular/common';
-import {HomeCategoriesRowComponent} from '../home-categories-row/home-categories-row.component';
+import {CategoriesRowComponent} from '../../../../../../shared/components/categories-row/categories-row.component';
 import {HomeService} from '../../../../services/home.service';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {NgxSplideModule} from 'ngx-splide';
 import {RouterLink} from '@angular/router';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {
+  CategoriesSplidesComponent
+} from '../../../../../../shared/components/categories-splides/categories-splides.component';
 
 @UntilDestroy()
 @Component({
@@ -16,10 +19,11 @@ import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
     TranslatePipe,
     NgForOf,
     NgIf,
-    HomeCategoriesRowComponent,
+    CategoriesRowComponent,
     NgxSplideModule,
     RouterLink,
-    FaIconComponent
+    FaIconComponent,
+    CategoriesSplidesComponent
   ],
   templateUrl: './home-categories.component.html',
   standalone: true,
