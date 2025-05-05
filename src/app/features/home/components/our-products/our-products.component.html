@@ -1,4 +1,4 @@
-<section class="p-5" aria-labelledby="our-products-heading">
+<section class="p-3 p-md-5" aria-labelledby="our-products-heading">
   <h2 id="our-products-heading" class="visually-hidden">Our Products</h2>
   <h3 class="fs-5 mb-3 mt-5">{{'home.ourProducts' | translate}}</h3>
   <h4 class="zapf-font fs-2" >{{'home.bestSeller' | translate}}</h4>
@@ -12,9 +12,23 @@
   </div>
 
   <!-- Show slider only when not loading and products exist -->
-  <div class="my-5 products-slider-placeholder" *ngIf="!isLoading && products && products.length > 0">
+  <div class="my-5 d-none d-md-block products-slider-placeholder" *ngIf="!isLoading && products && products.length > 0">
     <app-products-slider [products]="products"></app-products-slider>
   </div>
+
+  <div class="d-flex d-md-none row row-cols-2 g-3" *ngIf="!isLoading && products && products.length > 0">
+    <app-product-card *ngFor="let product of products | slice:0:4" [product]="product"></app-product-card>
+  </div>
+
+  <a type="button" class="btn btn-main-primary mt-3 p-3 text-light d-flex d-md-none align-items-center justify-content-center gap-2 col-6" routerLink="/categories">
+    <span>
+      {{'home.allProducts' | translate}}
+    </span>
+    <span>
+      <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
+      <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
+    </span>
+  </a>
 
   <!-- Optional: Show a message if no products are found after loading -->
   <div *ngIf="!isLoading && (!products || products.length === 0)" class="text-center my-5">

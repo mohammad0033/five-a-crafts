@@ -1,11 +1,15 @@
 import {Component, OnInit} from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
-import {NgIf} from '@angular/common';
+import {NgForOf, NgIf, SlicePipe} from '@angular/common';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {ProductsService} from '../../../../core/services/products.service';
 import {Product} from '../../../../core/models/product';
 import {finalize} from 'rxjs';
+import {ProductCardComponent} from '../../../../shared/components/product-card/product-card.component';
+import {RouterLink} from '@angular/router';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 
 @UntilDestroy()
 @Component({
@@ -13,7 +17,12 @@ import {finalize} from 'rxjs';
   imports: [
     TranslatePipe,
     ProductsSliderComponent,
-    NgIf
+    NgIf,
+    ProductCardComponent,
+    NgForOf,
+    SlicePipe,
+    RouterLink,
+    FaIconComponent
   ],
   templateUrl: './our-products.component.html',
   standalone: true,
@@ -22,11 +31,18 @@ import {finalize} from 'rxjs';
 export class OurProductsComponent implements OnInit {
   products : Product[] = []
   isLoading: boolean = true;
+  currentLang!: string
 
-  constructor(private productsService: ProductsService) {
+  constructor(private productsService: ProductsService,
+              private translate: TranslateService) {
   }
 
   ngOnInit() {
+    this.currentLang = this.translate.currentLang
+
+    this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event) => {
+      this.currentLang = event.lang
+    })
     this.isLoading = true;
     this.productsService.getBestSellingProducts()
       .pipe(
@@ -43,4 +59,7 @@ export class OurProductsComponent implements OnInit {
         }
       });
   }
+
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faArrowLeft = faArrowLeft;
 }
