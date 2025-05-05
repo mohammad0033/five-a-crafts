@@ -8,6 +8,7 @@ import {ActivatedRoute} from '@angular/router';
 import {PageMetadata} from '../../../../core/models/page-meta-data';
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
 import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-data';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +17,8 @@ import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-dat
     OurProductsComponent,
     HomeCategoriesComponent,
     OurCollectionsComponent,
-    HomeContactComponent
+    HomeContactComponent,
+    TranslatePipe
   ],
   templateUrl: './home.component.html',
   standalone: true,
