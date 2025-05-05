@@ -1,0 +1,42 @@
+<section class="p-3 p-md-5" [attr.aria-labelledby]="'our-' + category.name + '-collection-heading'">
+  <h2 [id]="'our-' + category.name + '-collection-heading'" class="visually-hidden">{{'home.ourCollections' | translate}}</h2>
+  <h3 class="fs-5 mb-3 mt-5">{{'home.ourCollections' | translate}}</h3>
+  <h4 class="zapf-font fs-2" *ngIf="currentLang === 'en'">{{category.name}} {{'category.collection' | translate}}</h4>
+  <h4 class="zapf-font fs-2" *ngIf="currentLang === 'ar'">{{'category.collection' | translate}} {{category.name}}</h4>
+  <p>{{category.description}}</p>
+
+  <!-- Optional: Show a loading indicator -->
+  <div *ngIf="isLoading" class="text-center my-5 d-flex justify-content-center gap-3">
+    <!-- You could add a spinner here -->
+    <span class="spinner-border spinner-border-sm border-main-primary" role="status" aria-hidden="true"></span>
+    <p>{{'product.loadingProducts' | translate}}</p>
+  </div>
+
+  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 my-2 my-md-5 candles-collection-placeholder" *ngIf="!isLoading && products.length > 0">
+    <!--    limit to 4 products-->
+    <div class="col d-none d-md-block" *ngFor="let product of products | slice:0:limitCount">
+      <app-product-card [product]="product"></app-product-card>
+    </div>
+    <div class="col d-md-none" *ngFor="let product of products | slice:0:2">
+      <app-product-card [product]="product"></app-product-card>
+    </div>
+  </div>
+
+  <!-- Optional: Show a message if no products are found after loading -->
+  <div *ngIf="!isLoading && (!products || products.length === 0)" class="text-center my-5">
+    <p>{{'product.noProducts' | translate}}</p>
+  </div>
+
+  <div class="d-flex my-3 my-md-4">
+    <a type="button" class="btn btn-main-primary d-flex align-items-center gap-2 p-3 text-light" [routerLink]="['/categories', category.id]">
+      <span>
+        {{'home.allCollection' | translate}}
+      </span>
+      <span>
+        <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
+        <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
+      </span>
+    </a>
+  </div>
+</section>
+
