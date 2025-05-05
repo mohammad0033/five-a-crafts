@@ -34,24 +34,6 @@ export class HomeCategoriesComponent implements OnInit {
   categoryRows:any[] = [];
 
   currentLang!: string
-  splideOptions = {
-    perPage: 4,
-    perMove: 1,
-    gap: '1rem',
-    autoplay: false,
-    pagination: true,
-    loop: true,
-    breakpoints: {
-      768: {
-        perPage: 1,
-      }
-    }
-  };
-
-  rtlSplideOptions = {
-    ...this.splideOptions,
-    direction: "rtl" as "rtl"
-  }
 
   constructor(private homeService: HomeService,
               private translate: TranslateService) {
