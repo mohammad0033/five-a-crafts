@@ -1,3 +1,7 @@
+.navbar-on-top {
+  position: relative; // Crucial: establishes a stacking context for the navbar
+  z-index: 20;      // Higher than the progress bar's z-index (10)
+}
 .navbar-wrapper {
   background-color: var(--nav-background-color);
   z-index: 1;

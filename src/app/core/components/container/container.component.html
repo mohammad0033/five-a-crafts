@@ -1,10 +1,15 @@
 <app-navbar ngSkipHydration></app-navbar>
-<mat-progress-bar
-  *ngIf="isLoading"
-  mode="indeterminate"
-  aria-label="Loading page data">
-</mat-progress-bar>
-<main>
-  <router-outlet></router-outlet>
-</main>
+
+<div class="main-content-area">
+  <mat-progress-bar
+    *ngIf="isLoading"
+    mode="indeterminate"
+    aria-label="Loading page data"
+    class="loading-indicator">
+  </mat-progress-bar>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
 <app-footer></app-footer>

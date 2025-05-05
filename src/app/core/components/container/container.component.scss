@@ -1,0 +1,21 @@
+.main-content-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; // Make sure it takes available space if container is flex
+}
+
+mat-progress-bar.loading-indicator,
+.main-content-area > mat-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.main-content-area > main {
+  padding-top: 4px;
+  width: 100%;
+  flex-grow: 1;
+}

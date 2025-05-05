@@ -156,7 +156,7 @@ export class ContentService {
     const mockMetadata: PageMetadata = {
       title: 'API: Five A Crafts | Handcrafted & Sustainable', // Example API title
       description: 'API: Shop unique, artisan-crafted, sustainable goods at Five A Crafts. Bring warmth to your home.', // Example API description
-      // Optionally provide specific image URLs from API
+      // Optionally provides specific image URLs from API
       // ogImageUrl: 'https://api.yourdomain.com/images/home-og.jpg',
       // twitterImageUrl: 'https://api.yourdomain.com/images/home-twitter.jpg'
     };
@@ -182,7 +182,7 @@ export class ContentService {
       description: 'API: Browse all product categories available at Five A Crafts, including candles, gifts, home decor, and craft supplies.',
       // ogImageUrl: 'https://api.yourdomain.com/images/categories-og.jpg',// Optional specific image
     };
-    return of(mockMetadata).pipe(delay(280)); //Simulate delay
+    return of(mockMetadata).pipe(delay(200)); //Simulate delay
   }
 
   getContactPageMetadata(): Observable<PageMetadata> {
