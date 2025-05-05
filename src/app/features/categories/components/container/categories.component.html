@@ -28,10 +28,12 @@
 </section>
 <!--category collections-->
 <ng-container *ngIf="categories.length > 0">
-  <app-category-collection
-    *ngFor="let category of categories"
-    [category]="category"
-    [products]="products"
-    [limitCount]="4"></app-category-collection>
+  <div class="p-3 p-md-5 d-flex flex-column gap-3 gap-md-5">
+    <app-category-collection
+      *ngFor="let category of categories"
+      [category]="category"
+      [products]="products"
+      [limitCount]="4"></app-category-collection>
+  </div>
 </ng-container>
 
