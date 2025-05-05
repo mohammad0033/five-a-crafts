@@ -1,4 +1,4 @@
-<section class="p-5" aria-labelledby="our-collections-heading">
+<section class="p-3 p-md-5" aria-labelledby="our-collections-heading">
   <h2 id="our-collections-heading" class="visually-hidden">Our Collections</h2>
   <h3 class="fs-5 mb-3 mt-5">{{'home.ourCollections' | translate}}</h3>
   <h4 class="zapf-font fs-2" >{{'home.candlesCollection' | translate}}</h4>
@@ -11,9 +11,12 @@
     <p>Loading products...</p>
   </div>
 
-  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 my-5 candles-collection-placeholder" *ngIf="!isLoading && products.length > 0">
+  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 my-2 my-md-5 candles-collection-placeholder" *ngIf="!isLoading && products.length > 0">
 <!--    limit to 8 products-->
-    <div class="col" *ngFor="let product of products | slice:0:8">
+    <div class="col d-none d-md-block" *ngFor="let product of products | slice:0:8">
+      <app-product-card [product]="product"></app-product-card>
+    </div>
+    <div class="col d-md-none" *ngFor="let product of products | slice:0:2">
       <app-product-card [product]="product"></app-product-card>
     </div>
   </div>
