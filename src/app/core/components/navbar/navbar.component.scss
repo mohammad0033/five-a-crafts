@@ -98,15 +98,15 @@
         opacity: 0;
         visibility: hidden;
         width: auto; // Reset mobile width
-        max-width: 900px; // Restore desktop max-width
+        //max-width: 900px; // Restore desktop max-width
         margin-top: 0; // Reset mobile margin
         border: 1px solid var(--primary-color); // Restore border
         box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,.175); // Restore shadow
 
         &.mega-menu {
           width: 60vw;
-          max-width: 900px;
-          max-height: 400px;
+          //max-width: 900px;
+          //max-height: 400px;
           overflow-y: auto;
         }
       }
