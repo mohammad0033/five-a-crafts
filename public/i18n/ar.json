@@ -13,13 +13,14 @@
   "language": "اللغة",
   "arabic": "العربية",
   "english": "الانجليزية",
+  "home.mainTitle": "Five A Crafts - منتجات مصنعه يدويا",
   "home.checkCategories": "استكشف التصنيفات",
   "home.ourProducts": "منتجاتنا",
   "home.bestSeller": "المنتجات الأكثر مبيعاً",
   "home.discover": "استكشف منتجاتنا المميزة والأكثر مبيعاً.",
   "home.allProducts": "جميع المنتجات",
   "home.categories": "استكشف التصنيفات",
-  "home.creativeCorners": "استكشف منتجاتنا المميزة والأكثر مبيعاً.",
+  "home.creativeCorners": "اغمر نفسك في زوايانا الإبداعية",
   "home.allCategories": "جميع التصنيفات",
   "home.allCollection": "كل المجموعه",
   "home.ourCollections": "مجموعاتنا",
@@ -29,5 +30,11 @@
   "contact.email": "البريد الالكتروني",
   "contact.phone": "رقم الهاتف",
   "contact.whatsapp": "رقم واتساب",
-  "product.moreDetails": "المزيد من التفاصيل"
+  "category.mainTitle": "تصنيفات المنتجات - Five A Crafts",
+  "category.categories": "استكشف التصنيفات",
+  "category.creativeCorners": "اغمر نفسك في زوايانا الإبداعية",
+  "category.collection": "مجموعة",
+  "product.moreDetails": "المزيد من التفاصيل",
+  "product.loadingProducts": "جاري تحميل المنتجات...",
+  "product.noProducts": "لا يوجد منتجات حاليا."
 }

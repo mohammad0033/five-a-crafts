@@ -13,6 +13,7 @@
   "language": "Language",
   "arabic": "Arabic",
   "english": "English",
+  "home.mainTitle": "Five A Crafts - Handcrafted Goods",
   "home.checkCategories": "Check our categories",
   "home.ourProducts": "Our Products",
   "home.bestSeller": "Best Seller Products",
@@ -29,5 +30,11 @@
   "contact.email": "Email Address",
   "contact.phone": "Phone Number",
   "contact.whatsapp": "Whatsapp Number",
-  "product.moreDetails": "More Details"
+  "category.mainTitle": "Product Categories - Five A Crafts",
+  "category.categories": "Explore Categories",
+  "category.creativeCorners": "Dive into our creative corners",
+  "category.collection": "Collection",
+  "product.moreDetails": "More Details",
+  "product.loadingProducts": "Loading products...",
+  "product.noProducts": "No products found at this time."
 }
