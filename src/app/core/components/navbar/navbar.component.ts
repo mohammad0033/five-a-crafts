@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+  ViewChild
+} from '@angular/core';
 import {isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowLeft, faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
@@ -9,7 +17,7 @@ import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {map} from "rxjs";
 import {ContentApiService, MegaMenuData} from '../../services/content-api.service';
-import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 
 @UntilDestroy()
 @Component({
@@ -30,11 +38,13 @@ import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
     changeDetection: ChangeDetectionStrategy.OnPush // Good practice with async pipes/observables
 })
 export class NavbarComponent implements OnInit{
+  @ViewChild('categoriesDropdown') categoriesDropdown!: NgbDropdown;
   protected readonly faUser = faUser;
   protected readonly faSearch = faSearch;
   protected readonly faHeart = faHeart;
   protected readonly faShoppingBag = faShoppingBag;
   protected readonly faArrowRight = faArrowRight;
+  protected readonly faArrowLeft = faArrowLeft; // Added missing declaration
   // Screen size tracking
   isDesktop: boolean = false;
   private readonly desktopBreakpoint = '(min-width: 768px)';
@@ -100,5 +110,12 @@ export class NavbarComponent implements OnInit{
     console.log(lang);
   }
 
-  protected readonly faArrowLeft = faArrowLeft;
+  // Method to close the dropdown on click (for desktop)
+  closeDropdownOnDesktopClick(): void {
+    if (this.isDesktop && this.categoriesDropdown) {
+      console.log('Closing dropdown on desktop click');
+      this.categoriesDropdown.close();
+    }
+    // Navigation is handled by routerLink directive on the anchor tag
+  }
 }

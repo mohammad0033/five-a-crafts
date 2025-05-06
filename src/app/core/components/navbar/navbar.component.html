@@ -53,14 +53,15 @@
           <li class="nav-item">
             <a class="nav-link" routerLink="/about" routerLinkActive="active">{{ 'aboutUs' | translate }}</a>
           </li>
-          <li class="nav-item dropdown" ngbDropdown>
+          <li class="nav-item dropdown" ngbDropdown #categoriesDropdown="ngbDropdown">
               <a class="nav-link dropdown-toggle"
                  ngbDropdownToggle
                  [routerLink]="isDesktop ? '/categories' : null"
                  routerLinkActive="active"
                  [routerLinkActiveOptions]="{ exact: false }"
                  role="button"
-                 id="navbarDropdownCategories">
+                 id="navbarDropdownCategories"
+                 (click)="closeDropdownOnDesktopClick()">
                   {{ 'categories' | translate }}
               </a>
             <!-- Mega Menu Structure -->
