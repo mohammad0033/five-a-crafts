@@ -57,8 +57,7 @@
               <a class="nav-link dropdown-toggle"
                  ngbDropdownToggle
                  [routerLink]="isDesktop ? '/categories' : null"
-                 routerLinkActive="active"
-                 [routerLinkActiveOptions]="{ exact: false }"
+                 [class.active]="isCategoriesOrProductsLinkActive()"
                  role="button"
                  id="navbarDropdownCategories"
                  (click)="closeDropdownOnDesktopClick()">
