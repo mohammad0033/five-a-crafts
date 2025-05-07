@@ -131,9 +131,34 @@ body.ar {
   color: var(--secondary-color);
 }
 
+.w-fit{
+  width: fit-content;
+}
+
 //move slider button to top so that it doesnt overlap favorite icon
 .products-slider{
   .splide__arrow{
     top: 45% !important;
   }
+}
+
+// add gap between gallery items and thumbnails
+gallery-core{
+  gap: 1rem!important;
+}
+
+// make gallery items rounded
+gallery-item{
+  border-radius: 0.5rem;
+}
+
+// make gallery thumbnails rounded
+gallery-thumb{
+  border-radius: 0.5rem;
+  margin: 0 0.25rem;
+}
+
+// make active gallery thumbnail border
+.g-active-thumb{
+  border: 2px solid var(--primary-color);
 }
