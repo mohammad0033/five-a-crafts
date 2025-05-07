@@ -36,5 +36,21 @@
   "category.collection": "مجموعة",
   "product.moreDetails": "المزيد من التفاصيل",
   "product.loadingProducts": "جاري تحميل المنتجات...",
-  "product.noProducts": "لا يوجد منتجات حاليا."
+  "product.noProducts": "لا يوجد منتجات حاليا.",
+  "product.category": "تصنيف",
+  "product.price": "السعر",
+  "product.quantity": "الكمية",
+  "product.total": "المجموع",
+  "product.buyItNow": "اشتري الان",
+  "product.addToCart": "اضافة الى السلة",
+  "product.addToFavorites": "اضافة الى المفضلة",
+  "product.removeFromFavorites": "ازالة من المفضلة",
+  "product.increaseQuantity": "زيادة الكمية",
+  "product.decreaseQuantity": "تقليل الكمية",
+  "product.quantityError": "الكمية المطلوبة يجب ان تكون اكبر من صفر",
+  "product.outOfStock": "غير متوفر",
+  "product.itemLeft": "منتج متبقي",
+  "product.itemLeft2": "منتج متبقي",
+  "product.itemsLeft": "منتجات متبقية",
+  "product.inStock": "متوفر"
 }

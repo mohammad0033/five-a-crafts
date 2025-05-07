@@ -36,5 +36,21 @@
   "category.collection": "Collection",
   "product.moreDetails": "More Details",
   "product.loadingProducts": "Loading products...",
-  "product.noProducts": "No products found at this time."
+  "product.noProducts": "No products found at this time.",
+  "product.category": "Category",
+  "product.price": "Price",
+  "product.quantity": "Quantity",
+  "product.total": "Total",
+  "product.buyItNow": "Buy It Now",
+  "product.addToCart": "Add to Cart",
+  "product.addToFavorites": "Add to Favorites",
+  "product.removeFromFavorites": "Remove from Favorites",
+  "product.increaseQuantity": "Increase Quantity",
+  "product.decreaseQuantity": "Decrease Quantity",
+  "product.quantityError": "Please enter a valid quantity.",
+  "product.outOfStock": "Out of stock",
+  "product.itemLeft": "Item Left",
+  "product.itemLeft2": "Items Left",
+  "product.itemsLeft": "Items Left",
+  "product.inStock": "In Stock"
 }
