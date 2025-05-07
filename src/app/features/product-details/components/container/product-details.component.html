@@ -1,1 +1,119 @@
-<p>product-details works!</p>
+<article class="container py-4" itemscope itemtype="https://schema.org/Product">
+  <div class="row">
+    <!-- Image Gallery -->
+    <div class="col-12 col-md-6">
+      <div *ngIf="images.length > 0 && isBrowser" class="w-100">
+        <gallery class="bg-transparent"
+                 [thumbCentralized]="false"
+                 imageSize="cover"
+                 thumbs="true"
+                 thumbPosition="bottom"
+                 thumbAutosize="true"
+                 gallerize
+                 [dir]="dir"
+                 [items]="images"></gallery>
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="col-md-6 d-flex flex-column gap-3">
+      <header>
+        <p class="mb-1 d-flex gap-2">
+          <span class="fw-medium">{{'product.category' | translate}}:</span>
+          <!-- Improved category itemprop -->
+          <a class="link-dark text-decoration-none" *ngIf="categoryLink; else categoryText" [routerLink]="categoryLink" itemprop="category">{{product?.category?.name}}</a>
+          <ng-template #categoryText>
+            <span itemprop="category">{{product?.category?.name}}</span>
+          </ng-template>
+        </p>
+        <h1 class="h3 fw-medium" itemprop="name">{{product?.name}}</h1>
+        <!-- Add itemprop="image" for the main product image -->
+        <meta *ngIf="product?.images?.[0]?.url as imageUrl" itemprop="image" [content]="imageUrl" />
+        <!-- Optional: Add itemprop="sku" if SKU is available -->
+        <!-- <meta *ngIf="product?.sku" itemprop="sku" [content]="product?.sku" /> -->
+        <p class="text-secondary" itemprop="description">
+          {{product?.description}}
+        </p>
+      </header>
+
+      <section>
+        <p class="h3 fw-medium m-0" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+          <meta itemprop="priceCurrency" content="EGP" />
+          <span itemprop="price">{{product?.price}}</span> LE
+          <!-- You can also add availability here if applicable -->
+           <link itemprop="availability" href="https://schema.org/InStock" *ngIf="product?.inStock"/>
+           <link itemprop="availability" href="https://schema.org/OutOfStock" *ngIf="!product?.inStock"/>
+        </p>
+      </section>
+
+      <section class="d-flex flex-column gap-3" aria-label="Product quantity selector">
+        <span class="text-secondary mx-2">{{'product.quantity' | translate}}</span>
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-3 border border-1 rounded-2 border-secondary-subtle w-fit">
+            <button class="btn border-0" type="button"
+                    [attr.aria-label]="'product.decreaseQuantity' | translate"
+                    (click)="decreaseProductQty()">
+              <fa-icon [icon]="faMinus"></fa-icon>
+            </button>
+            <span class="mx-2" aria-live="polite">{{ productQty }}</span>
+            <button class="btn border-0" type="button"
+                    [attr.aria-label]="'product.increaseQuantity' | translate"
+                    (click)="increaseProductQty()">
+              <fa-icon [icon]="faPlus"></fa-icon>
+            </button>
+          </div>
+          <div *ngIf="product" class="mx-2"> <!-- mx-2 to align with the "Quantity" label -->
+            <ng-container *ngIf="product.inStock === false; else availableBlock">
+              <span class="text-danger fw-medium">{{ 'product.outOfStock' | translate }}</span>
+            </ng-container>
+            <ng-template #availableBlock>
+              <!-- product.inStock is true or undefined here -->
+              <ng-container *ngIf="product.stockQuantity && product.stockQuantity > 0; else genericInStockBlock">
+            <span class="text-main-primary">
+              {{ product.stockQuantity }}
+              <span *ngIf="product.stockQuantity === 1">{{ 'product.itemLeft' | translate }}</span>
+              <span *ngIf="product.stockQuantity >= 2 && product.stockQuantity <= 10">{{ 'product.itemsLeft' | translate }}</span>
+              <span *ngIf="product.stockQuantity > 11">{{ 'product.itemLeft2' | translate }}</span>
+            </span>
+              </ng-container>
+              <ng-template #genericInStockBlock>
+                <!-- This case covers:
+                     - product.inStock is true, but stockQuantity is 0, undefined, or negative.
+                     - product.inStock is undefined, and stockQuantity is 0, undefined, or negative.
+                     Defaults to "In Stock" if not explicitly "Out of Stock" and no specific positive quantity.
+                -->
+                <span class="text-success fw-medium">{{ 'product.inStock' | translate }}</span>
+              </ng-template>
+            </ng-template>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="d-grid gap-2 mt-3">
+        <button class="btn btn-main-primary py-2 text-white">{{'product.buyItNow' | translate}}</button>
+        <button class="btn btn-outline-main-primary py-2">{{'product.addToCart' | translate}}</button>
+      </section>
+
+      <footer class="mt-3">
+        <button class="btn btn-link link-dark p-0 text-decoration-none d-flex gap-2">
+          <span>
+          <fa-icon
+            [icon]="product?.isFavorite ? faHeartSolid : faHeartRegular"
+            class="favorite-icon cursor-pointer"
+            [ngClass]="{
+              'favorite': product?.isFavorite,
+              'animate-heartbeat': isAnimating
+            }"
+            (click)="toggleFavorite($event)"
+            [title]="(product?.isFavorite ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))">
+          </fa-icon>
+          </span>
+          <span>
+            {{(product?.isFavorite ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))}}
+          </span>
+        </button>
+      </footer>
+    </div>
+  </div>
+</article>

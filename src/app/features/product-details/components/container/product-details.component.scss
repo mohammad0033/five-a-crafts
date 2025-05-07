@@ -1,0 +1,20 @@
+@use '../../../../shared/styles/animations';
+.favorite-icon {
+  display: inline-block; // Add this line
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out; // Added transform
+
+  &:hover {
+    transform: scale(1.1);
+    color: var(--bs-danger); // Bootstrap danger color
+  }
+
+  // Style when the product IS favorite
+  &.favorite {
+    color:  var(--bs-danger); // Bootstrap danger color (red)
+  }
+
+  // Apply animation when this class is added
+  &.animate-heartbeat {
+    animation: heartbeat 0.5s ease-in-out;
+  }
+}
