@@ -69,8 +69,12 @@ export class ProductsApiService {
         sku: 'LBJC-01',
         stockQuantity: 50,
         images: [
-          { url: 'https://www.yourdomain.com/assets/images/lavender-candle-1.jpg', altText: 'Lavender Bliss Jar Candle front view' },
-          { url: 'https://www.yourdomain.com/assets/images/lavender-candle-2.jpg', altText: 'Lavender Bliss Jar Candle burning' }
+          { url: 'https://picsum.photos/id/1061/300/300', altText: 'Lavender Bliss Jar Candle front view' },
+          { url: 'https://picsum.photos/id/1062/300/300', altText: 'Lavender Bliss Jar Candle burning' },
+          { url: 'https://picsum.photos/id/1063/300/300', altText: 'Lavender Bliss Jar Candle side view' },
+          { url: 'https://picsum.photos/id/1064/300/300', altText: 'Lavender Bliss Jar Candle candle holder' },
+          { url: 'https://picsum.photos/id/1065/300/300', altText: 'Lavender Bliss Jar Candle candle holder' },
+          { url: 'https://picsum.photos/id/1066/300/300', altText: 'Lavender Bliss Jar Candle candle holder' }
         ],
         category: {
           id: 'cat_01',
