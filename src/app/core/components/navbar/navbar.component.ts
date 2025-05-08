@@ -12,7 +12,7 @@ import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowLeft, faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 import {faHeart, faUser} from '@fortawesome/free-regular-svg-icons';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {RouterLink, RouterLinkActive} from "@angular/router";
+import {Router, RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {map} from "rxjs";
@@ -57,6 +57,7 @@ export class NavbarComponent implements OnInit{
         @Inject(PLATFORM_ID) private platformId: Object,
         private cdRef: ChangeDetectorRef,
         private contentService: ContentApiService, // Inject ContentApiService
+        private router: Router,
         private translate: TranslateService) {}
 
     ngOnInit(): void {
@@ -117,5 +118,19 @@ export class NavbarComponent implements OnInit{
       this.categoriesDropdown.close();
     }
     // Navigation is handled by routerLink directive on the anchor tag
+  }
+
+  isCategoriesOrProductsLinkActive(): boolean {
+    // This configuration mimics routerLinkActiveOptions="{ exact: false }"
+    // It checks if the current URL path starts with '/categories' or '/products'.
+    const isActiveOptions = {
+      paths: 'subset',        // Match if the URL is a subset (e.g., /categories/electronics)
+      queryParams: 'ignored', // Ignore query parameters
+      fragment: 'ignored',    // Ignore URL fragments
+      matrixParams: 'ignored' // Ignore matrix parameters
+    } as const; // Use 'as const' for stricter type checking on the options object
+
+    return this.router.isActive('/categories', isActiveOptions) ||
+      this.router.isActive('/products', isActiveOptions);
   }
 }

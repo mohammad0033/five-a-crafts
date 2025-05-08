@@ -1,0 +1,12 @@
+@keyframes heartbeat {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.35); }
+  50%  { transform: scale(1); }
+  75%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+// You could also define a reusable utility class here if preferred
+// .apply-heartbeat-animation {
+//   animation: heartbeat 0.5s ease-in-out;
+// }

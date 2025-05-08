@@ -1,81 +1,393 @@
-import {Component, OnInit} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  Output,
+  PLATFORM_ID,
+} from '@angular/core';
 import {ProductDetailsData} from '../../models/product-details-data';
 import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-data';
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {AsyncPipe, DatePipe, DecimalPipe, isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
+import {LightboxModule} from 'ng-gallery/lightbox';
+import {GalleryComponent, GalleryItem, GalleryModule, ImageItem} from 'ng-gallery';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+import {faHeart as faHeartSolid, faMinus, faPlus} from '@fortawesome/free-solid-svg-icons';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
+import { BidiModule, Direction } from '@angular/cdk/bidi';
+import {NgbRating} from '@ng-bootstrap/ng-bootstrap';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ReviewsData} from '../../models/reviews-data';
+import {Review} from '../../models/review';
+import {ProductsApiService} from '../../../../core/services/products-api.service';
+import {Observable, timer} from 'rxjs';
+import {Product} from '../../../../core/models/product';
+import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
+import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
 
+@UntilDestroy()
 @Component({
   selector: 'app-product-details',
-  imports: [],
+  imports: [
+    LightboxModule,
+    GalleryModule,
+    FaIconComponent,
+    NgIf,
+    NgClass,
+    TranslatePipe,
+    GalleryComponent,
+    RouterLink,
+    BidiModule,
+    NgbRating,
+    NgForOf,
+    FormsModule,
+    DecimalPipe,
+    AsyncPipe,
+    DatePipe,
+    ProductsSliderComponent,
+    MatSnackBarModule,
+    ReactiveFormsModule
+  ],
   templateUrl: './product-details.component.html',
   standalone: true,
   styleUrl: './product-details.component.scss'
 })
 export class ProductDetailsComponent implements OnInit {
+  @Output() favoriteToggled: EventEmitter<ProductDetailsData> = new EventEmitter<ProductDetailsData>();
+  productsYouMayLike$!: Observable<Product[]>;
+  recentlyViewedProducts$!: Observable<Product[]>;
 
-  // Property to hold the resolved product data
-  public product: ProductDetailsData | null = null;
-  public isLoading: boolean = true; // Manage loading state if needed within component
-  public errorLoading: boolean = false; // Manage error state
+  protected readonly faHeartRegular = faHeartRegular;
+  protected readonly faHeartSolid = faHeartSolid;
+  protected readonly faPlus = faPlus;
+  protected readonly faMinus = faMinus;
 
-  // --- Fallback Metadata Content (used ONLY if resolver returns null) ---
+  product: ProductDetailsData | null = null;
+  images: GalleryItem[] = [];
+  isLoading: boolean = true;
+  errorLoading: boolean = false;
+  isBrowser = false;
+  isAnimating = false;
+  productQty = 1;
+  productStock : number | undefined = 0
+  currentLang!: string
+  dir: Direction = 'ltr';
+  galleryThumbs  = true;
+  galleryThumbPosition = 'bottom' as "bottom";
+  galleryThumbCentralized = false;
+  galleryImageSize = 'cover' as "cover";
+
+  // meta data fallback data
   private readonly fallbackMetaData: FallbackMetaTagData = {
     title: 'Product Details | Five A Crafts',
     description: 'Explore detailed information about our handcrafted and sustainable products available at Five A Crafts.',
     ogImageUrl: 'https://www.yourdomain.com/assets/og-image-default-product.jpg',
     twitterImageUrl: 'https://www.yourdomain.com/assets/twitter-image-default-product.jpg'
   };
-  private readonly twitterHandle = '@YourTwitterHandle'; // Replace
+  private readonly twitterHandle = '@YourTwitterHandle';
+
+  // --- Reviews Section Data (Mock data, replace with actual data source) ---
+  public reviewsData: ReviewsData | null = null; // Your existing reviews summary data
+  public maxRating: number = 5;
+
+  // --- Review Form ---
+  reviewForm!: FormGroup;
+  isSubmittingReview: boolean = false;
+
+  // --- New/Modified properties for review pagination ---
+  private allProductReviews: Review[] = []; // Holds ALL reviews for the product
+  public visibleReviews: Review[] = [];    // Reviews currently displayed (already in your HTML)
+  public canShowMore: boolean = false;     // Controls visibility of "Show More" button (already in your HTML)
+  private readonly reviewsIncrement: number = 5; // Number of reviews to show per click
+  private numReviewsCurrentlyVisible: number = 0; // Counter for visible reviews
+
+  private snackBarConfig: MatSnackBarConfig = {
+    duration: 3000, // Default duration in ms
+    horizontalPosition: 'center',
+    verticalPosition: 'bottom',
+  };
 
   constructor(
     private metaTagService: MetaTagService,
-    private route: ActivatedRoute
-  ) {}
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private route: ActivatedRoute,
+    private translate: TranslateService,
+    private productsApiService: ProductsApiService,
+    private snackBar: MatSnackBar,
+    private datePipe: DatePipe,
+    private fb: FormBuilder) {
+    this.isBrowser = isPlatformBrowser(this.platformId)}
 
   ngOnInit(): void {
-    // Access the resolved data using the new key 'productData'
-    this.product = this.route.snapshot.data['productData'] as ProductDetailsData | null;
-    this.isLoading = false; // Data resolution is complete by now
+    this.currentLang = this.translate.currentLang;
+    this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event: any) => {
+      this.currentLang = event.lang;
+      this.toggleDir();
+    });
 
-    if (this.product) {
+    this.initReviewForm(); // Initialize the review form
+
+    // Product data from resolver
+    const resolvedProduct = this.route.snapshot.data['productData'] as ProductDetailsData | null;
+    this.isLoading = true; // Start with loading true
+
+    if (resolvedProduct) {
+      this.product = resolvedProduct;
       this.errorLoading = false;
-      // Construct the canonical URL using the fetched slug
-      const canonicalUrl = `https://www.yourdomain.com/products/${this.product.slug}`; // Adjust domain
-
-      // Set meta tags using the metadata nested within the product data
+      // Meta tags, images, stock setup
+      const canonicalUrl = `https://www.yourdomain.com/products/${this.product.slug}`;
       this.metaTagService.setTags(
-        this.product.metadata, // Pass the nested metadata object
-        this.fallbackMetaData, // Still provide fallbacks in case metadata is incomplete
-        {
-          canonicalUrl: canonicalUrl,
-          ogType: 'product',
-          twitterHandle: this.twitterHandle
-        }
+        this.product.metadata, this.fallbackMetaData,
+        { canonicalUrl, ogType: 'product', twitterHandle: this.twitterHandle }
       );
-      // Now you can use this.product in your template to display details
-      console.log('Product details loaded:', this.product);
+      this.productStock = this.product.stockQuantity;
+      this.images = Array.isArray(this.product.images)
+        ? this.product.images.map(item => new ImageItem({ src: item.url, thumb: item.url }))
+        : [];
+
+      // Fetch reviews for this product
+      this.loadProductReviews(this.product.slug);
+      // isLoading will be set to false after reviews are also loaded or fail
 
     } else {
-      // Handle the case where the resolver returned null (e.g., product not found)
+      this.product = null;
+      this.isLoading = false; // Finished loading attempt (failed)
       this.errorLoading = true;
-      console.error('Failed to load product details.');
-      // Set fallback meta tags explicitly if product data is null
-      const canonicalUrl = `https://www.yourdomain.com/`; // Fallback canonical? Or maybe 404 page canonical
-      this.metaTagService.setTags(
-        null, // No API metadata
-        this.fallbackMetaData,
-        {
-          canonicalUrl: canonicalUrl, // Decide on appropriate fallback URL
-          ogType: 'website', // Fallback type
-          twitterHandle: this.twitterHandle
+      console.error('Failed to load product details from resolver.');
+      const canonicalUrl = `https://www.yourdomain.com/`;
+      this.metaTagService.setTags(null, this.fallbackMetaData, { canonicalUrl, ogType: 'website', twitterHandle: this.twitterHandle });
+    }
+
+    // get you may also like
+    this.productsYouMayLike$ = this.productsApiService.getProductsYouMayLike();
+
+    // get recently viewed
+    this.recentlyViewedProducts$ = this.productsApiService.getRecentlyViewedProducts();
+  }
+
+  private initReviewForm(): void {
+    this.reviewForm = this.fb.group({
+      // productId: [null], // We'll add productId directly from this.product.id when submitting
+      rating: [0, [Validators.required, Validators.min(1), Validators.max(this.maxRating)]],
+      comment: ['', [Validators.required, Validators.minLength(5)]] // Added minLength for example
+    });
+  }
+
+  private loadProductReviews(productSlug: string): void {
+    this.productsApiService.getProductReviews(productSlug)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (reviewsDataFromApi) => {
+          this.reviewsData = reviewsDataFromApi;
+          this.allProductReviews = reviewsDataFromApi.reviewsList || [];
+          this.initializeReviewDisplay(this.allProductReviews);
+          console.log('Product reviews loaded:', this.reviewsData);
+          this.isLoading = false; // All product related data loaded
+        },
+        error: (err) => {
+          console.error('Error loading product reviews:', err);
+          this.reviewsData = { // Set to a default empty state to avoid errors in template
+            totalReviews: 0, averageRating: 0, ratingDistribution: [], reviewsList: []
+          };
+          this.initializeReviewDisplay([]); // Initialize with empty to hide "show more" etc.
+          this.isLoading = false; // Finished loading attempt (reviews failed)
         }
-      );
-      // You might want to show an error message in the template
+      });
+  }
+
+  // --- Review Pagination Methods (from your previous implementation) ---
+  private initializeReviewDisplay(allReviews: Review[]): void {
+    this.allProductReviews = allReviews || []; // Ensure allProductReviews is up-to-date
+    this.visibleReviews = [];
+    this.numReviewsCurrentlyVisible = 0;
+    this.loadMoreReviewsLogic();
+  }
+
+  public showMoreReviews(): void { // This is called by the button in your HTML
+    this.loadMoreReviewsLogic();
+  }
+
+  private loadMoreReviewsLogic(): void {
+    if (!this.allProductReviews || this.numReviewsCurrentlyVisible >= this.allProductReviews.length) {
+      this.updateCanShowMoreState();
+      return;
+    }
+    const nextBatch = this.allProductReviews.slice(
+      this.numReviewsCurrentlyVisible,
+      this.numReviewsCurrentlyVisible + this.reviewsIncrement
+    );
+    this.visibleReviews.push(...nextBatch);
+    this.numReviewsCurrentlyVisible += nextBatch.length;
+    this.updateCanShowMoreState();
+  }
+
+  private updateCanShowMoreState(): void {
+    this.canShowMore = this.allProductReviews && this.numReviewsCurrentlyVisible < this.allProductReviews.length;
+  }
+
+  submitReview(): void {
+    this.reviewForm.markAllAsTouched(); // Show validation errors if any
+
+    if (!this.product) {
+      console.error('Product context is missing. Cannot submit review.');
+      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), {
+        ...this.snackBarConfig, verticalPosition: 'top', panelClass: ['snackbar-error']
+      });
+      return;
+    }
+
+    if (this.reviewForm.invalid) {
+      const validationMessage = this.translate.instant('product.reviews.validationError'); // Ensure this key exists
+      this.snackBar.open(validationMessage, this.translate.instant('common.dismiss'), {
+        ...this.snackBarConfig, verticalPosition: 'top', panelClass: ['snackbar-error']
+      });
+      return;
+    }
+
+    this.isSubmittingReview = true;
+    this.reviewForm.disable(); // Disable the form during submission
+
+    const formValue = this.reviewForm.value;
+    const newReviewData: Review = {
+      id: Date.now(), // Mock ID
+      // productId: this.product.id, // Add product ID to the review data
+      userName: 'Current User', // Replace with actual user data
+      rating: formValue.rating,
+      comment: formValue.comment.trim(),
+      date: this.datePipe.transform(new Date(), 'dd/MM/yyyy') as string
+    };
+
+    console.log('Submitting review:', newReviewData);
+
+    // Simulate API call delay
+    timer(1500).pipe(untilDestroyed(this)).subscribe(() => {
+      this.allProductReviews.unshift(newReviewData);
+
+      if (this.reviewsData) {
+        this.reviewsData.reviewsList = [...this.allProductReviews];
+        this.reviewsData.totalReviews = this.allProductReviews.length;
+        // Recalculate average and distribution
+        let sumOfRatings = 0;
+        const ratingDistributionMap = new Map<number, number>();
+        for (let i = 5; i >= 1; i--) ratingDistributionMap.set(i, 0);
+        this.allProductReviews.forEach(review => {
+          sumOfRatings += review.rating;
+          ratingDistributionMap.set(review.rating, (ratingDistributionMap.get(review.rating) || 0) + 1);
+        });
+        this.reviewsData.averageRating = this.allProductReviews.length > 0 ? parseFloat((sumOfRatings / this.allProductReviews.length).toFixed(1)) : 0;
+        this.reviewsData.ratingDistribution = Array.from(ratingDistributionMap.entries())
+          .map(([stars, count]) => ({ stars, count }))
+          .sort((a, b) => b.stars - a.stars);
+      } else {
+        this.reviewsData = {
+          totalReviews: 1, averageRating: newReviewData.rating,
+          ratingDistribution: [{stars: newReviewData.rating, count: 1}],
+          reviewsList: [newReviewData]
+        };
+      }
+
+      this.initializeReviewDisplay(this.allProductReviews);
+      this.reviewForm.reset({ rating: 0, comment: '' }); // Reset form to initial values
+      this.reviewForm.enable(); // Re-enable the form
+      this.isSubmittingReview = false;
+
+      const successMessage = this.translate.instant('product.reviewSubmittedSuccessfully');
+      this.snackBar.open(successMessage, this.translate.instant('common.dismiss'), {
+        ...this.snackBarConfig, panelClass: ['snackbar-success']
+      });
+    });
+  }
+
+  // --- Getters for easy access to form controls in the template (optional but helpful for validation messages) ---
+  get ratingCtrl() {
+    return this.reviewForm.get('rating');
+  }
+
+  get commentCtrl() {
+    return this.reviewForm.get('comment');
+  }
+
+  get categoryLink(): string | null {
+    return this.product ? `/categories/${this.product.category.slug}` : null;
+  }
+
+  toggleFavorite(event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.product) {
+      this.product.isFavorite = !this.product.isFavorite;
+      if (this.product.isFavorite) {
+        this.isAnimating = true;
+        setTimeout(() => { this.isAnimating = false; }, 500);
+      }
+      this.favoriteToggled.emit(this.product);
+      console.log(`Favorite status for ${this.product.name}: ${this.product.isFavorite}`);
+    } else {
+      console.error('Product data is null. Cannot toggle favorite.');
     }
   }
 
-  // Example method to use in template for breadcrumbs
-  get categoryLink(): string | null {
-    return this.product ? `/categories/${this.product.category.slug}` : null;
+  toggleDir() {
+    this.dir = this.dir === 'rtl' ? 'ltr' : 'rtl';
+  }
+
+  increaseProductQty(): void {
+    if ( this.productStock && this.productQty < this.productStock) {
+      this.productQty++;
+    }
+  }
+
+  decreaseProductQty(): void {
+    if (this.productQty > 1) {
+      this.productQty--;
+    }
+  }
+
+  // Helper for ngb-rating aria-label in loops
+  getReviewRatingLabel(rating: number): string {
+    // This assumes you have a translation key like: "product.ratingOutOfMax": "{{rating}} out of {{maxRating}} stars"
+    return this.translate.instant('product.ratingOutOfMax', { rating: rating, maxRating: this.maxRating });
+  }
+
+  // --- New methods for Buy Now and Add to Cart ---
+  buyItNow(): void {
+    if (!this.product) {
+      console.error('Buy It Now: Product data is not available.');
+      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), { // Add productNotAvailableError to i18n
+        ...this.snackBarConfig,
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
+      return;
+    }
+    console.log(`Buy It Now clicked for product: ${this.product.name}, Quantity: ${this.productQty}`);
+    // TODO: Implement actual "Buy It Now" logic
+    const message = this.translate.instant('product.buyNowConfirmation', { productName: this.product.name, quantity: this.productQty }); // Add to i18n
+    this.snackBar.open(message, this.translate.instant('common.dismiss'), this.snackBarConfig);
+  }
+
+  addToCart(): void {
+    if (!this.product) {
+      console.error('Add to Cart: Product data is not available.');
+      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), { // Add productNotAvailableError to i18n
+        ...this.snackBarConfig,
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
+      return;
+    }
+    console.log(`Add to Cart clicked for product: ${this.product.name}, Quantity: ${this.productQty}`);
+    // TODO: Implement actual "Add to Cart" logic
+    const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.name, quantity: this.productQty }); // Add to i18n
+    this.snackBar.open(message, this.translate.instant('common.dismiss'), {
+      ...this.snackBarConfig,
+      // action: 'View Cart', // Example of adding an action
+      // duration: 5000 // Longer duration for actions
+    });
+    // if you add an action, you can subscribe to its event:
+    // snackBarRef.onAction().subscribe(() => { /* Navigate to cart or perform action */ });
   }
 }

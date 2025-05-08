@@ -23,9 +23,9 @@
       <p class="fw-semibold product-card-price" aria-label="Product price">{{ product.price }} LE</p>
       <div class="button-placeholder">
         <a class="btn btn-outline-main-primary more-details-btn w-100 py-2 d-none d-md-block"
-           [attr.aria-label]="'View more details about ' + product.name">{{'product.moreDetails' | translate}}</a>
+           [attr.aria-label]="'View more details about ' + product.name" [routerLink]="['/products', product.id]">{{'product.moreDetails' | translate}}</a>
         <a class="btn btn-outline-main-primary w-100 py-2 d-md-none fs-08"
-           [attr.aria-label]="'View more details about ' + product.name">{{'product.moreDetails' | translate}}</a>
+           [attr.aria-label]="'View more details about ' + product.name" [routerLink]="['/products', product.id]">{{'product.moreDetails' | translate}}</a>
       </div>
     </div>
   </section>

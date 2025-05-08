@@ -5,6 +5,7 @@ import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import {TranslatePipe} from '@ngx-translate/core';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-product-card',
@@ -13,7 +14,8 @@ import {TranslatePipe} from '@ngx-translate/core';
     NgIf,
     FaIconComponent,
     TranslatePipe,
-    SlicePipe
+    SlicePipe,
+    RouterLink
   ],
   templateUrl: './product-card.component.html',
   standalone: true,

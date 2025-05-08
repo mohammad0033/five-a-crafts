@@ -1,3 +1,5 @@
+@use '../../../shared/styles/_animations';
+
 .product-card {
   height: 36rem;
   transition: background-color 0.3s ease;
@@ -60,25 +62,6 @@
     &.animate-heartbeat {
       animation: heartbeat 0.5s ease-in-out;
     }
-  }
-}
-
-// --- Heartbeat Animation Definition ---
-@keyframes heartbeat {
-  0% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.35); // Increase size
-  }
-  50% {
-    transform: scale(1);
-  }
-  75% {
-    transform: scale(1.2); // Smaller increase
-  }
-  100% {
-    transform: scale(1); // Back to normal
   }
 }
 

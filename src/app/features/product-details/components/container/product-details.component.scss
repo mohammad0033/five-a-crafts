@@ -1,0 +1,76 @@
+@use '../../../../shared/styles/animations';
+.favorite-icon {
+  display: inline-block; // Add this line
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out; // Added transform
+
+  &:hover {
+    transform: scale(1.1);
+    color: var(--bs-danger); // Bootstrap danger color
+  }
+
+  // Style when the product IS favorite
+  &.favorite {
+    color:  var(--bs-danger); // Bootstrap danger color (red)
+  }
+
+  // Apply animation when this class is added
+  &.animate-heartbeat {
+    animation: heartbeat 0.5s ease-in-out;
+  }
+}
+
+// Styles for the new reviews section
+.reviews-section {
+  .star-display { // Renamed from .star to avoid conflict if .star is globally used
+    font-size: 1.25rem; // Adjust size as needed for display stars
+    color: var(--bs-gray-300); // Color for empty star
+    display: inline-block;
+    line-height: 1;
+    transition: color 0.2s ease-in-out;
+    cursor: default; // For readonly stars
+
+    &.filled {
+      color: var(--primary-color); // Color for filled star
+    }
+  }
+
+  // Styling for ngb-rating used in the form (interactive)
+  .add-review-form ngb-rating {
+    .star-display { // Target stars within interactive rating
+      cursor: pointer;
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
+
+  .review-item {
+    border-bottom: 1px solid var(--bs-gray-200);
+    &:last-of-type { // More robust than :last-child if ng-container/templates are used
+      border-bottom: none !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+  }
+
+  .review-comment-text {
+    white-space: pre-line; // Preserve line breaks in comments
+  }
+
+  .progress {
+    background-color: var(--bs-gray-200);
+  }
+}
+
+ngb-rating.average-rating span.star.star-display {
+  font-size: 2rem!important;
+}
+
+ngb-rating.user-rating span.star.star-display {
+  font-size: 3rem!important;
+}
+
+.comment-entry {
+  resize: none;
+  height: 9rem;
+}
