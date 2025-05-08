@@ -36,7 +36,7 @@ export class ProductsSliderComponent implements OnInit{
         perPage: 2,
       },
       768: {
-        perPage: 1,
+        height: 'auto',
       }
     }
   };
