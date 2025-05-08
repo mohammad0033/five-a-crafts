@@ -1,14 +1,14 @@
+<!-- Main product details container -->
 <article class="container py-4" itemscope itemtype="https://schema.org/Product">
   <div class="row">
     <!-- Image Gallery -->
     <div class="col-12 col-md-6">
       <div *ngIf="images.length > 0 && isBrowser" class="w-100">
         <gallery class="bg-transparent"
-                 [thumbCentralized]="false"
-                 imageSize="cover"
-                 thumbs="true"
-                 thumbPosition="bottom"
-                 thumbAutosize="true"
+                 [thumbs]="galleryThumbs"
+                 [thumbPosition]="galleryThumbPosition"
+                 [thumbCentralized]="galleryThumbCentralized"
+                 [imageSize]="galleryImageSize"
                  gallerize
                  [dir]="dir"
                  [items]="images"></gallery>
@@ -31,6 +31,13 @@
         <meta *ngIf="product?.images?.[0]?.url as imageUrl" itemprop="image" [content]="imageUrl" />
         <!-- Optional: Add itemprop="sku" if SKU is available -->
         <!-- <meta *ngIf="product?.sku" itemprop="sku" [content]="product?.sku" /> -->
+        <!--        This explicitly tells search engines the overall rating summary, which is crucial for rich snippets.-->
+        <div itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating" *ngIf="reviewsData && reviewsData.totalReviews > 0 && reviewsData.averageRating > 0">
+          <meta itemprop="ratingValue" [content]="reviewsData.averageRating | number:'1.1-1'">
+          <meta itemprop="bestRating" [content]="maxRating.toString()">
+          <meta itemprop="ratingCount" [content]="reviewsData.totalReviews.toString()">
+          <meta itemprop="reviewCount" [content]="reviewsData.totalReviews.toString()"> <!-- Often used with or instead of ratingCount -->
+        </div>
         <p class="text-secondary" itemprop="description">
           {{product?.description}}
         </p>
@@ -91,8 +98,8 @@
       </section>
 
       <section class="d-grid gap-2 mt-3">
-        <button class="btn btn-main-primary py-2 text-white">{{'product.buyItNow' | translate}}</button>
-        <button class="btn btn-outline-main-primary py-2">{{'product.addToCart' | translate}}</button>
+        <button class="btn btn-main-primary py-2 text-white" (click)="buyItNow()">{{'product.buyItNow' | translate}}</button>
+        <button class="btn btn-outline-main-primary py-2" (click)="addToCart()">{{'product.addToCart' | translate}}</button>
       </section>
 
       <footer class="mt-3">
@@ -117,3 +124,159 @@
     </div>
   </div>
 </article>
+
+<!-- Reviews Section -->
+<section class="container py-4 reviews-section" aria-labelledby="reviews-section-title">
+  <div class="row">
+
+    <!-- Left Column: Summary & Add Review -->
+    <div class="col-12 col-md-6 mb-4 mb-md-0">
+      <div class="d-flex flex-column gap-4">
+        <header>
+          <h2 id="reviews-section-title" class="fs-6 fw-normal mb-2">{{ 'product.reviews' | translate }}</h2>
+          <div *ngIf="reviewsData && reviewsData.totalReviews > 0">
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <span class="h3 fw-medium m-0">{{ reviewsData.averageRating | number:'1.1-1' }}/{{maxRating}}</span>
+              <ngb-rating [rate]="reviewsData.averageRating"
+                          class="average-rating"
+                          [max]="maxRating"
+                          [readonly]="true"
+                          [starTemplate]="star"
+                          [attr.aria-label]="('product.ratingOutOfMax' | translate:{rating: (reviewsData.averageRating | number:'1.1-1'), maxRating: maxRating})"></ngb-rating>
+            </div>
+            <p class="text-secondary fs-08 m-0">
+              {{ 'product.reviewedBy' | translate }} {{ reviewsData.totalReviews }} {{ 'product.customers' | translate }}
+            </p>
+          </div>
+          <p *ngIf="!reviewsData || reviewsData.totalReviews === 0" class="text-secondary fs-08 m-0">
+            {{ 'product.noReviews' | translate }}
+          </p>
+        </header>
+
+        <!-- Rating Breakdown -->
+        <section *ngIf="reviewsData && reviewsData.totalReviews > 0" aria-labelledby="rating-distribution-title">
+          <h3 id="rating-distribution-title" class="visually-hidden">{{ 'product.ratingDistribution' | translate }}</h3>
+          <ul class="list-unstyled d-flex flex-column gap-2 m-0 pb-3 border-bottom-light-grey">
+            <li *ngFor="let dist of reviewsData.ratingDistribution" class="d-flex align-items-center gap-md-3 gap-2">
+              <ngb-rating [rate]="dist.stars"
+                          [max]="maxRating"
+                          [readonly]="true"
+                          [starTemplate]="star"
+                          [attr.aria-label]="getReviewRatingLabel(dist.stars)">
+              </ngb-rating>
+              <span class="small text-secondary text-nowrap rating-count-label">{{ dist.count }} {{ 'product.customers' | translate }}</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Add Review Form -->
+        <section class="add-review-form" aria-labelledby="add-review-title">
+          <h3 id="add-review-title" class="h6 mb-3 visually-hidden">{{ 'product.addReview' | translate }}</h3>
+          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" novalidate>
+            <div class="mb-3">
+              <label for="reviewRating" class="form-label visually-hidden">{{ 'product.yourRating' | translate }}</label>
+              <ngb-rating
+                class="user-rating"
+                formControlName="rating"
+                [max]="maxRating"
+                [starTemplate]="star"
+                id="reviewRating"
+                [attr.aria-label]="'product.selectRating' | translate"></ngb-rating>
+              <!-- Validation for Rating -->
+              <div *ngIf="ratingCtrl?.invalid && (ratingCtrl?.dirty || ratingCtrl?.touched)" class="text-danger fs-08 mt-1">
+                <div *ngIf="ratingCtrl?.errors?.['required']">{{ 'product.ratingRequired' | translate }}</div>
+                <div *ngIf="ratingCtrl?.errors?.['min'] || ratingCtrl?.errors?.['max']">
+                  {{ 'product.ratingOutOfMax' | translate: {rating: ratingCtrl?.value, maxRating: maxRating} }} - {{ 'product.selectRating' | translate }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="reviewComment" class="form-label">{{ 'product.addComment' | translate }}</label>
+              <textarea class="form-control comment-entry"
+                        id="reviewComment"
+                        formControlName="comment"
+                        [attr.aria-label]="'product.yourComment' | translate"
+                        [placeholder]="'product.commentPlaceholder' | translate"
+                        [class.is-invalid]="commentCtrl?.invalid && (commentCtrl?.dirty || commentCtrl?.touched)"></textarea>
+              <!-- Validation for Comment -->
+              <div *ngIf="commentCtrl?.invalid && (commentCtrl?.dirty || commentCtrl?.touched)" class="invalid-feedback">
+                <div *ngIf="commentCtrl?.errors?.['required']">{{ 'product.commentRequired' | translate }}</div>
+                <div *ngIf="commentCtrl?.errors?.['minlength']">
+                  {{ 'product.commentMinLength' | translate: { requiredLength: commentCtrl?.errors?.['minlength']?.requiredLength } }}
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary p-3 text-white d-flex align-items-center gap-2" [disabled]="isSubmittingReview || reviewForm.invalid && reviewForm.touched">
+              <span *ngIf="isSubmittingReview" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span *ngIf="isSubmittingReview" class="visually-hidden">{{ 'common.loading' | translate }}</span>
+              <span>{{ 'product.addReview' | translate }}</span>
+            </button>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Right Column: List of Reviews -->
+    <div class="col-12 col-md-6">
+      <div class="d-flex flex-column">
+        <h3 class="visually-hidden">{{ 'product.customerReviewsList' | translate }}</h3>
+        <ng-container *ngIf="visibleReviews.length > 0; else noReviewsTemplate">
+          <article *ngFor="let review of visibleReviews" class="review-item pb-3 mb-3" itemprop="review" itemscope itemtype="https://schema.org/Review">
+            <meta itemprop="itemReviewed" [content]="product?.name" />
+            <header class="d-flex flex-column gap-2 mb-2">
+              <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
+                <meta itemprop="ratingValue" [content]="review.rating.toString()">
+                <meta itemprop="bestRating" [content]="maxRating.toString()">
+                <ngb-rating [rate]="review.rating"
+                            [max]="maxRating"
+                            [readonly]="true"
+                            [starTemplate]="star"
+                            [attr.aria-label]="getReviewRatingLabel(review.rating)"></ngb-rating>
+              </div>
+              <time class="text-secondary fs-08" [attr.datetime]="review.date" itemprop="datePublished">{{ review.date }}</time>
+            </header>
+            <!-- Visually hidden author for SEO purposes -->
+            <p class="mb-1 fw-medium visually-hidden" itemprop="author" itemscope itemtype="https://schema.org/Person">
+              <span itemprop="name">{{ review.userName || ('product.customer' | translate) }}</span> <!-- Fallback to generic "Customer" -->
+            </p>
+            <p class="m-0 fs-08 review-comment-text" itemprop="reviewBody">{{ review.comment }}</p>
+          </article>
+
+          <div *ngIf="canShowMore" class="mt-4">
+            <button class="btn btn-outline-main-primary p-3"
+                    (click)="showMoreReviews()">{{ 'product.showMore' | translate }}</button>
+          </div>
+        </ng-container>
+        <ng-template #noReviewsTemplate>
+          <div *ngIf="reviewsData && reviewsData.totalReviews === 0">
+            <p>{{ 'product.noReviewsYetDetailed' | translate }}</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--you may also like-->
+<section class="px-2 px-md-5 py-3">
+  <div *ngIf="productsYouMayLike$ | async as products">
+    <h2 class="zapf-font mb-3">{{'product.youMayLike' | translate}}</h2>
+    <app-products-slider [products]="products"></app-products-slider>
+  </div>
+</section>
+
+<!--recently viewed-->
+<section class="px-2 px-md-5 py-3">
+  <div *ngIf="recentlyViewedProducts$ | async as products">
+    <h2 class="zapf-font mb-3">{{'product.recentlyViewed' | translate}}</h2>
+    <app-products-slider [products]="products"></app-products-slider>
+  </div>
+</section>
+
+<!-- Star template for ngb-rating (place once, e.g., at the end of the component template) -->
+<ng-template #star let-fill="fill" let-index="index">
+  <span class="star star-display" [class.filled]="fill === 100" [class.half]="fill > 0 && fill < 100"
+        aria-hidden="true">★</span>
+</ng-template>
