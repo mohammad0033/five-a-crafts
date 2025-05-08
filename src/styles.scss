@@ -36,6 +36,12 @@ html {
   --background2-color: #{$background2-color-value};
   --background3-color: #{$background3-color-value};
   --nav-background-color: #{$nav-background-color-value};
+
+  @include mat.snack-bar-overrides((
+    container-color: var(--secondary-color),
+    supporting-text-color: var(--mat-sys-inverse-on-surface),
+    button-color: var(--mat-sys-inverse-primary)
+  ));
 }
 html, body { height: 100%; }
 body { margin: 0;
@@ -135,6 +141,10 @@ body.ar {
   width: fit-content;
 }
 
+//light grey border bottom
+.border-bottom-light-grey{
+  border-bottom: 1px solid var(--bs-gray-200);
+}
 //move slider button to top so that it doesnt overlap favorite icon
 .products-slider{
   .splide__arrow{
