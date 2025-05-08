@@ -12,6 +12,7 @@ import {GalleryModule} from 'ng-gallery';
 import {localizedApiInterceptor} from './core/interceptors/language.interceptor';
 import {API_PREFIX} from './core/tokens/API_PREFIX';
 import {Url} from './core/constants/base-url';
+import {DatePipe} from '@angular/common';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
   new TranslateHttpLoader(http, './i18n/', '.json');
@@ -42,5 +43,6 @@ export const appConfig: ApplicationConfig = {
       provide: API_PREFIX,
       useValue: Url.baseUrl // **Configure your API prefix here!**
     },
+    DatePipe
   ]
 };
