@@ -81,6 +81,7 @@ export class ProductsApiService {
         price: 19.99,
         sku: 'LBJC-01',
         stockQuantity: 50,
+        imageUrl: 'https://picsum.photos/id/1061/300/300',
         images: [
           { url: 'https://picsum.photos/id/1061/300/300', altText: 'Lavender Bliss Jar Candle front view' },
           { url: 'https://picsum.photos/id/1062/300/300', altText: 'Lavender Bliss Jar Candle burning' },
@@ -133,6 +134,7 @@ export class ProductsApiService {
         price: 34.50,
         sku: 'RWB-01',
         stockQuantity: 25,
+        imageUrl: 'https://www.yourdomain.com/assets/images/wooden-bowl-1.jpg',
         images: [
           { url: 'https://www.yourdomain.com/assets/images/wooden-bowl-1.jpg', altText: 'Rustic Wooden Bowl top view' },
           { url: 'https://www.yourdomain.com/assets/images/wooden-bowl-2.jpg', altText: 'Rustic Wooden Bowl side view' }

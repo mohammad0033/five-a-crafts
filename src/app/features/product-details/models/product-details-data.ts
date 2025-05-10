@@ -12,6 +12,7 @@ export interface ProductDetailsData {
   inStock?: boolean;
   stockQuantity?: number;
   isFavorite?: boolean;
+  imageUrl: string;
   images: ProductImageData[];
   category: ProductCategoryInfo; // Include category info for breadcrumbs etc.
   metadata: PageMetadata; // Nest the metadata within the main data object
