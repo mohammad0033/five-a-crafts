@@ -130,6 +130,12 @@ export class ProductDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentLang = this.translate.currentLang;
+    // explicitly set direction
+    if (this.currentLang === 'ar') {
+      this.dir = 'rtl';
+    } else {
+      this.dir = 'ltr';
+    }
     this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event: any) => {
       this.currentLang = event.lang;
       this.toggleDir();
@@ -462,8 +468,5 @@ export class ProductDetailsComponent implements OnInit {
     this.snackBar.open(message, this.translate.instant('common.dismiss'), {
       ...this.snackBarConfig,
     });
-
-    // Optionally, open the cart drawer after adding an item
-    this.cartService.openDrawer();
   }
 }
