@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Meta, Title} from '@angular/platform-browser';
 import {CartService} from '../../../../core/services/cart.service';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import {faShoppingBag} from '@fortawesome/free-solid-svg-icons';
+import {faPhone, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 import {MatButton} from '@angular/material/button';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
@@ -10,6 +10,9 @@ import {CartProductComponent} from '../cart-product/cart-product.component';
 import {CartItem} from '../../models/cart-item';
 import {Observable, Subscription} from 'rxjs';
 import {Router} from '@angular/router';
+import {faEnvelope} from '@fortawesome/free-regular-svg-icons';
+import {faFacebookF, faInstagram, faWhatsapp} from '@fortawesome/free-brands-svg-icons';
+import {ContactSectionComponent} from '../../../../shared/components/contact-section/contact-section.component';
 
 @Component({
   selector: 'app-cart',
@@ -20,7 +23,8 @@ import {Router} from '@angular/router';
     NgIf,
     AsyncPipe,
     CartProductComponent,
-    NgForOf
+    NgForOf,
+    ContactSectionComponent
   ],
   templateUrl: './cart.component.html',
   standalone: true,
@@ -103,4 +107,10 @@ export class CartComponent implements OnInit, OnDestroy {
     this.titleSubscription?.unsubscribe();
     this.langChangeSubscription?.unsubscribe();
   }
+
+  protected readonly faEnvelope = faEnvelope;
+  protected readonly faPhone = faPhone;
+  protected readonly faWhatsapp = faWhatsapp;
+  protected readonly faInstagram = faInstagram;
+  protected readonly faFacebookF = faFacebookF;
 }
