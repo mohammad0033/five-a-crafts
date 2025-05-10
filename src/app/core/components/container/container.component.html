@@ -2,7 +2,7 @@
   <mat-drawer #cartDrawer mode="over" position="end"
               [opened]="isCartDrawerOpen$ | async"
               (closedStart)="cartDrawerClosed()">
-    <app-cart></app-cart>
+    <app-side-cart></app-side-cart>
   </mat-drawer>
 
   <mat-drawer-content>
@@ -15,10 +15,13 @@
         aria-label="Loading page data"
         class="loading-indicator">
       </mat-progress-bar>
+
       <main>
         <router-outlet></router-outlet>
       </main>
+
     </div>
+
     <app-footer></app-footer>
   </mat-drawer-content>
 </mat-drawer-container>
