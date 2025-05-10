@@ -1,0 +1,52 @@
+<aside class="cart-drawer-content p-3 d-flex flex-column h-100 bg-light">
+  <header class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <fa-icon [icon]="faShoppingBag" class="cart-icon" aria-hidden="true"></fa-icon> <!-- Added aria-hidden as it's decorative next to text -->
+      <h2 class="h5 m-0">{{ 'cart.yourCart' | translate }}</h2>
+    </div>
+    <button mat-icon-button (click)="closeCart()" [attr.aria-label]="'cart.closeCart' | translate">
+      <fa-icon [icon]="faClose" aria-hidden="true"></fa-icon> <!-- Icon inside a labeled button can be hidden -->
+    </button>
+  </header>
+
+  <div class="cart-items-container" #cartItemsContainer> <!-- This div can remain for styling/scrolling purposes -->
+    <ng-container *ngIf="cartItems$ | async as items; else emptyCartDisplay">
+      <ul *ngIf="items.length > 0; else emptyCartDisplay" class="cart-items-list list-unstyled d-flex flex-column gap-3 m-0 p-0">
+        <!-- Added list-unstyled, m-0, p-0 to reset default list styles. Adjust as per your CSS setup. -->
+        <li *ngFor="let item of items; trackBy: trackByCartItemId" class="cart-item">
+          <app-cart-product
+            [product]="item.product"
+            [productQty]="item.quantity"
+            [productStock]="item.originalStock"
+            (quantityChange)="handleQuantityChange($event)"
+            (removeItem)="handleRemoveItem($event.toString())">
+            <!-- Pass other relevant item details if app-cart-product needs them, e.g., selected variations -->
+          </app-cart-product>
+        </li>
+      </ul>
+    </ng-container>
+    <!-- Renamed ng-template reference for clarity, ensure it's unique if 'emptyCart' is used elsewhere -->
+    <ng-template #emptyCartDisplay>
+      <div class="text-center d-flex flex-column h-100 justify-content-center align-items-center"> <!-- Added justify/align for better centering -->
+        <fa-icon [icon]="faShoppingBag" size="3x" class="text-muted mb-3" aria-hidden="true"></fa-icon> <!-- Decorative icon -->
+        <p class="text-muted">{{ 'cart.emptyMessage' | translate }}</p>
+        <button mat-stroked-button color="primary" (click)="closeCartAndNavigateToShop()">
+          {{ 'cart.continueShopping' | translate }}
+        </button>
+      </div>
+    </ng-template>
+  </div>
+
+  <footer class="d-flex flex-column gap-3 mt-auto pt-3 border-top" *ngIf="(cartItems$ | async)?.length"> <!-- Added mt-auto, pt-3, border-top for better footer separation -->
+    <div class="d-flex justify-content-between fw-bold">
+      <span>{{ 'cart.total' | translate }}</span>
+      <span>{{ (totalAmount$ | async) || 0 }} LE</span>
+    </div>
+    <button class="w-100 btn btn-main-primary text-white py-2" (click)="proceedToCheckout()">
+      {{ 'cart.proceedToCheckout' | translate }}
+    </button>
+    <button class="w-100 btn btn-outline-main-primary py-2" (click)="proceedToCart()">
+      {{ 'cart.viewCart' | translate }}
+    </button>
+  </footer>
+</aside>
