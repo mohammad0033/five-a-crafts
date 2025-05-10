@@ -3,12 +3,12 @@ import {HeroCarouselComponent} from '../hero-carousel/hero-carousel.component';
 import {OurProductsComponent} from '../our-products/our-products.component';
 import {HomeCategoriesComponent} from '../home-categories/components/container/home-categories.component';
 import {OurCollectionsComponent} from '../our-collections/our-collections.component';
-import {HomeContactComponent} from '../home-contact/home-contact.component';
 import {ActivatedRoute} from '@angular/router';
 import {PageMetadata} from '../../../../core/models/page-meta-data';
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
 import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-data';
 import {TranslatePipe} from '@ngx-translate/core';
+import {ContactSectionComponent} from '../../../../shared/components/contact-section/contact-section.component';
 
 @Component({
   selector: 'app-home',
@@ -17,8 +17,8 @@ import {TranslatePipe} from '@ngx-translate/core';
     OurProductsComponent,
     HomeCategoriesComponent,
     OurCollectionsComponent,
-    HomeContactComponent,
-    TranslatePipe
+    TranslatePipe,
+    ContactSectionComponent
   ],
   templateUrl: './home.component.html',
   standalone: true,
