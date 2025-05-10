@@ -1,5 +1,5 @@
 import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CartItem } from '../../features/cart/models/cart-item';
 import { Product } from '../models/product';
@@ -15,9 +15,28 @@ export class CartService {
   private cartItems = new BehaviorSubject<CartItem[]>([]);
   cartItems$ = this.cartItems.asObservable();
 
-  // Observable for the total amount, derived from cartItems$
-  totalAmount$: Observable<number> = this.cartItems$.pipe(
+  // Mock discount and shipping fee
+  private discountAmountSource = new BehaviorSubject<number>(0); // Initial mock discount
+  discount$: Observable<number> = this.discountAmountSource.asObservable();
+
+  private shippingFeeSource = new BehaviorSubject<number>(0);    // Initial mock shipping fee
+  shippingFee$: Observable<number> = this.shippingFeeSource.asObservable();
+
+  // Subtotal: sum of (item.product.price * item.quantity)
+  subtotal$: Observable<number> = this.cartItems$.pipe(
     map(items => Number((items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)).toFixed(2)))
+  );
+
+  // Total Amount: subtotal + shipping - discount
+  totalAmount$: Observable<number> = combineLatest([
+    this.subtotal$,
+    this.shippingFee$,
+    this.discount$
+  ]).pipe(
+    map(([subtotal, shipping, discount]) => {
+      const total = subtotal + shipping - discount;
+      return Number(Math.max(0, total).toFixed(2)); // Ensure total is not negative and fix to 2 decimal places
+    })
   );
 
   // Observable for the total number of items (sum of quantities)
@@ -33,6 +52,10 @@ export class CartService {
     if (this.isBrowser) {
       // Load cart from localStorage only if in the browser
       this.loadCartFromLocalStorage();
+      // Initialize mock values (or load them from somewhere if they are dynamic)
+      // These can be updated later via methods if needed (e.g., applyPromoCode)
+      this.discountAmountSource.next(30); // Example: 30 LE discount
+      this.shippingFeeSource.next(50);   // Example: 50 LE shipping fee
     }
   }
 
@@ -169,5 +192,14 @@ export class CartService {
         localStorage.removeItem('fiveACraftsShoppingCart');
       }
     }
+  }
+
+  // Optional: Methods to update mock discount and shipping if needed from elsewhere
+  public setDiscount(amount: number): void {
+    this.discountAmountSource.next(Math.max(0, amount)); // Ensure discount isn't negative
+  }
+
+  public setShippingFee(amount: number): void {
+    this.shippingFeeSource.next(Math.max(0, amount)); // Ensure shipping isn't negative
   }
 }
