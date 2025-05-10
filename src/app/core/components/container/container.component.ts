@@ -7,7 +7,7 @@ import {filter, Observable} from 'rxjs';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {CartService} from '../../services/cart.service';
 import {MatDrawer, MatDrawerContainer, MatSidenavModule} from '@angular/material/sidenav';
-import {CartComponent} from '../../../features/cart/components/container/cart.component';
+import {SideCartComponent} from '../../../features/cart/components/side-cart/side-cart.component';
 
 @Component({
   selector: 'app-container',
@@ -19,8 +19,9 @@ import {CartComponent} from '../../../features/cart/components/container/cart.co
     MatSidenavModule,
     MatProgressBar,
     MatDrawerContainer,
-    CartComponent,
-    MatDrawer],
+    MatDrawer,
+    SideCartComponent
+  ],
   templateUrl: './container.component.html',
   standalone: true,
   styleUrl: './container.component.scss'
