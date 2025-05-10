@@ -3,12 +3,24 @@ import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Route
 import {FooterComponent} from '../footer/footer.component';
 import {NavbarComponent} from '../navbar/navbar.component';
 import {CommonModule} from '@angular/common';
-import {filter} from 'rxjs';
+import {filter, Observable} from 'rxjs';
 import {MatProgressBar} from '@angular/material/progress-bar';
+import {CartService} from '../../services/cart.service';
+import {MatDrawer, MatDrawerContainer, MatSidenavModule} from '@angular/material/sidenav';
+import {CartComponent} from '../../../features/cart/components/container/cart.component';
 
 @Component({
   selector: 'app-container',
-  imports: [CommonModule, RouterModule, FooterComponent, NavbarComponent, MatProgressBar],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FooterComponent,
+    NavbarComponent,
+    MatSidenavModule,
+    MatProgressBar,
+    MatDrawerContainer,
+    CartComponent,
+    MatDrawer],
   templateUrl: './container.component.html',
   standalone: true,
   styleUrl: './container.component.scss'
@@ -17,8 +29,11 @@ export class ContainerComponent {
   isLoading = false;
   // Example value for determinate mode (0-100)
   loadingProgress = 50;
+  isCartDrawerOpen$!: Observable<boolean>;
 
-  constructor(private router: Router) {
+  constructor(private router: Router,
+              private cartService: CartService) {
+    this.isCartDrawerOpen$ = this.cartService.drawerOpen$;
     this.router.events.pipe(
       // Filter for the relevant navigation events
       filter(event =>
@@ -37,5 +52,9 @@ export class ContainerComponent {
         this.isLoading = false;
       }
     });
+  }
+
+  cartDrawerClosed(): void {
+    this.cartService.closeDrawer();
   }
 }

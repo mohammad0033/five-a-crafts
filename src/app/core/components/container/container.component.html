@@ -1,15 +1,24 @@
-<app-navbar ngSkipHydration></app-navbar>
+<mat-drawer-container class="app-drawer-container" autosize>
+  <mat-drawer #cartDrawer mode="over" position="end"
+              [opened]="isCartDrawerOpen$ | async"
+              (closedStart)="cartDrawerClosed()">
+    <app-cart></app-cart>
+  </mat-drawer>
 
-<div class="main-content-area">
-  <mat-progress-bar
-    *ngIf="isLoading"
-    mode="indeterminate"
-    aria-label="Loading page data"
-    class="loading-indicator">
-  </mat-progress-bar>
-  <main>
-    <router-outlet></router-outlet>
-  </main>
-</div>
+  <mat-drawer-content>
+    <div class="main-content-area bg-light">
+      <app-navbar ngSkipHydration></app-navbar>
 
-<app-footer></app-footer>
+      <mat-progress-bar
+        *ngIf="isLoading"
+        mode="indeterminate"
+        aria-label="Loading page data"
+        class="loading-indicator">
+      </mat-progress-bar>
+      <main>
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+    <app-footer></app-footer>
+  </mat-drawer-content>
+</mat-drawer-container>
