@@ -15,5 +15,6 @@ export interface ProductDetailsData {
   images: ProductImageData[];
   category: ProductCategoryInfo; // Include category info for breadcrumbs etc.
   metadata: PageMetadata; // Nest the metadata within the main data object
+  variations?: any[];
   // Add any other relevant product fields: attributes, reviews, etc.
 }

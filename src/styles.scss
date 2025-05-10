@@ -95,8 +95,8 @@ body.ar {
 }
 
 .btn-main-primary{
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out!important;
 }
 
@@ -111,9 +111,9 @@ body.ar {
 }
 
 .btn-outline-main-primary{
-  border-color: var(--primary-color);
-  color: black;
-  background: transparent;
+  border-color: var(--primary-color) !important;
+  color: black !important;
+  background: transparent !important;
   transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
@@ -144,6 +144,9 @@ body.ar {
 //light grey border bottom
 .border-bottom-light-grey{
   border-bottom: 1px solid var(--bs-gray-200);
+}
+.bg-light-grey{
+  background-color: var(--bs-gray-200);
 }
 //move slider button to top so that it doesnt overlap favorite icon
 .products-slider{

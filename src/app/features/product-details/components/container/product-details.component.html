@@ -94,8 +94,45 @@
             </ng-template>
           </div>
         </div>
-
       </section>
+
+      <!-- START: Product Variations Section -->
+      <section *ngIf="product?.variations && product?.variations?.length! > 0"
+               class="d-flex flex-column gap-3 mt-3"
+               aria-label="Product variations">
+        <form [formGroup]="variationsForm">
+          <div *ngFor="let variationCategory of product?.variations" class="variation-category mb-3">
+            <h3 class="h6 mb-2">{{ variationCategory.name }}:</h3>
+            <div class="d-flex flex-wrap gap-2 variation-options" role="radiogroup" [attr.aria-labelledby]="variationCategory.id + '-label'">
+              <span id="{{variationCategory.id}}-label" class="visually-hidden">{{variationCategory.name}}</span>
+              <ng-container *ngFor="let option of variationCategory.options; let i = index">
+                <input type="radio"
+                       class="btn-check"
+                       [formControlName]="variationCategory.id"
+                       [name]="variationCategory.id"
+                       [id]="variationCategory.id + '-' + option.value"
+                       [value]="option.value"
+                       autocomplete="off">
+                <label class="btn"
+                       [ngClass]="{
+                    'btn-outline-main-primary': variationsForm.get(variationCategory.id)?.value === option.value,
+                    'bg-light-grey': variationsForm.get(variationCategory.id)?.value !== option.value
+                 }"
+                       [for]="variationCategory.id + '-' + option.value">
+                  {{ option.name }}
+                </label>
+              </ng-container>
+            </div>
+            <!-- Optional: Display validation errors for this category -->
+            <!--
+            <div *ngIf="variationsForm.get(variationCategory.id)?.invalid && variationsForm.get(variationCategory.id)?.touched" class="text-danger fs-08 mt-1">
+              Please select a {{ variationCategory.name | lowercase }}.
+            </div>
+            -->
+          </div>
+        </form>
+      </section>
+      <!-- END: Product Variations Section -->
 
       <section class="d-grid gap-2 mt-3">
         <button class="btn btn-main-primary py-2 text-white" (click)="buyItNow()">{{'product.buyItNow' | translate}}</button>

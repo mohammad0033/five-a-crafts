@@ -99,7 +99,29 @@ export class ProductsApiService {
           description: 'Shop the Lavender Bliss Jar Candle at Five A Crafts. Hand-poured, sustainable soy wax candle with calming lavender scent.', // SEO-focused description
           ogImageUrl: 'https://www.yourdomain.com/assets/og-image-lavender-candle.jpg',
           twitterImageUrl: 'https://www.yourdomain.com/assets/twitter-image-lavender-candle.jpg'
-        }
+        },
+        variations: [
+          {
+            "id": "color",
+            "name": "Color",
+            "options": [
+              { "name": "White", "value": "white" },
+              { "name": "Black", "value": "black" },
+              { "name": "Off-white", "value": "offwhite" },
+              { "name": "Gold", "value": "gold_color" }
+            ]
+            // selectedValue could be pre-filled by the backend or set to a default
+          },
+          {
+            "id": "gold-paper",
+            "name": "Gold Paper",
+            "options": [
+              { "name": "Silver", "value": "silver_paper" },
+              { "name": "Gold", "value": "gold_paper" }
+            ]
+          },
+          // ... and so on for other variation categories like "Stones"
+        ]
       };
     } else if (productSlug === 'rustic-wooden-bowl') {
       // Add another mock product example

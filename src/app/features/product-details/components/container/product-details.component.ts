@@ -28,6 +28,7 @@ import {Observable, timer} from 'rxjs';
 import {Product} from '../../../../core/models/product';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
 import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
+import {ProductVariationCategory} from '../../models/product-variation-category';
 
 @UntilDestroy()
 @Component({
@@ -47,7 +48,6 @@ import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/materi
     FormsModule,
     DecimalPipe,
     AsyncPipe,
-    DatePipe,
     ProductsSliderComponent,
     MatSnackBarModule,
     ReactiveFormsModule
@@ -90,6 +90,8 @@ export class ProductDetailsComponent implements OnInit {
   };
   private readonly twitterHandle = '@YourTwitterHandle';
 
+  variationsForm!: FormGroup;
+
   // --- Reviews Section Data (Mock data, replace with actual data source) ---
   public reviewsData: ReviewsData | null = null; // Your existing reviews summary data
   public maxRating: number = 5;
@@ -120,7 +122,9 @@ export class ProductDetailsComponent implements OnInit {
     private snackBar: MatSnackBar,
     private datePipe: DatePipe,
     private fb: FormBuilder) {
-    this.isBrowser = isPlatformBrowser(this.platformId)}
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    this.variationsForm = this.fb.group({}); // Initialize an empty group
+  }
 
   ngOnInit(): void {
     this.currentLang = this.translate.currentLang;
@@ -137,6 +141,7 @@ export class ProductDetailsComponent implements OnInit {
 
     if (resolvedProduct) {
       this.product = resolvedProduct;
+      this.initializeVariationsForm(); // Call this after product is set
       this.errorLoading = false;
       // Meta tags, images, stock setup
       const canonicalUrl = `https://www.yourdomain.com/products/${this.product.slug}`;
@@ -167,6 +172,29 @@ export class ProductDetailsComponent implements OnInit {
 
     // get recently viewed
     this.recentlyViewedProducts$ = this.productsApiService.getRecentlyViewedProducts();
+  }
+
+  private initializeVariationsForm(): void {
+    if (this.product && this.product.variations) {
+      const groupConfig: { [key: string]: any } = {};
+      this.product.variations.forEach(category => {
+        // Set initial value: either pre-selected from backend, or first option, or null
+        const initialValue = category.selectedValue || (category.options.length > 0 ? category.options[0].value : null);
+        groupConfig[category.id] = [initialValue, Validators.required]; // Example: make each variation required
+        // If you don't want to pre-select, you can set initialValue to null
+        // and remove category.selectedValue from your interface or ignore it here.
+      });
+      this.variationsForm = this.fb.group(groupConfig);
+
+      // Optional: If you still want to use category.selectedValue for display in the template
+      // you can subscribe to form changes to update it, or derive it from form value.
+      this.variationsForm.valueChanges.pipe(untilDestroyed(this)).subscribe(values => {
+        this.product?.variations?.forEach(cat => {
+          cat.selectedValue = values[cat.id];
+        });
+        console.log('Variation Form Values:', values);
+      });
+    }
   }
 
   private initReviewForm(): void {
@@ -352,42 +380,54 @@ export class ProductDetailsComponent implements OnInit {
     return this.translate.instant('product.ratingOutOfMax', { rating: rating, maxRating: this.maxRating });
   }
 
+  private getSelectedVariations(): { [key: string]: string | undefined } {
+    if (this.variationsForm.valid) { // Or just this.variationsForm.value if not all are required
+      // You might want to map the form value to match the previous structure if needed
+      const formValues = this.variationsForm.value;
+      const selections: { [key: string]: string | undefined } = {};
+      this.product?.variations?.forEach(category => {
+        selections[category.name] = formValues[category.id];
+      });
+      return selections;
+      // Or simply return this.variationsForm.value;
+    }
+    return {}; // Or handle invalid form appropriately
+  }
+
   // --- New methods for Buy Now and Add to Cart ---
   buyItNow(): void {
     if (!this.product) {
       console.error('Buy It Now: Product data is not available.');
-      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), { // Add productNotAvailableError to i18n
+      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), {
         ...this.snackBarConfig,
         verticalPosition: 'top',
         panelClass: ['snackbar-error']
       });
       return;
     }
-    console.log(`Buy It Now clicked for product: ${this.product.name}, Quantity: ${this.productQty}`);
-    // TODO: Implement actual "Buy It Now" logic
-    const message = this.translate.instant('product.buyNowConfirmation', { productName: this.product.name, quantity: this.productQty }); // Add to i18n
+    const selectedVariations = this.getSelectedVariations();
+    console.log(`Buy It Now clicked for product: ${this.product.name}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
+    // TODO: Implement actual "Buy It Now" logic, including selectedVariations
+    const message = this.translate.instant('product.buyNowConfirmation', { productName: this.product.name });
     this.snackBar.open(message, this.translate.instant('common.dismiss'), this.snackBarConfig);
   }
 
   addToCart(): void {
     if (!this.product) {
       console.error('Add to Cart: Product data is not available.');
-      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), { // Add productNotAvailableError to i18n
+      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), {
         ...this.snackBarConfig,
         verticalPosition: 'top',
         panelClass: ['snackbar-error']
       });
       return;
     }
-    console.log(`Add to Cart clicked for product: ${this.product.name}, Quantity: ${this.productQty}`);
-    // TODO: Implement actual "Add to Cart" logic
-    const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.name, quantity: this.productQty }); // Add to i18n
+    const selectedVariations = this.getSelectedVariations();
+    console.log(`Add to Cart clicked for product: ${this.product.name}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
+    // TODO: Implement actual "Add to Cart" logic, including selectedVariations
+    const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.name, quantity: this.productQty });
     this.snackBar.open(message, this.translate.instant('common.dismiss'), {
       ...this.snackBarConfig,
-      // action: 'View Cart', // Example of adding an action
-      // duration: 5000 // Longer duration for actions
     });
-    // if you add an action, you can subscribe to its event:
-    // snackBarRef.onAction().subscribe(() => { /* Navigate to cart or perform action */ });
   }
 }
