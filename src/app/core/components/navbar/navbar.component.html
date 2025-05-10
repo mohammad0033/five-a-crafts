@@ -24,10 +24,10 @@
 
       <!-- === Mobile Only: Right Group (Heart + Bag) === -->
       <div class="d-flex align-items-center d-md-none gap-2">
-        <button type="button" class="btn rounded-circle p-2">
+        <button type="button" class="btn rounded-circle p-2 border-0">
           <fa-icon [icon]="faHeart"></fa-icon>
         </button>
-        <button type="button" class="btn rounded-circle p-2">
+        <button type="button" class="btn rounded-circle p-2 border-0" (click)="openCart()">
           <fa-icon [icon]="faShoppingBag"></fa-icon>
         </button>
         <a class="d-flex p-2" (click)="changeLanguage('en')" *ngIf="currentLang === 'ar'">
@@ -111,7 +111,7 @@
           <a type="button" class="btn rounded-circle" routerLink="/profile"> <!-- User Icon -->
             <fa-icon [icon]="faUser"></fa-icon>
           </a>
-          <button type="button" class="btn rounded-circle"> <!-- Desktop Bag -->
+          <button type="button" class="btn rounded-circle" (click)="openCart()"> <!-- Desktop Bag -->
             <fa-icon [icon]="faShoppingBag"></fa-icon>
           </button>
           <a class="d-flex gap-2 link-primary link-underline-opacity-0 link-underline-opacity-100-hover cursor-pointer" (click)="changeLanguage('en')" *ngIf="currentLang === 'ar'">

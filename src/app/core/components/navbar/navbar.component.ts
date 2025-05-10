@@ -18,6 +18,7 @@ import {BreakpointObserver} from "@angular/cdk/layout";
 import {map} from "rxjs";
 import {ContentApiService, MegaMenuData} from '../../services/content-api.service';
 import {NgbDropdown, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
+import {CartService} from '../../services/cart.service';
 
 @UntilDestroy()
 @Component({
@@ -58,7 +59,8 @@ export class NavbarComponent implements OnInit{
         private cdRef: ChangeDetectorRef,
         private contentService: ContentApiService, // Inject ContentApiService
         private router: Router,
-        private translate: TranslateService) {}
+        private translate: TranslateService,
+        private cartService: CartService) {}
 
     ngOnInit(): void {
       this.trackScreenSize();
@@ -132,5 +134,10 @@ export class NavbarComponent implements OnInit{
 
     return this.router.isActive('/categories', isActiveOptions) ||
       this.router.isActive('/products', isActiveOptions);
+  }
+
+  // Method to open the cart
+  openCart(): void {
+    this.cartService.openDrawer();
   }
 }
