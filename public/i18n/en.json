@@ -78,5 +78,15 @@
   "product.productNotAvailableError": "Product is not available",
   "product.buyNowConfirmation": "Are you sure you want to buy {{productName}} now?",
   "product.addToCartConfirmation": "Added {{quantity}} of {{productName}} to cart",
+  "cart.yourCart": "Shopping Cart",
+  "cart.emptyMessage": "Your cart is empty",
+  "cart.continueShopping": "Continue Shopping",
+  "cart.total": "Total",
+  "cart.proceedToCheckout": "Proceed to Checkout",
+  "cart.viewCart": "View Cart",
+  "cart.orderSummary": "Order Summary",
+  "cart.subtotal": "Subtotal",
+  "cart.discount": "Discount",
+  "cart.shippingFee": "Shipping Fee",
   "common.dismiss": "Dismiss"
 }

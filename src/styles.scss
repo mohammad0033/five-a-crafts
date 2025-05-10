@@ -175,3 +175,14 @@ gallery-thumb{
 .g-active-thumb{
   border: 2px solid var(--primary-color);
 }
+
+// drawer width
+.mat-drawer{
+  width: 32.875rem!important;
+}
+
+@media (max-width: 767.98px) {
+  .mat-drawer{
+    width: 20.6875rem!important;
+  }
+}

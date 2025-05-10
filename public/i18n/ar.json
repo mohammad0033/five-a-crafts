@@ -78,6 +78,16 @@
   "product.productNotAvailableError": "المنتج غير متوفر حاليا.",
   "product.buyNowConfirmation": "هل تريد شراء المنتج {{productName}}؟",
   "product.addToCartConfirmation": "تم اضافة {{quantity}} من المنتج {{productName}} الى السلة",
+  "cart.yourCart": "سلة التسوق",
+  "cart.emptyMessage": "سلة التسوق فارغة",
+  "cart.continueShopping": "استمر في التسوق",
+  "cart.total": "المجموع",
+  "cart.proceedToCheckout": "اتمام الشراء",
+  "cart.viewCart": "اظهار السلة",
+  "cart.orderSummary": "ملخص الطلب",
+  "cart.subtotal": "المجموع الفرعي",
+  "cart.discount": "خصم",
+  "cart.shippingFee": "رسوم الشحن",
   "common.dismiss": "اغلاق"
 
 }

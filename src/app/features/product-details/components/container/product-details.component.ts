@@ -28,7 +28,7 @@ import {Observable, timer} from 'rxjs';
 import {Product} from '../../../../core/models/product';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
 import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
-import {ProductVariationCategory} from '../../models/product-variation-category';
+import {CartService} from '../../../../core/services/cart.service';
 
 @UntilDestroy()
 @Component({
@@ -80,6 +80,7 @@ export class ProductDetailsComponent implements OnInit {
   galleryThumbPosition = 'bottom' as "bottom";
   galleryThumbCentralized = false;
   galleryImageSize = 'cover' as "cover";
+  galleryDisableThumbMouseScroll = false;
 
   // meta data fallback data
   private readonly fallbackMetaData: FallbackMetaTagData = {
@@ -121,13 +122,20 @@ export class ProductDetailsComponent implements OnInit {
     private productsApiService: ProductsApiService,
     private snackBar: MatSnackBar,
     private datePipe: DatePipe,
-    private fb: FormBuilder) {
+    private fb: FormBuilder,
+    private cartService: CartService) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.variationsForm = this.fb.group({}); // Initialize an empty group
   }
 
   ngOnInit(): void {
     this.currentLang = this.translate.currentLang;
+    // explicitly set direction
+    if (this.currentLang === 'ar') {
+      this.dir = 'rtl';
+    } else {
+      this.dir = 'ltr';
+    }
     this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event: any) => {
       this.currentLang = event.lang;
       this.toggleDir();
@@ -363,7 +371,9 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   increaseProductQty(): void {
-    if ( this.productStock && this.productQty < this.productStock) {
+    if ( this.productStock !== undefined && this.productQty < this.productStock) {
+      this.productQty++;
+    } else if (this.productStock === undefined) { // Allow increase if stock is not defined (e.g., unlimited)
       this.productQty++;
     }
   }
@@ -406,8 +416,23 @@ export class ProductDetailsComponent implements OnInit {
       return;
     }
     const selectedVariations = this.getSelectedVariations();
+    if (selectedVariations === null && this.product.variations && this.product.variations.length > 0) {
+      // getSelectedVariations already showed a snackbar for invalid variations
+      return;
+    }
+
     console.log(`Buy It Now clicked for product: ${this.product.name}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
-    // TODO: Implement actual "Buy It Now" logic, including selectedVariations
+    // TODO: Implement actual "Buy It Now" logic:
+    // 1. Add item to cart (maybe clear cart first or use a separate "buy now" cart state)
+    // 2. Redirect to checkout
+    this.cartService.addItem(
+      this.product, // Assuming ProductDetailsData is compatible or can be cast
+      this.productQty,
+      this.productStock,
+      selectedVariations
+    );
+    // For "Buy Now", you might want to navigate directly to checkout
+    // this.router.navigate(['/checkout']); // Make sure Router is injected if you use this
     const message = this.translate.instant('product.buyNowConfirmation', { productName: this.product.name });
     this.snackBar.open(message, this.translate.instant('common.dismiss'), this.snackBarConfig);
   }
@@ -422,9 +447,23 @@ export class ProductDetailsComponent implements OnInit {
       });
       return;
     }
+
     const selectedVariations = this.getSelectedVariations();
-    console.log(`Add to Cart clicked for product: ${this.product.name}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
-    // TODO: Implement actual "Add to Cart" logic, including selectedVariations
+    // If variations are required and not selected, getSelectedVariations will show a snackbar and return null.
+    if (selectedVariations === null && this.product.variations && this.product.variations.length > 0) {
+      return; // Stop if variations were required but invalid/not selected
+    }
+
+    // Call the CartService to add the item
+    // We assume ProductDetailsData has the necessary fields of the Product model
+    // or you might need to map it to a Product object.
+    this.cartService.addItem(
+      this.product as Product, // Cast if ProductDetailsData is a superset of Product
+      this.productQty,
+      this.productStock,
+      selectedVariations
+    );
+
     const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.name, quantity: this.productQty });
     this.snackBar.open(message, this.translate.instant('common.dismiss'), {
       ...this.snackBarConfig,

@@ -1,1 +1,71 @@
-<p>cart works!</p>
+<div class="p-3 p-md-5 d-flex flex-column">
+  <header class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <h2 class="h5 m-0">{{ 'cart.yourCart' | translate }}</h2>
+    </div>
+  </header>
+
+  <div class="d-flex flex-column flex-md-row gap-3">
+
+<!--    items container-->
+    <div class="cart-items-container col-12 col-md-6">
+
+      <ng-container *ngIf="cartItems$ | async as items; else emptyCart">
+        <div *ngIf="items.length > 0; else emptyCart" class="d-flex flex-column gap-3">
+          <div *ngFor="let item of items; trackBy: trackByCartItemId" class="cart-item">
+            <app-cart-product
+              [product]="item.product"
+              [productQty]="item.quantity"
+              [productStock]="item.originalStock"
+              (quantityChange)="handleQuantityChange($event)"
+              (removeItem)="handleRemoveItem($event.toString())">
+              <!-- Pass other relevant item details if app-cart-product needs them, e.g., selected variations -->
+            </app-cart-product>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #emptyCart>
+        <div class="text-center d-flex flex-column h-100">
+          <fa-icon [icon]="faShoppingBag" size="3x" class="text-muted mb-3"></fa-icon> <!-- Example icon -->
+          <p class="text-muted">{{ 'cart.emptyMessage' | translate }}</p>
+          <button mat-stroked-button color="primary" (click)="closeCartAndNavigateToShop()">
+            {{ 'cart.continueShopping' | translate }}
+          </button>
+        </div>
+      </ng-template>
+    </div>
+
+<!--    order summary-->
+    <div class="col-12 col-md-6 p-3 rounded-2 border border-1 border-secondary-subtle">
+      <h3 class="h5 mb-3">{{ 'cart.orderSummary' | translate }}</h3>
+
+      <div class="d-flex justify-content-between mb-3">
+        <span class="text-secondary">{{ 'cart.subtotal' | translate }}</span>
+        <span>{{ (subtotal$ | async) || 0 }} LE</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-3">
+        <span class="text-secondary">{{ 'cart.discount' | translate }}</span>
+        <span class="text-danger">-{{ (discount$ | async) || 0 }} LE</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-3">
+        <span class="text-secondary">{{ 'cart.shippingFee' | translate }}</span>
+        <span>{{ (shippingFee$ | async) || 0 }} LE</span>
+      </div>
+
+      <hr class="border border-1 border-secondary-subtle my-3">
+
+      <div class="d-flex justify-content-between mb-3">
+        <span>{{ 'cart.total' | translate }}</span>
+        <span>{{ (totalAmount$ | async) || 0 }} LE</span>
+      </div>
+
+      <button class="w-100 btn btn-main-primary text-white py-2" (click)="proceedToCheckout()" [disabled]="!((cartItems$ | async)?.length)">
+        {{ 'cart.proceedToCheckout' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-contact-section></app-contact-section>

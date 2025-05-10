@@ -1,45 +1,40 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Meta, Title} from '@angular/platform-browser';
-import {CartService} from '../../../../core/services/cart.service';
-import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import {faPhone, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
-import {MatButton} from '@angular/material/button';
-import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {CartProductComponent} from '../cart-product/cart-product.component';
-import {CartItem} from '../../models/cart-item';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {faClose, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Observable, Subscription} from 'rxjs';
+import {CartItem} from '../../models/cart-item';
+import {Meta, Title} from '@angular/platform-browser';
+import {CartService} from '../../../../core/services/cart.service';
 import {Router} from '@angular/router';
-import {faEnvelope} from '@fortawesome/free-regular-svg-icons';
-import {faFacebookF, faInstagram, faWhatsapp} from '@fortawesome/free-brands-svg-icons';
-import {ContactSectionComponent} from '../../../../shared/components/contact-section/contact-section.component';
 
 @Component({
-  selector: 'app-cart',
+  selector: 'app-side-cart',
   imports: [
-    FaIconComponent,
-    TranslatePipe,
-    MatButton,
-    NgIf,
     AsyncPipe,
     CartProductComponent,
+    FaIconComponent,
+    MatButton,
+    MatIconButton,
     NgForOf,
-    ContactSectionComponent
+    NgIf,
+    TranslatePipe
   ],
-  templateUrl: './cart.component.html',
+  templateUrl: './side-cart.component.html',
   standalone: true,
-  styleUrl: './cart.component.scss'
+  styleUrl: './side-cart.component.scss'
 })
-export class CartComponent implements OnInit, OnDestroy {
+export class SideCartComponent implements OnInit, OnDestroy {
   cartItems$: Observable<CartItem[]>;
-  subtotal$: Observable<number>;     // Will hold the subtotal before discount/shipping
-  discount$: Observable<number>;     // From CartService
-  shippingFee$: Observable<number>;  // From CartService
-  totalAmount$: Observable<number>;   // This will be the final grand total from CartService
+  totalAmount$: Observable<number>;
 
   private titleSubscription?: Subscription;
   private langChangeSubscription?: Subscription;
 
+  protected readonly faClose = faClose;
   protected readonly faShoppingBag = faShoppingBag;
 
   constructor(
@@ -50,10 +45,7 @@ export class CartComponent implements OnInit, OnDestroy {
     private translate: TranslateService
   ) {
     this.cartItems$ = this.cartService.cartItems$;
-    this.subtotal$ = this.cartService.subtotal$;         // Get subtotal from service
-    this.discount$ = this.cartService.discount$;         // Get discount from service
-    this.shippingFee$ = this.cartService.shippingFee$;   // Get shipping fee from service
-    this.totalAmount$ = this.cartService.totalAmount$;   // Get final total amount from service
+    this.totalAmount$ = this.cartService.totalAmount$;
   }
 
   ngOnInit(): void {
@@ -72,6 +64,10 @@ export class CartComponent implements OnInit, OnDestroy {
     this.titleSubscription = this.translate.get('cart.pageTitle').subscribe((pageTitle: string) => {
       this.titleService.setTitle(pageTitle);
     });
+  }
+
+  closeCart(): void {
+    this.cartService.closeDrawer();
   }
 
   handleQuantityChange(event: { productId: string | number; newQuantity: number }): void {
@@ -102,15 +98,16 @@ export class CartComponent implements OnInit, OnDestroy {
     // console.log('Proceeding to checkout with items:', this.cartService.cartItems.value);
   }
 
+  proceedToCart(): void {
+    this.cartService.closeDrawer();
+    this.router.navigate(['/cart']); // Adjust this route to your actual cart page
+    // console.log('Proceeding to cart with items:', this.cartService.cartItems.value);
+  }
+
   ngOnDestroy(): void {
     this.metaService.removeTag("name='robots'");
     this.titleSubscription?.unsubscribe();
     this.langChangeSubscription?.unsubscribe();
   }
 
-  protected readonly faEnvelope = faEnvelope;
-  protected readonly faPhone = faPhone;
-  protected readonly faWhatsapp = faWhatsapp;
-  protected readonly faInstagram = faInstagram;
-  protected readonly faFacebookF = faFacebookF;
 }
