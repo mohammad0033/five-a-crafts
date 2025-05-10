@@ -2,8 +2,8 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Meta, Title} from '@angular/platform-browser';
 import {CartService} from '../../../../core/services/cart.service';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import {faClose, faShoppingBag, faShoppingCart} from '@fortawesome/free-solid-svg-icons';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {faShoppingBag} from '@fortawesome/free-solid-svg-icons';
+import {MatButton} from '@angular/material/button';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {CartProductComponent} from '../cart-product/cart-product.component';
@@ -15,7 +15,6 @@ import {Router} from '@angular/router';
   selector: 'app-cart',
   imports: [
     FaIconComponent,
-    MatIconButton,
     TranslatePipe,
     MatButton,
     NgIf,
@@ -29,13 +28,15 @@ import {Router} from '@angular/router';
 })
 export class CartComponent implements OnInit, OnDestroy {
   cartItems$: Observable<CartItem[]>;
-  totalAmount$: Observable<number>;
+  subtotal$: Observable<number>;     // Will hold the subtotal before discount/shipping
+  discount$: Observable<number>;     // From CartService
+  shippingFee$: Observable<number>;  // From CartService
+  totalAmount$: Observable<number>;   // This will be the final grand total from CartService
 
   private titleSubscription?: Subscription;
   private langChangeSubscription?: Subscription;
 
-  protected readonly faClose = faClose;
-  protected readonly faShoppingCart = faShoppingCart;
+  protected readonly faShoppingBag = faShoppingBag;
 
   constructor(
     private metaService: Meta,
@@ -45,7 +46,10 @@ export class CartComponent implements OnInit, OnDestroy {
     private translate: TranslateService
   ) {
     this.cartItems$ = this.cartService.cartItems$;
-    this.totalAmount$ = this.cartService.totalAmount$;
+    this.subtotal$ = this.cartService.subtotal$;         // Get subtotal from service
+    this.discount$ = this.cartService.discount$;         // Get discount from service
+    this.shippingFee$ = this.cartService.shippingFee$;   // Get shipping fee from service
+    this.totalAmount$ = this.cartService.totalAmount$;   // Get final total amount from service
   }
 
   ngOnInit(): void {
@@ -64,10 +68,6 @@ export class CartComponent implements OnInit, OnDestroy {
     this.titleSubscription = this.translate.get('cart.pageTitle').subscribe((pageTitle: string) => {
       this.titleService.setTitle(pageTitle);
     });
-  }
-
-  closeCart(): void {
-    this.cartService.closeDrawer();
   }
 
   handleQuantityChange(event: { productId: string | number; newQuantity: number }): void {
@@ -98,17 +98,9 @@ export class CartComponent implements OnInit, OnDestroy {
     // console.log('Proceeding to checkout with items:', this.cartService.cartItems.value);
   }
 
-  proceedToCart(): void {
-    this.cartService.closeDrawer();
-    this.router.navigate(['/cart']); // Adjust this route to your actual cart page
-    // console.log('Proceeding to cart with items:', this.cartService.cartItems.value);
-  }
-
   ngOnDestroy(): void {
     this.metaService.removeTag("name='robots'");
     this.titleSubscription?.unsubscribe();
     this.langChangeSubscription?.unsubscribe();
   }
-
-  protected readonly faShoppingBag = faShoppingBag;
 }
