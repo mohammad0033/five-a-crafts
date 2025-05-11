@@ -123,6 +123,12 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'not-found', // Your 404 route
+    loadComponent: () =>
+      import('./core/components/not-found/not-found.component').then((m) => m.NotFoundComponent), // Example path
+    title: 'Page Not Found | Five A Crafts'
+  },
+  {
     path: '**',
     redirectTo: '',
   }

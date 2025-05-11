@@ -1,0 +1,109 @@
+.not-found-container{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:70vh; // Adjust as needed to fill viewport
+  text-align: center;
+  padding: 20px;
+}
+
+.not-found-content {
+  max-width: 600px;
+}
+
+.not-found-title {
+  font-size: 6rem; // Large, prominent 404
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0;
+  line-height: 1;
+}
+
+.not-found-subtitle {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #343a40; // Dark gray, adjust to your theme
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.not-found-message {
+  font-size: 1.1rem;
+  color: #6c757d; // Lighter gray, adjust to your theme
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.not-found-actions {
+  .btn {
+    margin: 0 10px;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #007bff; // Primary button color, adjust to your theme
+    color: white;
+    border: 1px solid #007bff;
+
+    &:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+  }
+
+  .btn-secondary {
+    background-color: #6c757d; // Secondary button color, adjust to your theme
+    color: white;
+    border: 1px solid #6c757d;
+
+    &:hover {
+      background-color: #545b62;
+      border-color: #545b62;
+    }
+  }
+}
+
+.not-found-image-container {
+  margin-top: 40px;
+
+  .not-found-icon {
+    width: 100px; // Adjust size as needed
+    height: 100px;
+    color: #adb5bd; // A muted color for the icon
+  }
+
+  img { // If you use an actual image file
+    max-width: 200px;
+    height: auto;
+    opacity: 0.7;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .not-found-title {
+    font-size: 5rem;
+  }
+  .not-found-subtitle {
+    font-size: 1.5rem;
+  }
+  .not-found-message {
+    font-size: 1rem;
+  }
+  .not-found-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .btn {
+      margin: 10px 0;
+      width: 80%;
+      max-width: 250px;
+    }
+  }
+}
