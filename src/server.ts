@@ -9,6 +9,11 @@ import cookieParser from 'cookie-parser'; // Middleware to parse cookies from in
 import { readFileSync } from 'node:fs'; // Node.js file system module to read files synchronously
 import { INITIAL_LANG } from './app/core/tokens/initial-lang.token'; // Custom Angular token to pass the initial language from server to client
 
+// --- Custom Providers for SSR Translation ---
+import { TranslateLoader } from '@ngx-translate/core'; // Import TranslateLoader
+import { TranslateServerLoader } from './app/core/translate-loader/translate-server.loader'; // Your new server loader
+import { SERVER_ASSETS_PATH } from './app/core/tokens/server-assets-path.token'; // Token for assets path
+
 // --- Path Setup ---
 // Determines the directory of the current server file (e.g., /dist/your-project/server)
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
@@ -97,6 +102,15 @@ app.get('*', (req, res, next) => { // Changed from '**' to '*' for better clarit
       providers: [ // Providers available to the Angular application during server-side rendering
         { provide: APP_BASE_HREF, useValue: baseUrl }, // Provides the base URL of the application
         { provide: INITIAL_LANG, useValue: requestLang }, // Provides the detected language to the Angular app
+        // Provide the path to the browser assets for the TranslateServerLoader.
+        // Your i18n files (e.g., en.json, ar.json) are in 'dist/five-a-crafts/browser/i18n/'
+        // because 'public/i18n/' is copied to the root of 'browserDistFolder'.
+        { provide: SERVER_ASSETS_PATH, useValue: browserDistFolder },
+        // Explicitly provide TranslateServerLoader using its own class as the token and implementation.
+        // This ensures Angular knows how to create and inject TranslateServerLoader.
+        { provide: TranslateServerLoader, useClass: TranslateServerLoader },
+        // Now, when TranslateLoader is requested, use the existing instance of TranslateServerLoader.
+        { provide: TranslateLoader, useExisting: TranslateServerLoader }
       ],
     })
     .then((html) => res.send(html)) // Send the rendered HTML back to the client
