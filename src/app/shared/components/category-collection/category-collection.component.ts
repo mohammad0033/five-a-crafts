@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Category} from '../../../core/models/category';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {NgForOf, NgIf, SlicePipe} from '@angular/common';
@@ -29,8 +29,12 @@ export class CategoryCollectionComponent implements OnInit {
   @Input() category!: Category
   @Input() products : Product[] = []
   @Input() limitCount!: number
+  @Output() favoriteToggleRequested = new EventEmitter<Product>()
   isLoading: boolean = false
   currentLang!: string
+
+  protected readonly faArrowLeft = faArrowLeft;
+  protected readonly faArrowRight = faArrowRight;
 
   constructor(private translate: TranslateService) {}
 
@@ -41,6 +45,7 @@ export class CategoryCollectionComponent implements OnInit {
     })
   }
 
-  protected readonly faArrowLeft = faArrowLeft;
-  protected readonly faArrowRight = faArrowRight;
+  handleFavoriteToggle(product: Product) {
+    this.favoriteToggleRequested.emit(product)
+  }
 }
