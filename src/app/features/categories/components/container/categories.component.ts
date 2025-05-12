@@ -18,6 +18,7 @@ import {CategoryCollectionComponent} from '../../../../shared/components/categor
 import {Product} from '../../../../core/models/product';
 import {catchError, EMPTY, finalize, switchMap, tap, throwError} from 'rxjs';
 import {ProductsApiService} from '../../../../core/services/products-api.service';
+import {FavoritesApiService} from '../../../../core/services/favorites-api.service';
 
 @UntilDestroy()
 @Component({
@@ -43,6 +44,9 @@ export class CategoriesComponent implements OnInit {
   isLoading: boolean = false
   currentLang!: string
 
+  protected readonly faArrowLeft = faArrowLeft;
+  protected readonly faArrowRight = faArrowRight;
+
   // --- Fallback Metadata Content for Categories Page ---
   private readonly fallbackData: FallbackMetaTagData = {
     title: 'Product Categories | Five A Crafts',
@@ -60,6 +64,7 @@ export class CategoriesComponent implements OnInit {
   constructor(private metaTagService: MetaTagService,
               private categoriesService: CategoriesService,
               private productsApiService: ProductsApiService,
+              private favoritesApiService: FavoritesApiService,
               private translate: TranslateService,
               private route: ActivatedRoute) {}
 
@@ -131,6 +136,22 @@ export class CategoriesComponent implements OnInit {
     });
   }
 
-  protected readonly faArrowLeft = faArrowLeft;
-  protected readonly faArrowRight = faArrowRight;
+  handleFavoriteToggle(productToToggle: Product): void {
+    console.log(`Component: Toggling favorite for ${productToToggle.name}`);
+    this.favoritesApiService.toggleFavorite(productToToggle.id)
+      .pipe(untilDestroyed(this)) // Component subscribes to the toggle action
+      .subscribe({
+        next: (result) => {
+          if (result.action === 'added' && result.product) {
+            console.log(`${result.product.name} was added to favorites. List will refresh via service.`);
+          } else if (result.action === 'removed') {
+            // Using productToToggle.name here as the removed product object isn't always returned by remove ops
+            console.log(`${productToToggle.name} (ID: ${result.productId}) was removed from favorites. List will refresh via service.`);
+          }
+          // The favorites list (products$) will update automatically because
+          // toggleFavorite calls addFavorite/removeFavorite, which in turn call loadFavorites.
+        },
+        error: (err) => console.error(`Component: Failed to toggle favorite for ${productToToggle.name}`, err)
+      });
+  }
 }
