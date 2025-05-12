@@ -11,7 +11,7 @@
     <section class="cart-items-container col-12 col-md-6"  aria-labelledby="cart-heading">
 
       <ng-container *ngIf="cartItems$ | async as items; else emptyCart">
-        <ul *ngIf="items.length > 0; else emptyCart" class="d-flex flex-column list-unstyled gap-3">
+        <ul *ngIf="items.length > 0; else emptyCart" class="d-flex flex-column list-unstyled p-0 gap-3">
           <li *ngFor="let item of items; trackBy: trackByCartItemId" class="cart-item">
             <app-cart-product
               [product]="item.product"
