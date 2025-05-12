@@ -6,14 +6,14 @@
     <header class="d-flex align-items-center justify-content-between">
       <h2 class="card-title fw-bold h5">{{ product.name }}</h2>
       <fa-icon
-        [icon]="product.isFavorite ? faHeartSolid : faHeartRegular"
+        [icon]="isActuallyFavorite ? faHeartSolid : faHeartRegular"
         class="favorite-icon cursor-pointer"
         [ngClass]="{
-          'favorite': product.isFavorite,
-          'animate-heartbeat': isAnimating
+          'favorite': isActuallyFavorite,
+          'animate-heartbeat': isAnimating && !isActuallyFavorite
         }"
-        (click)="toggleFavorite($event)"
-        [title]="product.isFavorite ? 'Remove from favorites' : 'Add to favorites'">
+        (click)="onToggleFavorite($event)"
+        [title]="(isActuallyFavorite ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))">
       </fa-icon>
     </header>
     <p class="card-text text-muted d-none d-md-block" *ngIf="product.description">
