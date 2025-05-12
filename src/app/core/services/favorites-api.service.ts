@@ -11,11 +11,17 @@ import { ProductsApiService } from './products-api.service';
 export class FavoritesApiService {
   private favoritesSubject = new BehaviorSubject<Product[]>([]);
   public favorites$: Observable<Product[]> = this.favoritesSubject.asObservable();
+  public favoritesCount$!: Observable<number>;
 
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   public isLoading$: Observable<boolean> = this.isLoadingSubject.asObservable();
 
-  constructor(private productsApiService: ProductsApiService) {}
+  constructor(private productsApiService: ProductsApiService) {
+    // Derive favoritesCount$ from favorites$
+    this.favoritesCount$ = this.favorites$.pipe(
+      map(favorites => favorites.length)
+    );
+  }
 
   // These methods simulate direct interaction with a backend or data source
   // In your current setup, they modify the mock product list in ProductsApiService

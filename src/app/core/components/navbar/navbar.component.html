@@ -24,8 +24,12 @@
 
       <!-- === Mobile Only: Right Group (Heart + Bag) === -->
       <div class="d-flex align-items-center d-md-none gap-2">
-        <button type="button" class="btn rounded-circle p-2 border-0">
+        <button type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2">
           <fa-icon [icon]="faHeart"></fa-icon>
+          <span *ngIf="favoritesCount > 0">
+            {{ favoritesCount }}
+            <span class="visually-hidden">favorite items</span>
+          </span>
         </button>
         <button type="button" class="btn rounded-circle p-2 border-0" (click)="openCart()">
           <fa-icon [icon]="faShoppingBag"></fa-icon>
@@ -105,8 +109,12 @@
           <button type="button" class="btn rounded-circle"> <!-- Desktop Search -->
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
-          <a type="button" class="btn rounded-circle" routerLink="/favorites"> <!-- Desktop Heart -->
+          <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" routerLink="/favorites"> <!-- Desktop Heart -->
             <fa-icon [icon]="faHeart"></fa-icon>
+            <span *ngIf="favoritesCount > 0">
+            {{ favoritesCount }}
+              <span class="visually-hidden">favorite items</span>
+          </span>
           </a>
           <a type="button" class="btn rounded-circle" routerLink="/profile"> <!-- User Icon -->
             <fa-icon [icon]="faUser"></fa-icon>
