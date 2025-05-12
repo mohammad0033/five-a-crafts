@@ -15,10 +15,10 @@
   <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 my-2 my-md-5 candles-collection-placeholder" *ngIf="!isLoading && products.length > 0">
     <!--    limit to 4 products-->
     <div class="col d-none d-md-block" *ngFor="let product of products | slice:0:limitCount">
-      <app-product-card [product]="product"></app-product-card>
+      <app-product-card [product]="product" (favoriteToggleRequested)="handleFavoriteToggle(product)"></app-product-card>
     </div>
     <div class="col d-md-none" *ngFor="let product of products | slice:0:2">
-      <app-product-card [product]="product"></app-product-card>
+      <app-product-card [product]="product" (favoriteToggleRequested)="handleFavoriteToggle(product)"></app-product-card>
     </div>
   </div>
 

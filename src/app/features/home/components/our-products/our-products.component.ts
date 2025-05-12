@@ -10,6 +10,7 @@ import {ProductCardComponent} from '../../../../shared/components/product-card/p
 import {RouterLink} from '@angular/router';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {FavoritesApiService} from '../../../../core/services/favorites-api.service';
 
 @UntilDestroy()
 @Component({
@@ -33,7 +34,11 @@ export class OurProductsComponent implements OnInit {
   isLoading: boolean = true;
   currentLang!: string
 
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faArrowLeft = faArrowLeft;
+
   constructor(private productsApiService: ProductsApiService,
+              private favoritesApiService: FavoritesApiService,
               private translate: TranslateService) {
   }
 
@@ -60,6 +65,22 @@ export class OurProductsComponent implements OnInit {
       });
   }
 
-  protected readonly faArrowRight = faArrowRight;
-  protected readonly faArrowLeft = faArrowLeft;
+  handleFavoriteToggle(productToToggle: Product): void {
+    console.log(`Component: Toggling favorite for ${productToToggle.name}`);
+    this.favoritesApiService.toggleFavorite(productToToggle.id)
+      .pipe(untilDestroyed(this)) // Component subscribes to the toggle action
+      .subscribe({
+        next: (result) => {
+          if (result.action === 'added' && result.product) {
+            console.log(`${result.product.name} was added to favorites. List will refresh via service.`);
+          } else if (result.action === 'removed') {
+            // Using productToToggle.name here as the removed product object isn't always returned by remove ops
+            console.log(`${productToToggle.name} (ID: ${result.productId}) was removed from favorites. List will refresh via service.`);
+          }
+          // The favorites list (products$) will update automatically because
+          // toggleFavorite calls addFavorite/removeFavorite, which in turn call loadFavorites.
+        },
+        error: (err) => console.error(`Component: Failed to toggle favorite for ${productToToggle.name}`, err)
+      });
+  }
 }

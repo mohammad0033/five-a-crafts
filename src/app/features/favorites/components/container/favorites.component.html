@@ -1,1 +1,35 @@
-<p>favorites works!</p>
+<section class="p-3 p-md-5">
+  <h2 class="mb-5">{{'favorites.wishlist' | translate}}</h2>
+
+  <!-- Use *ngIf with async pipe to get the resolved products array -->
+  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" *ngIf="products$ | async as products; else loadingFavorites">
+    <!-- Check if there are any products to display -->
+    <ng-container *ngIf="products.length > 0; else noFavoritesMessage">
+      <app-product-card class="col" *ngFor="let product of products" [product]="product"
+                        (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-product-card>
+    </ng-container>
+
+    <!-- Template to show if there are no favorite products -->
+    <ng-template #noFavoritesMessage>
+      <p>{{ 'favorites.noFavoritesFound' | translate }}</p>
+      <!-- Make sure to add 'favorites.noFavoritesFound' to your translation files -->
+    </ng-template>
+  </div>
+
+  <!-- Optional: Template to show while products are loading -->
+  <ng-template #loadingFavorites>
+    <div class="d-flex align-items-center text-center gap-3">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span class="visually-hidden">Loading...</span>
+      <p>{{ 'favorites.loading' | translate }}</p>
+    </div>
+  </ng-template>
+</section>
+
+<!--you may also like-->
+<section class="px-2 px-md-5 py-3">
+  <div *ngIf="productsYouMayLike$ | async as products">
+    <h2 class="zapf-font mb-3">{{'product.youMayLike' | translate}}</h2>
+    <app-products-slider [products]="products"></app-products-slider>
+  </div>
+</section>

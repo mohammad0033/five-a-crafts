@@ -33,7 +33,8 @@
       *ngFor="let category of categories"
       [category]="category"
       [products]="products"
-      [limitCount]="4"></app-category-collection>
+      [limitCount]="4"
+      (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-category-collection>
   </div>
 </ng-container>
 

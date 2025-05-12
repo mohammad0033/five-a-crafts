@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Product} from '../../../core/models/product';
 import {NgClass, NgIf, SlicePipe} from '@angular/common';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
@@ -6,7 +6,10 @@ import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import {TranslatePipe} from '@ngx-translate/core';
 import {RouterLink} from '@angular/router';
+import {FavoritesApiService} from '../../../core/services/favorites-api.service';
+import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-product-card',
   imports: [
@@ -21,36 +24,55 @@ import {RouterLink} from '@angular/router';
   standalone: true,
   styleUrl: './product-card.component.scss'
 })
-export class ProductCardComponent {
+export class ProductCardComponent implements OnInit {
   @Input() product!: Product;
-  @Output() favoriteToggled = new EventEmitter<Product>();
+  @Output() favoriteToggleRequested = new EventEmitter<Product>();
   hover = false;
   isAnimating = false; // Flag to trigger the heartbeat animation
   protected readonly faHeartRegular = faHeartRegular;
   protected readonly faHeartSolid = faHeartSolid;
 
-  toggleFavorite(event: MouseEvent): void {
-    // Prevent the click from bubbling up to parent elements if needed
-    event.stopPropagation();
+  // This will hold the actual favorite status from the service
+  isActuallyFavorite: boolean = false;
 
-    // Toggle the favorite status on the product object
-    // Note: Modifying @Input directly is simple but can be considered bad practice.
-    // Emitting an event (like favoriteToggled) is often preferred.
-    this.product.isFavorite = !this.product.isFavorite;
+  constructor(private favoritesApiService: FavoritesApiService) {}
 
-    // Trigger animation only when adding to favorites
-    if (this.product.isFavorite) {
+  ngOnInit(): void {
+    if (this.product && this.product.id != null) {
+      // console.log(`Card [${this.product.id} - ${this.product.name}]: ngOnInit - Subscribing to isFavorite.`);
+      this.favoritesApiService.isFavorite(this.product.id)
+        .pipe(untilDestroyed(this))
+        .subscribe(isFav => {
+          console.log(`Card [${this.product.id} - ${this.product.name}]: Received isFav = ${isFav}. Current isActuallyFavorite = ${this.isActuallyFavorite}`);
+          if (this.isActuallyFavorite !== isFav) {
+            console.log(`Card [${this.product.id} - ${this.product.name}]: Updating isActuallyFavorite from ${this.isActuallyFavorite} to ${isFav}`);
+            this.isActuallyFavorite = isFav;
+            // this.cdr.detectChanges(); // Explicitly trigger change detection
+          } else {
+            console.log(`Card [${this.product.id} - ${this.product.name}]: isFav (${isFav}) is same as isActuallyFavorite. No UI change needed unless forced.`);
+            // Even if the value is the same, if an external event (like loadFavorites) triggers this,
+            // it's good to ensure Angular checks this component.
+            // this.cdr.detectChanges();
+          }
+        });
+    } else {
+      console.warn('ProductCardComponent: Input product or product.id is missing or invalid.', this.product);
+    }
+  }
+
+  onToggleFavorite(event: MouseEvent): void {
+    console.log(`Card [${this.product.id} - ${this.product.name}]: onToggleFavorite called.`);
+    event.stopPropagation(); // Good practice
+
+    console.log(`Card [${this.product.id} - ${this.product.name}]: isActuallyFavorite = ${this.isActuallyFavorite}`);
+
+    // Trigger animation optimistically if it's about to become a favorite
+    if (!this.isActuallyFavorite) {
       this.isAnimating = true;
-      // Remove the animation class after the animation completes (500ms)
       setTimeout(() => {
         this.isAnimating = false;
-      }, 500); // Duration should match the CSS animation duration
+      }, 500);
     }
-
-    // Emit the event with the updated product data
-    this.favoriteToggled.emit(this.product);
-
-    // You might want to call a service here to persist the change
-    console.log(`Favorite status for ${this.product.name}: ${this.product.isFavorite}`);
+    this.favoriteToggleRequested.emit(this.product);
   }
 }

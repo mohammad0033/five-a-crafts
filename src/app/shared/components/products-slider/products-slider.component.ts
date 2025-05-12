@@ -1,9 +1,10 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {NgxSplideModule} from 'ngx-splide';
 import {NgForOf, NgIf} from '@angular/common';
 import {ProductCardComponent} from '../product-card/product-card.component';
+import {Product} from '../../../core/models/product';
 
 @UntilDestroy()
 @Component({
@@ -20,6 +21,7 @@ import {ProductCardComponent} from '../product-card/product-card.component';
 })
 export class ProductsSliderComponent implements OnInit{
   @Input() products: any
+  @Output() favoriteToggleRequested = new EventEmitter<Product>()
   currentLang!: string
   splideOptions = {
     height: '38rem',
@@ -53,5 +55,9 @@ export class ProductsSliderComponent implements OnInit{
     this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event: any) => {
       this.currentLang = event.lang
     })
+  }
+
+  emitFavoriteToggle(product: Product) {
+    this.favoriteToggleRequested.emit(product);
   }
 }

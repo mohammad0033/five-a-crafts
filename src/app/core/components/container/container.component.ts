@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterModule} from '@angular/router';
 import {FooterComponent} from '../footer/footer.component';
 import {NavbarComponent} from '../navbar/navbar.component';
@@ -8,6 +8,7 @@ import {MatProgressBar} from '@angular/material/progress-bar';
 import {CartService} from '../../services/cart.service';
 import {MatDrawer, MatDrawerContainer, MatSidenavModule} from '@angular/material/sidenav';
 import {SideCartComponent} from '../../../features/cart/components/side-cart/side-cart.component';
+import {FavoritesApiService} from '../../services/favorites-api.service';
 
 @Component({
   selector: 'app-container',
@@ -26,14 +27,15 @@ import {SideCartComponent} from '../../../features/cart/components/side-cart/sid
   standalone: true,
   styleUrl: './container.component.scss'
 })
-export class ContainerComponent {
+export class ContainerComponent implements OnInit{
   isLoading = false;
   // Example value for determinate mode (0-100)
   loadingProgress = 50;
   isCartDrawerOpen$!: Observable<boolean>;
 
   constructor(private router: Router,
-              private cartService: CartService) {
+              private cartService: CartService,
+              private favoriteService: FavoritesApiService) {
     this.isCartDrawerOpen$ = this.cartService.drawerOpen$;
     this.router.events.pipe(
       // Filter for the relevant navigation events
@@ -53,6 +55,10 @@ export class ContainerComponent {
         this.isLoading = false;
       }
     });
+  }
+
+  ngOnInit() {
+    this.favoriteService.loadFavorites();
   }
 
   cartDrawerClosed(): void {

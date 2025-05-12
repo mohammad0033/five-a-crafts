@@ -19,6 +19,7 @@ import {map} from "rxjs";
 import {ContentApiService, MegaMenuData} from '../../services/content-api.service';
 import {NgbDropdown, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 import {CartService} from '../../services/cart.service';
+import {FavoritesApiService} from '../../services/favorites-api.service';
 
 @UntilDestroy()
 @Component({
@@ -52,6 +53,8 @@ export class NavbarComponent implements OnInit{
   // Property to hold the mega menu data
   megaMenuColumns: MegaMenuData | null = null;
   currentLang!: string;
+  cartItemsCount: number = 0;
+  favoritesCount: number = 0;
 
     constructor(
         private breakpointObserver: BreakpointObserver,
@@ -60,6 +63,7 @@ export class NavbarComponent implements OnInit{
         private contentService: ContentApiService, // Inject ContentApiService
         private router: Router,
         private translate: TranslateService,
+        private favoritesApiService: FavoritesApiService,
         private cartService: CartService) {}
 
     ngOnInit(): void {
@@ -71,6 +75,21 @@ export class NavbarComponent implements OnInit{
       this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event) => {
         this.currentLang = event.lang
       })
+
+      // Load initial favorites and subscribe to count updates
+      this.favoritesApiService.loadFavorites(); // <-- Trigger initial load of favorites
+      this.favoritesApiService.favoritesCount$
+        .pipe(untilDestroyed(this))
+        .subscribe(count => {
+          this.favoritesCount = count;
+          this.cdRef.markForCheck(); // Trigger change detection for OnPush
+        });
+
+      //load cart items count
+      this.cartService.itemCount$.pipe(untilDestroyed(this)).subscribe(count => {
+        this.cartItemsCount = count;
+        this.cdRef.markForCheck(); // Trigger change detection for OnPush
+      });
     }
 
   private trackScreenSize(): void {

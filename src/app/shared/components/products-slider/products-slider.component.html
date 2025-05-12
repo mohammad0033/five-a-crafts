@@ -1,13 +1,13 @@
 <div class="d-flex justify-content-center products-slider">
   <splide [options]="splideOptions" class="col-12" *ngIf="currentLang === 'en'">
     <splide-slide *ngFor="let product of products">
-      <app-product-card [product]="product"></app-product-card>
+      <app-product-card [product]="product" (favoriteToggleRequested)="emitFavoriteToggle(product)"></app-product-card>
     </splide-slide>
   </splide>
 
   <splide [options]="rtlSplideOptions" class="col-12" *ngIf="currentLang === 'ar'">
     <splide-slide *ngFor="let product of products">
-      <app-product-card [product]="product"></app-product-card>
+      <app-product-card [product]="product" (favoriteToggleRequested)="emitFavoriteToggle(product)"></app-product-card>
     </splide-slide>
   </splide>
 </div>

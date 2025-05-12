@@ -32,15 +32,15 @@ export class ProductsApiService {
     // Add more mock reviews for other product slugs as needed
   };
 
-  private allMockProducts: Product[] = [
-    { id: 1, name: 'Lavender Bliss Candle', description:'A calming lavender scented candle.', imageUrl: 'https://picsum.photos/id/1060/300/300', price: 15.99, altText: 'A calming lavender scented candle' },
+  allMockProducts: Product[] = [
+    { id: 1, name: 'Lavender Bliss Candle', description:'A calming lavender scented candle.', imageUrl: 'https://picsum.photos/id/1060/300/300', price: 15.99,isFavorite: true, altText: 'A calming lavender scented candle' },
     { id: 2, name: 'Ocean Breeze Pillar', description:'A refreshing ocean breeze scented pillar candle.', imageUrl: 'https://picsum.photos/id/1061/300/300', price: 12.50, isFavorite: true, altText: 'A blue pillar candle' },
-    { id: 3, name: 'Vanilla Dream Votive Set', description:'Sweet vanilla dream votive candle set.', imageUrl: 'https://picsum.photos/id/1062/300/300', price: 9.99, altText: 'Set of small vanilla votive candles' },
-    { id: 4, name: 'Cozy Cabin Tealights', description:'Warm and cozy cabin scented tealights.', imageUrl: 'https://picsum.photos/id/1063/300/300', price: 5.49, altText: 'Pack of tealight candles' },
+    { id: 3, name: 'Vanilla Dream Votive Set', description:'Sweet vanilla dream votive candle set.', imageUrl: 'https://picsum.photos/id/1062/300/300', price: 9.99,isFavorite: true, altText: 'Set of small vanilla votive candles' },
+    { id: 4, name: 'Cozy Cabin Tealights', description:'Warm and cozy cabin scented tealights.', imageUrl: 'https://picsum.photos/id/1063/300/300', price: 5.49,isFavorite: true, altText: 'Pack of tealight candles' },
     { id: 5, name: 'Elegant Taper Candles (Pair)', description:'A pair of elegant taper candles for formal occasions.', imageUrl: 'https://picsum.photos/id/1064/300/300', price: 8.00, altText: 'Two tall taper candles' },
     { id: 6, name: 'Mystery Scent Jar', description:'A mysterious and intriguing scented jar candle.', imageUrl: 'https://picsum.photos/id/1065/300/300', price: 18.00, altText: 'A jar candle with a question mark' },
     { id: 7, name: 'Autumn Spice Delight', description:'A delightful autumn spice scented candle.', imageUrl: 'https://picsum.photos/id/1066/300/300', price: 16.50, altText: 'An orange candle with autumn spices' },
-    { id: 8, name: 'Forest Pine Cones', description:'Decorative pine cones with a hint of forest scent.', imageUrl: 'https://picsum.photos/id/1067/300/300', price: 7.99, altText: 'A collection of forest pine cones' },
+    { id: 8, name: 'Forest Pine Cones', description:'Decorative pine cones with a hint of forest scent.', imageUrl: 'https://picsum.photos/id/1067/300/300', price: 7.99,isFavorite: true, altText: 'A collection of forest pine cones' },
     { id: 9, name: 'Handcrafted Wooden Spoon', description:'A beautifully handcrafted wooden spoon for your kitchen.', imageUrl: 'https://picsum.photos/id/1068/300/300', price: 11.00, altText: 'Handcrafted wooden spoon' },
     { id: 10, name: 'Ceramic Mug Set', description:'Set of two artisanal ceramic mugs.', imageUrl: 'https://picsum.photos/id/1069/300/300', price: 22.50, altText: 'Two ceramic mugs' },
   ];
@@ -260,5 +260,11 @@ export class ProductsApiService {
 
     // Ensure we don't return more than a certain number, e.g., 4
     return of(mockRecentlyViewed.slice(0, 4)).pipe(delay(400)); // Simulate API delay
+  }
+
+  getFavoriteProducts(): Observable<Product[]> {
+    // return all products with isFavorite === true
+    const mockFavoriteProducts: Product[] = this.allMockProducts.filter(p => p.isFavorite);
+    return of(mockFavoriteProducts).pipe(delay(300));
   }
 }
