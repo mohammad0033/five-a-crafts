@@ -13,11 +13,11 @@
 
   <!-- Show slider only when not loading and products exist -->
   <div class="my-5 d-none d-md-block products-slider-placeholder" *ngIf="!isLoading && products && products.length > 0">
-    <app-products-slider [products]="products"></app-products-slider>
+    <app-products-slider [products]="products" (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-products-slider>
   </div>
 
   <div class="d-flex d-md-none row row-cols-2 g-3" *ngIf="!isLoading && products && products.length > 0">
-    <app-product-card *ngFor="let product of products | slice:0:4" [product]="product"></app-product-card>
+    <app-product-card *ngFor="let product of products | slice:0:4" [product]="product" (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-product-card>
   </div>
 
   <a type="button" class="btn btn-main-primary mt-3 p-3 text-light d-flex d-md-none align-items-center justify-content-center gap-2 col-6" routerLink="/categories">
