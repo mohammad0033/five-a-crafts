@@ -53,6 +53,7 @@ export class NavbarComponent implements OnInit{
   // Property to hold the mega menu data
   megaMenuColumns: MegaMenuData | null = null;
   currentLang!: string;
+  cartItemsCount: number = 0;
   favoritesCount: number = 0;
 
     constructor(
@@ -83,6 +84,12 @@ export class NavbarComponent implements OnInit{
           this.favoritesCount = count;
           this.cdRef.markForCheck(); // Trigger change detection for OnPush
         });
+
+      //load cart items count
+      this.cartService.itemCount$.pipe(untilDestroyed(this)).subscribe(count => {
+        this.cartItemsCount = count;
+        this.cdRef.markForCheck(); // Trigger change detection for OnPush
+      });
     }
 
   private trackScreenSize(): void {
