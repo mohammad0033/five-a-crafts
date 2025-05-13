@@ -37,6 +37,7 @@ html {
   --background3-color: #{$background3-color-value};
   --nav-background-color: #{$nav-background-color-value};
 
+  // override angular material snack bar
   @include mat.snack-bar-overrides((
     container-color: var(--secondary-color),
     supporting-text-color: var(--mat-sys-inverse-on-surface),
@@ -179,6 +180,11 @@ gallery-thumb{
 // drawer width
 .mat-drawer{
   width: 32.875rem!important;
+}
+
+// hide mat-form-field error
+mat-form-field.promo-code div.mat-mdc-form-field-subscript-wrapper{
+  display: none!important;
 }
 
 @media (max-width: 767.98px) {
