@@ -9,7 +9,7 @@ import {
 import {ProductDetailsData} from '../../models/product-details-data';
 import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-data';
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {AsyncPipe, DatePipe, DecimalPipe, isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
 import {LightboxModule} from 'ng-gallery/lightbox';
@@ -118,6 +118,7 @@ export class ProductDetailsComponent implements OnInit {
     private metaTagService: MetaTagService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private route: ActivatedRoute,
+    private router: Router,
     private translate: TranslateService,
     private productsApiService: ProductsApiService,
     private snackBar: MatSnackBar,
@@ -390,20 +391,28 @@ export class ProductDetailsComponent implements OnInit {
     return this.translate.instant('product.ratingOutOfMax', { rating: rating, maxRating: this.maxRating });
   }
 
-  private getSelectedVariations(): { [key: string]: string | undefined } {
-    if (this.variationsForm.valid) { // Or just this.variationsForm.value if not all are required
-      // You might want to map the form value to match the previous structure if needed
+  private getSelectedVariations(): { [key: string]: string | undefined } | null { // Modified to return null for invalid
+    if (this.product && this.product.variations && this.product.variations.length > 0) {
+      if (this.variationsForm.invalid) {
+        this.snackBar.open(this.translate.instant('product.selectVariationsError'), this.translate.instant('common.dismiss'), {
+          ...this.snackBarConfig,
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
+        this.variationsForm.markAllAsTouched(); // Show errors on variation form
+        return null; // Indicate invalid selection
+      }
       const formValues = this.variationsForm.value;
       const selections: { [key: string]: string | undefined } = {};
-      this.product?.variations?.forEach(category => {
+      this.product.variations.forEach(category => {
         selections[category.name] = formValues[category.id];
       });
       return selections;
-      // Or simply return this.variationsForm.value;
     }
-    return {}; // Or handle invalid form appropriately
+    return {}; // No variations to select, return empty object
   }
 
+  // --- New methods for Buy Now and Add to Cart ---
   // --- New methods for Buy Now and Add to Cart ---
   buyItNow(): void {
     if (!this.product) {
@@ -416,25 +425,22 @@ export class ProductDetailsComponent implements OnInit {
       return;
     }
     const selectedVariations = this.getSelectedVariations();
+    // Check if variations were required and not selected (getSelectedVariations returns null)
     if (selectedVariations === null && this.product.variations && this.product.variations.length > 0) {
-      // getSelectedVariations already showed a snackbar for invalid variations
-      return;
+      return; // Stop if variations were required but invalid/not selected
     }
 
     console.log(`Buy It Now clicked for product: ${this.product.name}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
-    // TODO: Implement actual "Buy It Now" logic:
-    // 1. Add item to cart (maybe clear cart first or use a separate "buy now" cart state)
-    // 2. Redirect to checkout
+
     this.cartService.addItem(
-      this.product, // Assuming ProductDetailsData is compatible or can be cast
+      this.product as Product, // Cast if ProductDetailsData is a superset of Product
       this.productQty,
       this.productStock,
-      selectedVariations
+      selectedVariations || {} // Pass empty object if selectedVariations is null (no variations)
     );
-    // For "Buy Now", you might want to navigate directly to checkout
-    // this.router.navigate(['/checkout']); // Make sure Router is injected if you use this
-    const message = this.translate.instant('product.buyNowConfirmation', { productName: this.product.name });
-    this.snackBar.open(message, this.translate.instant('common.dismiss'), this.snackBarConfig);
+
+    // Navigate to checkout
+    this.router.navigate(['/checkout']); // <-- ADDED THIS LINE
   }
 
   addToCart(): void {
@@ -461,7 +467,7 @@ export class ProductDetailsComponent implements OnInit {
       this.product as Product, // Cast if ProductDetailsData is a superset of Product
       this.productQty,
       this.productStock,
-      selectedVariations
+      selectedVariations || {}
     );
 
     const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.name, quantity: this.productQty });
