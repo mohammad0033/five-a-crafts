@@ -129,14 +129,28 @@
         </ul>
 
         <!-- Promo code section (placeholder) -->
-        <div class="d-flex gap-2">
-          <!-- Placeholder for promo code input/display -->
-          <mat-form-field appearance="outline" class="w-100 promo-code">
-            <input matInput placeholder="{{'checkout.promoCode' | translate}}">
-          </mat-form-field>
-          <button class="btn btn-outline-main-primary" aria-label="Apply promo code">
-            {{'checkout.apply' | translate}}
-          </button>
+        <div class="d-flex flex-column gap-1">
+          <div class="d-flex gap-2 align-items-center">
+            <mat-form-field appearance="outline" class="w-100 promo-code mb-0">
+              <input matInput [formControl]="promoCodeControl"
+                     [placeholder]="'checkout.promoCode' | translate"
+                     [readonly]="isApplyingPromoCode"> <!-- Control is disabled/enabled by TS logic -->
+            </mat-form-field>
+            <button type="button" class="btn btn-outline-main-primary d-flex justify-content-center align-items-center gap-2"
+                    (click)="applyPromoCode()"
+                    [disabled]="isApplyingPromoCode || !promoCodeControl.value || promoCodeControl.disabled"
+                    aria-label="Apply promo code">
+              <span *ngIf="!isApplyingPromoCode">{{'checkout.apply' | translate}}</span>
+              <span *ngIf="isApplyingPromoCode" class="d-flex align-items-center gap-2">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                {{'checkout.applyingPromoCode' | translate}}
+              </span>
+            </button>
+          </div>
+          <div *ngIf="promoCodeMessage" class="promo-message"
+               [ngClass]="{'text-success': promoCodeMessageType === 'success', 'text-danger': promoCodeMessageType === 'error'}">
+            {{ promoCodeMessage }}
+          </div>
         </div>
 
         <!-- Totals: Use dl, dt, dd for semantic key-value pairs -->
