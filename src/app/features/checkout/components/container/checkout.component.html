@@ -1,0 +1,209 @@
+<main class="p-3 p-md-5 d-flex flex-column">
+  <header class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <!-- Added id for aria-labelledby -->
+      <h2 class="h5 m-0" id="checkout-form-heading">{{ 'checkout.billingDetails' | translate }}</h2>
+    </div>
+  </header>
+
+  <form [formGroup]="checkoutForm" (ngSubmit)="submitCheckout()" class="d-flex flex-column flex-md-row gap-3">
+
+    <!-- Billing details form container -->
+    <section class="checkout-form-container col-12 col-md-6" aria-labelledby="checkout-form-heading">
+      <div class="p-3 rounded-2 border border-1 border-secondary-subtle">
+        <div class="d-flex flex-column gap-3">
+
+          <!-- first name-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="first-name">{{'form.name' | translate}} <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="name" id="first-name" matInput>
+              <mat-error *ngIf="checkoutForm.controls['name'].hasError('required')">
+                {{ 'form.required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- company name-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="company-name">{{'form.company' | translate}}</label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="company" id="company-name" matInput>
+            </mat-form-field>
+          </div>
+
+          <!-- address-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="address">{{'form.address' | translate}} <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="address" id="address" matInput>
+              <mat-error *ngIf="checkoutForm.controls['address'].hasError('required')">
+                {{ 'form.required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- apartment-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="apartment">{{'form.apartment' | translate}}</label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="apartment" id="apartment" matInput>
+            </mat-form-field>
+          </div>
+
+          <!-- city-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="city">{{'form.city' | translate}} <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="city" id="city" matInput>
+              <mat-error *ngIf="checkoutForm.controls['city'].hasError('required')">
+                {{ 'form.required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- governorate-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="governorate">{{'form.governorate' | translate}}</label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="governorate" id="governorate" matInput>
+            </mat-form-field>
+          </div>
+
+          <!-- phone-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="phone">{{'form.phone' | translate}} <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="phone" id="phone" matInput type="tel">
+              <mat-error *ngIf="checkoutForm.controls['phone'].hasError('required')">
+                {{ 'form.required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- email-->
+          <div class="d-flex flex-column">
+            <label class="mb-1" for="email">{{'form.email' | translate}} <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input formControlName="email" id="email" matInput type="email">
+              <mat-error *ngIf="checkoutForm.controls['email'].hasError('required')">
+                {{ 'form.required' | translate }}
+              </mat-error>
+              <mat-error *ngIf="checkoutForm.controls['email'].hasError('email')">
+                {{ 'form.invalidEmail' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Save this information for faster check-out next time-->
+          <mat-checkbox formControlName="saveInfo" class="example-margin">
+            <span>{{'form.saveInfo' | translate}}</span>
+          </mat-checkbox>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order summary container -->
+    <section class="checkout-summary-container col-12 col-md-6" aria-labelledby="checkout-summary-heading">
+      <div class="p-3 rounded-2 border border-1 border-secondary-subtle d-flex flex-column gap-3">
+        <!-- Added id for aria-labelledby -->
+        <h3 class="h6 mb-0" id="checkout-summary-heading">{{'checkout.summary' | translate}}</h3>
+
+        <!-- Items list: Use ul and li for semantic list structure -->
+        <ul class="list-unstyled d-flex flex-column gap-2 m-0 p-0">
+          <li *ngFor="let item of cartItems$ | async" class="p-2 rounded-2 border border-1 border-secondary-subtle d-flex justify-content-between align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+              <div class="image-container rounded-2 overflow-hidden flex-shrink-0">
+                <img class="w-100 h-100 object-fit-cover" [src]="item.product.imageUrl || 'placeholder.jpg'" [alt]="item.product.name || 'Product image'">
+              </div>
+              <div class="d-flex flex-column">
+                <span class="fw-medium">{{ item.product.name || 'Product Name' }}</span>
+              </div>
+            </div>
+            <span class="fw-medium flex-shrink-0">x{{ item.quantity }}</span>
+            <span class="fw-medium text-nowrap flex-shrink-0">{{ item.product.price }} {{ 'product.currencySymbol' | translate }}</span>
+          </li>
+          <li *ngIf="!(cartItems$ | async)?.length">
+            <p>{{ 'cart.emptyMessage' | translate }}</p>
+          </li>
+        </ul>
+
+        <!-- Promo code section (placeholder) -->
+        <div class="d-flex flex-column gap-1">
+          <div class="d-flex gap-2 align-items-center">
+            <mat-form-field appearance="outline" class="w-100 promo-code mb-0">
+              <input matInput [formControl]="promoCodeControl"
+                     [placeholder]="'checkout.promoCode' | translate"
+                     [readonly]="isApplyingPromoCode"> <!-- Control is disabled/enabled by TS logic -->
+            </mat-form-field>
+            <button type="button" class="btn btn-outline-main-primary d-flex justify-content-center align-items-center gap-2"
+                    (click)="applyPromoCode()"
+                    [disabled]="isApplyingPromoCode || !promoCodeControl.value || promoCodeControl.disabled"
+                    aria-label="Apply promo code">
+              <span *ngIf="!isApplyingPromoCode">{{'checkout.apply' | translate}}</span>
+              <span *ngIf="isApplyingPromoCode" class="d-flex align-items-center gap-2">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                {{'checkout.applyingPromoCode' | translate}}
+              </span>
+            </button>
+          </div>
+          <div *ngIf="promoCodeMessage" class="promo-message"
+               [ngClass]="{'text-success': promoCodeMessageType === 'success', 'text-danger': promoCodeMessageType === 'error'}">
+            {{ promoCodeMessage }}
+          </div>
+        </div>
+
+        <!-- Totals: Use dl, dt, dd for semantic key-value pairs -->
+        <dl class="d-flex flex-column m-0 gap-2">
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium">{{ 'cart.subtotal' | translate }}</dt>
+            <!-- Consider using Angular's currency pipe -->
+            <dd class="fw-medium m-0">{{ (subtotal$ | async) }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium">{{ 'cart.discount' | translate }}</dt>
+            <dd class="fw-medium text-danger m-0">-{{ (discount$ | async) }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium">{{ 'cart.shippingFee' | translate }}</dt>
+            <dd class="fw-medium m-0">{{ (shippingFee$ | async) }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+
+          <hr class="border border-1 border-secondary-subtle my-2">
+
+          <div class="d-flex justify-content-between">
+            <dt class="fs-5">{{ 'cart.total' | translate }}</dt>
+            <dd class="fs-5 fw-bold m-0">{{ (totalAmount$ | async) }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+        </dl>
+
+        <!-- Payment method: Use fieldset and legend -->
+        <fieldset>
+          <legend class="h6 small mb-2">{{ 'checkout.paymentMethod' | translate }}</legend>
+          <mat-radio-group formControlName="paymentMethod" class="d-flex flex-column gap-2">
+            <div class="p-2 d-flex align-items-center justify-content-between">
+              <mat-radio-button value="card" class="flex-grow-1">{{ 'checkout.bank' | translate }}</mat-radio-button>
+               <div> <img src="images/visa-master.png" alt="Visa Mastercard" style="height: 24px;"> </div>
+            </div>
+            <div class="p-2 d-flex align-items-center justify-content-between">
+              <mat-radio-button value="cod" class="flex-grow-1">{{ 'checkout.cashOnDelivery' | translate }}</mat-radio-button>
+            </div>
+          </mat-radio-group>
+          <mat-error *ngIf="checkoutForm.controls['paymentMethod'].hasError('required') && checkoutForm.controls['paymentMethod']?.touched">
+            {{ 'checkout.paymentMethodRequired' | translate }}
+          </mat-error>
+        </fieldset>
+
+        <!-- Submit button (now part of the form) -->
+        <div class="mt-auto">
+          <button class="btn btn-main-primary w-100 p-3 d-flex justify-content-center align-items-center gap-2 text-light"
+                  type="submit" [disabled]="checkoutForm.invalid || isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>{{'checkout.placeOrder' | translate}}</span>
+            <span><fa-icon [icon]="currentLang === 'en' ? faArrowRight : faArrowLeft"></fa-icon></span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </form>
+</main>

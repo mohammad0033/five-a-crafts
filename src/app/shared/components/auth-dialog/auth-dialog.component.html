@@ -1,0 +1,9 @@
+<h2 mat-dialog-title>{{ 'authDialog.title' | translate }}</h2>
+<mat-dialog-content>
+  <p>{{ 'authDialog.message' | translate }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">{{ 'authDialog.cancel' | translate }}</button>
+  <button mat-stroked-button color="primary" (click)="onRegister()">{{ 'authDialog.register' | translate }}</button>
+  <button mat-flat-button color="primary" (click)="onLogin()">{{ 'authDialog.login' | translate }}</button>
+</mat-dialog-actions>

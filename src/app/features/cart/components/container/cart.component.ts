@@ -10,7 +10,9 @@ import {CartItem} from '../../models/cart-item';
 import {Observable, Subscription} from 'rxjs';
 import {Router} from '@angular/router';
 import {ContactSectionComponent} from '../../../../shared/components/contact-section/contact-section.component';
+import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-cart',
   imports: [
@@ -34,7 +36,6 @@ export class CartComponent implements OnInit, OnDestroy {
   totalAmount$: Observable<number>;   // This will be the final grand total from CartService
 
   private titleSubscription?: Subscription;
-  private langChangeSubscription?: Subscription;
 
   protected readonly faShoppingBag = faShoppingBag;
 
@@ -56,8 +57,7 @@ export class CartComponent implements OnInit, OnDestroy {
     this.setPageTitle();
     this.metaService.updateTag({ name: 'robots', content: 'noindex, nofollow' });
 
-    // Update title if language changes
-    this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
+    this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe(() => {
       this.setPageTitle();
     });
   }
@@ -101,6 +101,5 @@ export class CartComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.metaService.removeTag("name='robots'");
     this.titleSubscription?.unsubscribe();
-    this.langChangeSubscription?.unsubscribe();
   }
 }

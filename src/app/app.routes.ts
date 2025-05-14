@@ -120,6 +120,16 @@ export const routes: Routes = [
         title: 'Your Cart | Five A Crafts'
         // No resolver needed
       },
+      {
+        path: 'checkout',
+        loadComponent: () =>
+          import('./features/checkout/components/container/checkout.component').then(
+            (m) => m.CheckoutComponent
+          ),
+        // Add static title for UX
+        title: 'Your Checkout | Five A Crafts'
+        // No resolver needed
+      },
     ]
   },
   {

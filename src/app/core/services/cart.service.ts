@@ -1,9 +1,21 @@
 import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, startWith} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CartItem } from '../../features/cart/models/cart-item';
 import { Product } from '../models/product';
-import {isPlatformBrowser} from '@angular/common'; // Ensure this path is correct
+import {isPlatformBrowser} from '@angular/common';
+
+const CART_STORAGE_KEY = 'fiveACraftsShoppingCart';
+const BASE_DISCOUNT_STORAGE_KEY = 'fiveACraftsBaseDiscount';
+const PROMO_DISCOUNT_STORAGE_KEY = 'fiveACraftsPromoDiscount';
+const SHIPPING_FEE_STORAGE_KEY = 'fiveACraftsShippingFee';
+
+const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface StoredItem<T> {
+  value: T;
+  expiresAt: number; // Timestamp in milliseconds
+}
 
 @Injectable({
   providedIn: 'root'
@@ -12,52 +24,166 @@ export class CartService {
   private drawerOpen = new BehaviorSubject<boolean>(false);
   drawerOpen$ = this.drawerOpen.asObservable();
 
-  private cartItems = new BehaviorSubject<CartItem[]>([]);
-  cartItems$ = this.cartItems.asObservable();
+  private cartItemsSource = new BehaviorSubject<CartItem[]>([]);
+  cartItems$: Observable<CartItem[]> = this.cartItemsSource.asObservable();
 
-  // Mock discount and shipping fee
-  private discountAmountSource = new BehaviorSubject<number>(0); // Initial mock discount
-  discount$: Observable<number> = this.discountAmountSource.asObservable();
+  private baseDiscountAmountSource = new BehaviorSubject<number>(0);
+  baseDiscount$: Observable<number> = this.baseDiscountAmountSource.asObservable();
 
-  private shippingFeeSource = new BehaviorSubject<number>(0);    // Initial mock shipping fee
+  private promoDiscountAmountSource = new BehaviorSubject<number>(0);
+  promoDiscount$: Observable<number> = this.promoDiscountAmountSource.asObservable();
+
+  discount$: Observable<number>;
+
+  private shippingFeeSource = new BehaviorSubject<number>(0);
   shippingFee$: Observable<number> = this.shippingFeeSource.asObservable();
 
-  // Subtotal: sum of (item.product.price * item.quantity)
-  subtotal$: Observable<number> = this.cartItems$.pipe(
-    map(items => Number((items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)).toFixed(2)))
-  );
-
-  // Total Amount: subtotal + shipping - discount
-  totalAmount$: Observable<number> = combineLatest([
-    this.subtotal$,
-    this.shippingFee$,
-    this.discount$
-  ]).pipe(
-    map(([subtotal, shipping, discount]) => {
-      const total = subtotal + shipping - discount;
-      return Number(Math.max(0, total).toFixed(2)); // Ensure total is not negative and fix to 2 decimal places
-    })
-  );
-
-  // Observable for the total number of items (sum of quantities)
-  itemCount$: Observable<number> = this.cartItems$.pipe(
-    map(items => items.reduce((acc, item) => acc + item.quantity, 0))
-  );
+  subtotal$: Observable<number>;
+  totalAmount$: Observable<number>;
+  itemCount$: Observable<number>;
 
   private readonly isBrowser: boolean;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    this.isBrowser = isPlatformBrowser(this.platformId); // Check if running in browser
+    this.isBrowser = isPlatformBrowser(this.platformId);
+
+    this.subtotal$ = this.cartItemsSource.pipe(
+      map(items => Number((items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)).toFixed(2))),
+      startWith(0)
+    );
+
+    this.discount$ = combineLatest([
+      this.baseDiscountAmountSource,
+      this.promoDiscountAmountSource
+    ]).pipe(
+      map(([baseDiscount, promoDiscount]) => Number((baseDiscount + promoDiscount).toFixed(2))),
+      startWith(0)
+    );
+
+    this.totalAmount$ = combineLatest([
+      this.subtotal$,
+      this.shippingFeeSource,
+      this.discount$
+    ]).pipe(
+      map(([subtotal, shipping, totalDiscountValue]) => {
+        const total = subtotal + shipping - totalDiscountValue;
+        return Number(Math.max(0, total).toFixed(2));
+      }),
+      startWith(0)
+    );
+
+    this.itemCount$ = this.cartItemsSource.pipe(
+      map(items => items.reduce((acc, item) => acc + item.quantity, 0)),
+      startWith(0)
+    );
 
     if (this.isBrowser) {
-      // Load cart from localStorage only if in the browser
-      this.loadCartFromLocalStorage();
-      // Initialize mock values (or load them from somewhere if they are dynamic)
-      // These can be updated later via methods if needed (e.g., applyPromoCode)
-      this.discountAmountSource.next(30); // Example: 30 LE discount
-      this.shippingFeeSource.next(50);   // Example: 50 LE shipping fee
+      this.loadCartStateFromLocalStorage();
     }
   }
+
+  // --- LocalStorage Helper Methods with Expiration ---
+  private saveDataWithExpiration<T>(key: string, data: T): void {
+    if (this.isBrowser) {
+      const now = new Date().getTime();
+      const itemToStore: StoredItem<T> = {
+        value: data,
+        expiresAt: now + SEVEN_DAYS_IN_MS
+      };
+      try {
+        localStorage.setItem(key, JSON.stringify(itemToStore));
+      } catch (e) {
+        console.error(`Error saving ${key} to localStorage:`, e);
+      }
+    }
+  }
+
+  private loadDataWithExpiration<T>(key: string): T | null {
+    if (this.isBrowser) {
+      const itemStr = localStorage.getItem(key);
+      if (!itemStr) {
+        return null;
+      }
+      try {
+        const item: StoredItem<T> = JSON.parse(itemStr);
+        const now = new Date().getTime();
+        if (now > item.expiresAt) {
+          localStorage.removeItem(key); // Expired
+          console.log(`CartService: Item with key ${key} has expired and was removed.`);
+          return null;
+        }
+        return item.value;
+      } catch (e) {
+        console.error(`CartService: Error parsing or checking expiration for ${key} from localStorage:`, e);
+        localStorage.removeItem(key); // Corrupted data
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // --- Update existing LocalStorage Persistence methods ---
+  private saveCartItemsToLocalStorage(): void {
+    this.saveDataWithExpiration(CART_STORAGE_KEY, this.cartItemsSource.value);
+  }
+
+  private saveBaseDiscountToLocalStorage(): void {
+    this.saveDataWithExpiration(BASE_DISCOUNT_STORAGE_KEY, this.baseDiscountAmountSource.value);
+  }
+
+  private savePromoDiscountToLocalStorage(): void {
+    this.saveDataWithExpiration(PROMO_DISCOUNT_STORAGE_KEY, this.promoDiscountAmountSource.value);
+  }
+
+  private saveShippingFeeToLocalStorage(): void {
+    this.saveDataWithExpiration(SHIPPING_FEE_STORAGE_KEY, this.shippingFeeSource.value);
+  }
+
+  private loadCartStateFromLocalStorage(): void {
+    if (!this.isBrowser) return;
+
+    // Load Cart Items
+    let loadedCartItems = this.loadDataWithExpiration<CartItem[]>(CART_STORAGE_KEY);
+    if (loadedCartItems === null || !Array.isArray(loadedCartItems) || !loadedCartItems.every(item =>
+      item && typeof item.product === 'object' && item.product !== null && typeof item.product.id !== 'undefined'
+    )) {
+      if (loadedCartItems !== null) console.warn('CartService: Loaded cart items were invalid or expired, resetting.');
+      loadedCartItems = []; // Default if expired, not found, or invalid
+    }
+    this.cartItemsSource.next(loadedCartItems);
+    this.saveCartItemsToLocalStorage(); // Always re-save to refresh expiration or save default
+
+    // Load Base Discount
+    let loadedBaseDiscount = this.loadDataWithExpiration<number>(BASE_DISCOUNT_STORAGE_KEY);
+    if (loadedBaseDiscount === null || typeof loadedBaseDiscount !== 'number') {
+      if (loadedBaseDiscount !== null) console.warn('CartService: Loaded base discount was invalid or expired, resetting.');
+      loadedBaseDiscount = 30; // Default
+    }
+    this.baseDiscountAmountSource.next(loadedBaseDiscount);
+    this.saveBaseDiscountToLocalStorage(); // Always re-save
+
+    // Load Promo Discount
+    let loadedPromoDiscount = this.loadDataWithExpiration<number>(PROMO_DISCOUNT_STORAGE_KEY);
+    if (loadedPromoDiscount === null || typeof loadedPromoDiscount !== 'number') {
+      if (loadedPromoDiscount !== null) console.warn('CartService: Loaded promo discount was invalid or expired, resetting.');
+      loadedPromoDiscount = 0; // Default
+    }
+    this.promoDiscountAmountSource.next(loadedPromoDiscount);
+    this.savePromoDiscountToLocalStorage(); // Always re-save
+
+    // Load Shipping Fee
+    let loadedShippingFee = this.loadDataWithExpiration<number>(SHIPPING_FEE_STORAGE_KEY);
+    if (loadedShippingFee === null || typeof loadedShippingFee !== 'number') {
+      if (loadedShippingFee !== null) console.warn('CartService: Loaded shipping fee was invalid or expired, resetting.');
+      loadedShippingFee = 50; // Default
+    }
+    this.shippingFeeSource.next(loadedShippingFee);
+    this.saveShippingFeeToLocalStorage(); // Always re-save
+  }
+
+
+  // --- Public API methods (addItem, updateItemQuantity, etc.) remain the same ---
+  // They already call the save...ToLocalStorage methods, which now handle expiration.
 
   toggleDrawer(isOpen?: boolean): void {
     this.drawerOpen.next(isOpen === undefined ? !this.drawerOpen.value : isOpen);
@@ -71,135 +197,79 @@ export class CartService {
     this.drawerOpen.next(false);
   }
 
-  /**
-   * Adds a product to the cart or updates its quantity if it already exists.
-   * @param product The product to add.
-   * @param quantity The quantity to add.
-   * @param originalStock The available stock for the product.
-   * @param variations Optional: Any selected product variations.
-   */
   addItem(product: Product, quantity: number, originalStock?: number, variations?: any): void {
-    const currentItems = this.cartItems.value;
-    // A more robust check for existing items might include variations
-    const existingItemIndex = currentItems.findIndex(item =>
-      item.product.id === product.id /* && deepCompare(item.variations, variations) */
-    );
+    const currentItems = this.cartItemsSource.value;
+    const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
 
     if (existingItemIndex > -1) {
       const updatedItems = [...currentItems];
       const existingItem = updatedItems[existingItemIndex];
       let newQuantity = existingItem.quantity + quantity;
-
-      // Ensure quantity does not exceed stock if stock info is available
       if (existingItem.originalStock !== undefined) {
         newQuantity = Math.min(newQuantity, existingItem.originalStock);
       }
       updatedItems[existingItemIndex].quantity = newQuantity;
-      this.cartItems.next(updatedItems);
+      this.cartItemsSource.next(updatedItems);
     } else {
-      const newItem: CartItem = {
-        product,
-        quantity,
-        originalStock,
-        // variations // Uncomment if you handle variations
-      };
-      this.cartItems.next([...currentItems, newItem]);
+      const newItem: CartItem = { product, quantity, originalStock };
+      this.cartItemsSource.next([...currentItems, newItem]);
     }
-    this.saveCartToLocalStorage();
-    // Optionally open the drawer when an item is added
-    // this.openDrawer();
+    this.saveCartItemsToLocalStorage();
   }
 
-  /**
-   * Updates the quantity of a specific item in the cart.
-   * @param productId The ID of the product to update.
-   * @param newQuantity The new quantity.
-   */
   updateItemQuantity(productId: string | number, newQuantity: number): void {
-    const currentItems = this.cartItems.value;
+    const currentItems = this.cartItemsSource.value;
     const itemIndex = currentItems.findIndex(item => item.product.id === productId);
 
     if (itemIndex > -1) {
       const updatedItems = [...currentItems];
       const itemToUpdate = updatedItems[itemIndex];
-
       if (newQuantity > 0) {
-        // Ensure new quantity does not exceed original stock if available
         const stockLimit = itemToUpdate.originalStock;
         itemToUpdate.quantity = stockLimit !== undefined ? Math.min(newQuantity, stockLimit) : newQuantity;
       } else {
-        // If quantity becomes 0 or less, remove the item
         updatedItems.splice(itemIndex, 1);
       }
-      this.cartItems.next(updatedItems);
-      this.saveCartToLocalStorage();
+      this.cartItemsSource.next(updatedItems);
+      this.saveCartItemsToLocalStorage();
     }
   }
 
-  /**
-   * Removes an item completely from the cart.
-   * @param productId The ID of the product to remove.
-   */
   removeItem(productId: string | number): void {
-    const updatedItems = this.cartItems.value.filter(item => item.product.id !== productId);
-    this.cartItems.next(updatedItems);
-    this.saveCartToLocalStorage();
+    const updatedItems = this.cartItemsSource.value.filter(item => item.product.id !== productId);
+    this.cartItemsSource.next(updatedItems);
+    this.saveCartItemsToLocalStorage();
   }
 
-  /**
-   * Clears all items from the cart.
-   */
   clearCart(): void {
-    this.cartItems.next([]);
-    this.saveCartToLocalStorage();
+    this.cartItemsSource.next([]);
+    this.promoDiscountAmountSource.next(0);
+    // this.baseDiscountAmountSource.next(0); // Or some default if base discount should reset
+    this.saveCartItemsToLocalStorage(); // Saves empty cart with new expiration
+    this.savePromoDiscountToLocalStorage(); // Saves 0 promo discount with new expiration
+    // if base discount is reset, save it too: this.saveBaseDiscountToLocalStorage();
   }
 
-  // --- LocalStorage Persistence ---
-  private saveCartToLocalStorage(): void {
-    if (this.isBrowser) { // Only save if in browser
-      try {
-        localStorage.setItem('fiveACraftsShoppingCart', JSON.stringify(this.cartItems.value));
-      } catch (e) {
-        console.error('Error saving cart to localStorage:', e);
-      }
-    }
+  public applyPromoCodeDiscount(amount: number): void {
+    const currentPromoDiscount = this.promoDiscountAmountSource.value;
+    this.promoDiscountAmountSource.next(currentPromoDiscount + amount);
+    this.savePromoDiscountToLocalStorage();
+    console.log(`CartService: Applied promo discount of ${amount}. New total promo discount: ${this.promoDiscountAmountSource.value}`);
   }
 
-  private loadCartFromLocalStorage(): void {
-    // This method is already guarded by the constructor's isBrowser check,
-    // but an additional check here doesn't hurt and makes it more robust
-    // if called from elsewhere.
-    if (this.isBrowser) {
-      try {
-        const storedCart = localStorage.getItem('fiveACraftsShoppingCart');
-        if (storedCart) {
-          const parsedCart: CartItem[] = JSON.parse(storedCart);
-          // Enhanced validation for item structure
-          if (Array.isArray(parsedCart) && parsedCart.every(item =>
-            item &&
-            typeof item.product === 'object' && item.product !== null &&
-            typeof item.product.id !== 'undefined' && // Basic check for product object
-            true
-          )) {
-            this.cartItems.next(parsedCart);
-          } else {
-            console.warn('Invalid cart data found in localStorage. Clearing it.');
-            localStorage.removeItem('fiveACraftsShoppingCart');
-          }
-        }
-      } catch (e) {
-        console.error('Error loading cart from localStorage:', e);
-        localStorage.removeItem('fiveACraftsShoppingCart');
-      }
-    }
+  public clearPromoCodeDiscount(): void {
+    this.promoDiscountAmountSource.next(0);
+    this.savePromoDiscountToLocalStorage();
+    console.log('CartService: Promo discount cleared.');
   }
 
-  // Optional: Methods to update mock discount and shipping if needed from elsewhere
-  public setDiscount(amount: number): void {
-    this.discountAmountSource.next(Math.max(0, amount)); // Ensure discount isn't negative
+  public setBaseDiscount(amount: number){
+    this.baseDiscountAmountSource.next(Math.max(0, amount));
+    this.saveBaseDiscountToLocalStorage();
   }
 
-  public setShippingFee(amount: number): void {
-    this.shippingFeeSource.next(Math.max(0, amount)); // Ensure shipping isn't negative
+  public setShippingFee(amount: number){
+    this.shippingFeeSource.next(Math.max(0, amount));
+    this.saveShippingFeeToLocalStorage();
   }
 }
