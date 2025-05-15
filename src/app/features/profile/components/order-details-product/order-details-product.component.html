@@ -1,0 +1,15 @@
+<div class="d-flex gap-3">
+  <div class="image-container position-relative">
+    <img class="w-100" [src]="product.imageUrl" [alt]="product.altText || product.name" loading="lazy">
+    <span class="position-absolute bottom-0 start-100 translate-middle badge rounded-pill bg-main-primary"
+          *ngIf="product.quantity > 1">
+      x{{ product.quantity || 0 }}
+    <span class="visually-hidden">{{'product.quantity' | translate}}</span>
+  </span>
+  </div>
+  <div>
+    <h4 class="fs-08 mb-1">{{product.name || 'Product Name'}}</h4>
+    <p class="fs-08 text-secondary mb-1">{{product.description || 'Product Description'}}</p>
+    <p class="fs-08 fw-bold mb-0">{{product.price || 'Product Price'}} {{ 'product.currencySymbol' | translate }}</p>
+  </div>
+</div>
