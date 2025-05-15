@@ -11,7 +11,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <!-- Mobile Search -->
-        <button type="button" class="btn rounded-circle">
+        <button type="button" class="btn rounded-circle p-2 border-0">
           <fa-icon [icon]="faSearch"></fa-icon>
         </button>
       </div>
@@ -110,17 +110,17 @@
         <!-- === Desktop Only: Icons Group (Right Aligned) === -->
         <!-- These icons are hidden on mobile and appear right-aligned on desktop -->
         <div class="d-none d-md-flex gap-2 align-items-center" [ngClass]="currentLang === 'en' ? 'ms-auto' : 'me-auto'">
-          <button type="button" class="btn rounded-circle"> <!-- Desktop Search -->
+          <button type="button" class="btn rounded-circle p-2 border-0"> <!-- Desktop Search -->
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
           <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" routerLink="/favorites"> <!-- Desktop Heart -->
             <fa-icon [icon]="faHeart"></fa-icon>
             <span *ngIf="favoritesCount > 0">
-            {{ favoritesCount }}
+              {{ favoritesCount }}
               <span class="visually-hidden">favorite items</span>
-          </span>
+            </span>
           </a>
-          <a type="button" class="btn rounded-circle" routerLink="/profile"> <!-- User Icon -->
+          <a type="button" class="btn rounded-circle p-2 border-0" routerLink="/profile"> <!-- User Icon -->
             <fa-icon [icon]="faUser"></fa-icon>
           </a>
           <button type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" (click)="openCart()"> <!-- Desktop Bag -->
@@ -128,7 +128,7 @@
             <span *ngIf="cartItemsCount > 0">
               {{cartItemsCount}}
               <span class="visually-hidden">cart items</span>
-          </span>
+            </span>
           </button>
           <a class="d-flex gap-2 link-primary link-underline-opacity-0 link-underline-opacity-100-hover cursor-pointer" (click)="changeLanguage('en')" *ngIf="currentLang === 'ar'">
             <img src="images/english-flag.png" alt="english language">
