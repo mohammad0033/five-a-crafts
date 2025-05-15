@@ -4,6 +4,8 @@ import {aboutPageMetaResolver} from './features/about/resolver/about-page-meta.r
 import {categoriesPageMetaResolver} from './features/categories/reslover/categories-page-meta.resolver';
 import {contactPageMetaResolver} from './features/contact/reslover/contact-page-meta.resolver';
 import {productDetailsResolver} from './features/product-details/resolver/product-details.resolver';
+import {profileResolver} from './features/profile/resolvers/profile.resolver';
+import {orderDetailsResolver} from './features/profile/resolvers/order-details.resolver';
 
 export const routes: Routes = [
   {
@@ -107,8 +109,50 @@ export const routes: Routes = [
             (m) => m.ProfileComponent
           ),
         // Add static title for UX
-        title: 'Your Profile | Five A Crafts'
-        // No resolver needed
+        title: 'Your Profile | Five A Crafts',
+        resolve: {
+          profilePageData: profileResolver // Use a descriptive key
+        },
+        children: [
+          {
+            path: '',
+            redirectTo: 'info',
+            pathMatch: 'full'
+          },
+          {
+            path: 'info',
+            loadComponent: () =>
+              import('./features/profile/components/user-info/user-info.component').then(
+                (m) => m.UserInfoComponent
+              ),
+            // Add static title for UX
+            title: 'Your Info | Five A Crafts'
+            // No resolver needed
+          },
+          {
+          path: 'orders',
+          loadComponent: () =>
+            import('./features/profile/components/user-orders/user-orders.component').then(
+              (m) => m.UserOrdersComponent
+            ),
+          // Add static title for UX
+          title: 'Your Orders | Five A Crafts'
+          // No resolver needed
+          },
+          {
+            // Add the order details route as a child of profile
+            path: 'orders/:orderSlug', // Use a parameter for the slug
+            loadComponent: () =>
+              import('./features/profile/components/order-details/order-details.component').then(
+                (m) => m.OrderDetailsComponent
+              ),
+            title: 'Order Details | Five A Crafts', // Dynamic title can be set in component or resolver
+            resolve: {
+              // Add a resolver specifically for fetching the details of this order
+              orderDetails: orderDetailsResolver
+            }
+          }
+        ]
       },
       {
         path: 'cart',
