@@ -1,0 +1,13 @@
+.image-container{
+  width: 6.25rem;
+  height: 6.25rem;
+}
+
+.user-order-card{
+  transition:all 0.3s ease-in-out;
+
+  &:hover{
+    color: var(--primary-color) !important;
+    border: 2px solid var(--primary-color) !important;
+  }
+}

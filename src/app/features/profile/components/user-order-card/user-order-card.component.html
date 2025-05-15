@@ -1,0 +1,36 @@
+<article class="d-flex flex-column rounded-2 border border-2 border-secondary-subtle text-decoration-none user-order-card cursor-pointer"
+         [routerLink]="['/profile/orders', order.orderNumber]">
+  <!-- Accessible heading for the article, using the order number -->
+  <h3 class="visually-hidden">{{'profile.orderNumber' | translate}}: {{order.orderNumber}}</h3>
+
+  <!-- Order Number Section -->
+  <div class="border-bottom border-1 border-secondary-subtle p-2 mb-2">
+    <dl class="d-flex align-items-center gap-2 mb-0">
+      <dt class="fw-normal">{{'profile.orderNumber' | translate}}:</dt>
+      <dd class="mb-0">{{order.orderNumber}}</dd>
+    </dl>
+  </div>
+
+  <!-- Order Summary Section -->
+  <div class="d-flex gap-3 border-bottom border-1 border-secondary-subtle p-2">
+    <div class="image-container">
+      <img class="w-100" [src]="order.products[0].imageUrl" [alt]="order.products[0].altText" loading="lazy">
+    </div>
+    <div class="d-flex flex-column gap-1">
+      <h4 class="fs-08 mb-1">{{order.products[0].name}}</h4> <!-- Product/Order item name -->
+      <p class="fs-08 text-secondary mb-1">{{order.products[0].description}}</p>
+      <p class="fs-08 fw-bold mb-0">{{order.total}}</p>
+    </div>
+  </div>
+
+  <!-- Order Status Section -->
+  <div class="p-2">
+    <dl class="d-flex align-items-center justify-content-between mb-0">
+      <dt class="fw-normal">{{'profile.orderStatus' | translate}}</dt>
+      <dd class="mb-0"
+          [ngClass]="{'text-success': order.status === 'delivered', 'text-danger': order.status === 'cancelled', 'text-warning': order.status === 'pending'}">
+        {{order.status}}
+      </dd>
+    </dl>
+  </div>
+</article>
