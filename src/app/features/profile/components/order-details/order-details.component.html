@@ -1,0 +1,58 @@
+<div>
+  <h1 class="mb-4">Order Details</h1>
+  <div class="d-flex justify-content-between mb-3">
+    <span>
+      {{'profile.orderNumber' | translate}}: {{order?.orderNumber}}
+    </span>
+    <span>
+      {{'profile.orderedOn' | translate}}: {{order?.orderDate}}
+    </span>
+  </div>
+  <div class="row row-cols-2 g-3 mb-3 flex-column flex-md-row">
+    <div class="d-flex flex-column gap-3 col-12 col-md-6">
+<!--      shipment address-->
+      <div class="p-2 border border-1 border-secondary-subtle rounded-2 h-100">
+        <h3 class="fs-6 fw-medium text-main-primary">{{'profile.shippingAddress' | translate}}</h3>
+        <p class="fs-08 m-0 text-secondary">{{order?.shippingAddress}}</p>
+      </div>
+
+<!--      payment method-->
+      <div class="p-2 border border-1 border-secondary-subtle rounded-2 h-100">
+        <h3 class="fs-6 fw-medium text-main-primary">{{'profile.paymentMethod' | translate}}</h3>
+        <p class="fs-08 m-0 text-secondary">{{order?.paymentMethod}}</p>
+      </div>
+    </div>
+<!--    order summary-->
+    <div class="p-2 border border-1 border-secondary-subtle rounded-2 col-12 col-md-6">
+      <h3 class="fs-6 fw-medium text-main-primary">{{'profile.orderSummary' | translate}}</h3>
+      <dl class="d-flex flex-column m-0 gap-2">
+        <div class="d-flex justify-content-between">
+          <dt class="text-secondary fw-medium fs-08">{{ 'profile.productsCost' | translate }}</dt>
+          <dd class="fw-medium m-0">{{ order?.subtotal }} {{ 'product.currencySymbol' | translate }}</dd>
+        </div>
+        <div class="d-flex justify-content-between">
+          <dt class="text-secondary fw-medium fs-08">{{ 'profile.discount' | translate }}</dt>
+          <dd class="fw-medium m-0">-{{ order?.discount }} {{ 'product.currencySymbol' | translate }}</dd>
+        </div>
+        <div class="d-flex justify-content-between">
+          <dt class="text-secondary fw-medium fs-08">{{ 'profile.shippingCost' | translate }}</dt>
+          <dd class="fw-medium m-0">{{ order?.shippingCost }} {{ 'product.currencySymbol' | translate }}</dd>
+        </div>
+        <div class="d-flex justify-content-between">
+          <dt class="text-secondary fw-medium fs-08">{{ 'profile.totalCost' | translate }}</dt>
+          <dd class="fw-medium m-0">{{ order?.totalCost }} {{ 'product.currencySymbol' | translate }}</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+<!-- order products-->
+  <div>
+    <h3>{{'profile.orderItems' | translate}}</h3>
+    <p *ngIf="order?.status === 'delivered'">{{'profile.deliveredOn' | translate}}: {{order?.deliveredOn}}</p>
+    <p *ngIf="order?.status === 'cancelled'">{{'profile.cancelledOn' | translate}}: {{order?.cancelledOn}}</p>
+    <div class="d-flex flex-column gap-3">
+      <app-order-details-product *ngFor="let product of order?.products" [product]="product"></app-order-details-product>
+    </div>
+  </div>
+</div>
