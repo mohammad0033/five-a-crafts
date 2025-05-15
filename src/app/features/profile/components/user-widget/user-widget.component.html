@@ -1,0 +1,23 @@
+<section class="rounded-2 border border-1 border-secondary-subtle p-3 d-flex gap-3 col-12 col-sm-6 col-md-12">
+  <!-- Image/Icon area -->
+  <div class="image-container bg-main-primary overflow-hidden d-flex justify-content-center align-items-center rounded-circle">
+    <img class="w-100" [src]="image" alt="user-image" *ngIf="image">
+    <fa-icon [icon]="faUser" size="lg" *ngIf="!image"></fa-icon>
+  </div>
+
+  <!-- User details -->
+  <div class="w-100 d-flex flex-column gap-2">
+    <!-- User Name (Heading for the section) -->
+    <h3 class="fs-6 fw-bold mb-0 text-main-primary">{{name}}</h3>
+    <!-- User Phone Number -->
+    <p class="mb-0 text-secondary fs-08">{{phone}}</p>
+
+    <!-- Commented out button - if uncommented, it's already semantic -->
+    <!--
+    <button class="btn btn-outline-main-primary d-flex gap-2 align-items-center w-fit fw-medium">
+      <span><fa-icon [icon]="faEdit"></fa-icon></span>
+      <span>{{'profile.editProfile' | translate}}</span>
+    </button>
+    -->
+  </div>
+</section>
