@@ -1,1 +1,17 @@
-<p>profile works!</p>
+<main class="container-fluid container-md d-flex flex-column flex-md-row gap-4 py-5">
+<!--  sidebar-->
+  <aside class="col-3 d-none d-md-flex flex-column gap-3">
+    <app-user-widget [name]="userName" [phone]="userPhone"></app-user-widget>
+    <app-profile-menu></app-profile-menu>
+  </aside>
+
+  <div class="col-12 col-md-3 d-md-none d-flex flex-column gap-3">
+    <app-user-widget [name]="userName" [phone]="userPhone"></app-user-widget>
+    <app-profile-menu></app-profile-menu>
+  </div>
+
+<!--  content-->
+  <div class="col-12 col-md-9">
+    <router-outlet></router-outlet>
+  </div>
+</main>

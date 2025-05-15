@@ -1,14 +1,24 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Meta, Title} from '@angular/platform-browser';
+import {UserWidgetComponent} from '../user-widget/user-widget.component';
+import {ProfileMenuComponent} from '../profile-menu/profile-menu.component';
+import {RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-profile',
-  imports: [],
+  imports: [
+    UserWidgetComponent,
+    ProfileMenuComponent,
+    RouterOutlet
+  ],
   templateUrl: './profile.component.html',
   standalone: true,
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit, OnDestroy {
+  userImage = 'https://picsum.photos/id/1062/300/300'
+  userName = 'John Doe'
+  userPhone = '+1 (123) 456-7890'
 
   constructor(
     private metaService: Meta,
