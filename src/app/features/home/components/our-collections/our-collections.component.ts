@@ -52,16 +52,17 @@ export class OurCollectionsComponent implements OnInit {
     this.categoriesService.getCategoriesData().pipe(
       untilDestroyed(this),
       tap(categories => {
-        // Find the 'Candles' category (adjust 'Candles' if the name might differ)
-        const candlesCategory = categories.find(cat => cat.name === 'Candles');
-        if (candlesCategory) {
-          this.category = candlesCategory;
-          console.log('Found Candles category:', this.category);
+        console.log('All Categories fetched:', categories);
+        if (categories && categories.length > 0) {
+          this.category = categories[0]; // Assign the first category
+          console.log('Selected first category:', this.category);
         } else {
-          console.warn("Could not find 'Candles' category.");
-          // Optionally handle the case where the category isn't found
-          // Maybe throw an error or assign a default/empty category
-          throw new Error("Candles category not found"); // Or handle differently
+          console.warn("No categories found.");
+          // Set category to undefined or throw an error to prevent further processing
+          this.category = undefined!; // Explicitly set to undefined if no categories
+          // The exclamation mark is to satisfy strict null checks if category is expected to be set.
+          // Consider throwing an error if a category is essential.
+          // throw new Error("No categories available to display.");
         }
       }),
       // Use switchMap to switch to the products observable *after* categories are processed
