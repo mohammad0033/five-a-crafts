@@ -50,7 +50,8 @@ export const appConfig: ApplicationConfig = {
           provide: TranslateLoader, // Token for the translation loader.
           useFactory: httpLoaderFactory, // Uses the custom factory to create the loader.
           deps: [HttpClient] // Dependencies required by the factory (HttpClient in this case).
-        }
+        },
+        useDefaultLang: true, // important to use default lang if the language is not available
       }),
       GalleryModule // Provides services and components from ng-gallery.
     ),
