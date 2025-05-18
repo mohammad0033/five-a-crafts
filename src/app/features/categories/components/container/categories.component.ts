@@ -96,6 +96,7 @@ export class CategoriesComponent implements OnInit {
     this.categoriesService.getCategoriesData().pipe(
       untilDestroyed(this),
       tap(categories => {
+        console.log('Categories loaded:', categories);
         this.categories = categories;
         // Split the data into chunks of 2
         this.categoryRows = []; // Reset the rows array
