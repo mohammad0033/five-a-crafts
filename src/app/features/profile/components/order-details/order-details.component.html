@@ -1,58 +1,81 @@
 <div>
-  <h1 class="mb-4">Order Details</h1>
-  <div class="d-flex justify-content-between mb-3">
-    <span>
-      {{'profile.orderNumber' | translate}}: {{order?.orderNumber}}
-    </span>
-    <span>
-      {{'profile.orderedOn' | translate}}: {{order?.orderDate}}
-    </span>
-  </div>
-  <div class="row row-cols-2 g-3 mb-3 flex-column flex-md-row">
-    <div class="d-flex flex-column gap-3 col-12 col-md-6">
-<!--      shipment address-->
-      <div class="p-2 border border-1 border-secondary-subtle rounded-2 h-100">
-        <h3 class="fs-6 fw-medium text-main-primary">{{'profile.shippingAddress' | translate}}</h3>
-        <p class="fs-08 m-0 text-secondary">{{order?.shippingAddress}}</p>
-      </div>
-
-<!--      payment method-->
-      <div class="p-2 border border-1 border-secondary-subtle rounded-2 h-100">
-        <h3 class="fs-6 fw-medium text-main-primary">{{'profile.paymentMethod' | translate}}</h3>
-        <p class="fs-08 m-0 text-secondary">{{order?.paymentMethod}}</p>
-      </div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center p-5">
+    <div class="spinner-border text-main-primary" role="status">
+      <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
     </div>
-<!--    order summary-->
-    <div class="p-2 border border-1 border-secondary-subtle rounded-2 col-12 col-md-6">
-      <h3 class="fs-6 fw-medium text-main-primary">{{'profile.orderSummary' | translate}}</h3>
-      <dl class="d-flex flex-column m-0 gap-2">
-        <div class="d-flex justify-content-between">
-          <dt class="text-secondary fw-medium fs-08">{{ 'profile.productsCost' | translate }}</dt>
-          <dd class="fw-medium m-0">{{ order?.subtotal }} {{ 'product.currencySymbol' | translate }}</dd>
-        </div>
-        <div class="d-flex justify-content-between">
-          <dt class="text-secondary fw-medium fs-08">{{ 'profile.discount' | translate }}</dt>
-          <dd class="fw-medium m-0">-{{ order?.discount }} {{ 'product.currencySymbol' | translate }}</dd>
-        </div>
-        <div class="d-flex justify-content-between">
-          <dt class="text-secondary fw-medium fs-08">{{ 'profile.shippingCost' | translate }}</dt>
-          <dd class="fw-medium m-0">{{ order?.shippingCost }} {{ 'product.currencySymbol' | translate }}</dd>
-        </div>
-        <div class="d-flex justify-content-between">
-          <dt class="text-secondary fw-medium fs-08">{{ 'profile.totalCost' | translate }}</dt>
-          <dd class="fw-medium m-0">{{ order?.totalCost }} {{ 'product.currencySymbol' | translate }}</dd>
-        </div>
-      </dl>
-    </div>
+    <p class="mt-2">{{ 'profile.loadingOrders' | translate }}...</p>
   </div>
 
-<!-- order products-->
-  <div>
-    <h3>{{'profile.orderItems' | translate}}</h3>
-    <p *ngIf="order?.status === 'delivered'">{{'profile.deliveredOn' | translate}}: {{order?.deliveredOn}}</p>
-    <p *ngIf="order?.status === 'cancelled'">{{'profile.cancelledOn' | translate}}: {{order?.cancelledOn}}</p>
-    <div class="d-flex flex-column gap-3">
-      <app-order-details-product *ngFor="let product of order?.products" [product]="product"></app-order-details-product>
+  <!-- Order Found State -->
+  <ng-container *ngIf="!isLoading && order">
+    <h1 class="mb-4">{{'profile.orderDetails' | translate}}</h1>
+    <p class="d-flex justify-content-between mb-3">
+      <span>
+        {{'profile.orderNumber' | translate}}: {{order.orderNumber}}
+      </span>
+      <span>
+        {{'profile.orderedOn' | translate}}: {{order.orderDate}}
+      </span>
+    </p>
+    <div class="row row-cols-2 g-3 mb-3 flex-column flex-md-row">
+      <section class="d-flex flex-column gap-3 col-12 col-md-6" aria-labelledby="shippingAndPaymentHeading">
+        <h2 id="shippingAndPaymentHeading" class="visually-hidden">{{'profile.shippingAndPayment' | translate}}</h2>
+        <!--      shipment address-->
+        <div class="p-2 border border-1 border-secondary-subtle rounded-2 h-100">
+          <h3 class="fs-6 fw-medium text-main-primary">{{'profile.shippingAddress' | translate}}</h3>
+          <p class="fs-08 m-0 text-secondary">{{order.shippingAddress || ('common.notProvided' | translate)}}</p>
+        </div>
+
+        <!--      payment method-->
+        <div class="p-2 border border-1 border-secondary-subtle rounded-2 h-100">
+          <h3 class="fs-6 fw-medium text-main-primary">{{'profile.paymentMethod' | translate}}</h3>
+          <p class="fs-08 m-0 text-secondary">{{order.paymentMethod || ('common.notProvided' | translate)}}</p>
+        </div>
+      </section>
+      <!--    order summary-->
+      <section aria-labelledby="orderSummaryHeading" class="p-2 border border-1 border-secondary-subtle rounded-2 col-12 col-md-6">
+        <h2 id="orderSummaryHeading" class="fs-6 fw-medium text-main-primary">{{'profile.orderSummary' | translate}}</h2>
+        <dl class="d-flex flex-column m-0 gap-2">
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium fs-08">{{ 'profile.productsCost' | translate }}</dt>
+            <dd class="fw-medium m-0">{{ order.subtotal }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium fs-08">{{ 'profile.discount' | translate }}</dt>
+            <dd class="fw-medium m-0">-{{ order.discount }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium fs-08">{{ 'profile.shippingCost' | translate }}</dt>
+            <dd class="fw-medium m-0">{{ order.shippingCost }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+          <div class="d-flex justify-content-between">
+            <dt class="text-secondary fw-medium fs-08">{{ 'profile.totalCost' | translate }}</dt>
+            <dd class="fw-medium m-0">{{ order.totalCost }} {{ 'product.currencySymbol' | translate }}</dd>
+          </div>
+        </dl>
+      </section>
     </div>
+
+    <!-- order products-->
+    <section  aria-labelledby="orderProductsHeading">
+      <h2 id="orderProductsHeading">{{'profile.orderItems' | translate}}</h2>
+      <p *ngIf="order.status === 'delivered'">{{'profile.deliveredOn' | translate}}: {{order.deliveredOn}}</p>
+      <p *ngIf="order.status === 'cancelled'">{{'profile.cancelledOn' | translate}}: {{order.cancelledOn}}</p>
+      <ul class="list-unstyled p-0 d-flex flex-column gap-3">
+        <li *ngFor="let product of order.products" class="border-bottom pb-3"> <!-- Added border for separation -->
+          <app-order-details-product [product]="product"></app-order-details-product>
+        </li>
+      </ul>
+    </section>
+  </ng-container>
+
+  <!-- Order Not Found State -->
+  <div *ngIf="!isLoading && !order" class="alert alert-warning text-center" role="alert">
+    <h4 class="alert-heading">{{ 'profile.orderNotFound' | translate }}</h4>
+    <p>{{ 'profile.orderNotFoundMessage' | translate }}</p>
+    <hr>
+    <a routerLink="/profile/orders" class="btn btn-outline-primary">{{ 'profile.backToOrders' | translate }}</a>
   </div>
+
 </div>

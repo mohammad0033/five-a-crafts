@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core'; // Import OnInit
-import { ActivatedRoute } from '@angular/router'; // Import ActivatedRoute
+import {ActivatedRoute, RouterLink} from '@angular/router'; // Import ActivatedRoute
 import { TranslatePipe } from '@ngx-translate/core';
 import {NgForOf, NgIf} from '@angular/common';
 import { OrderDetailsProductComponent } from '../order-details-product/order-details-product.component';
@@ -11,7 +11,8 @@ import {Order} from '../../models/order';
     TranslatePipe,
     NgIf,
     OrderDetailsProductComponent,
-    NgForOf
+    NgForOf,
+    RouterLink
   ],
   templateUrl: './order-details.component.html',
   standalone: true,
