@@ -8,8 +8,9 @@
 
 .category-card-wrapper {
   // --- Initial State ---
-  flex: 0 1 50%; // Each wrapper takes exactly 50% of the container width
-  transition: flex-basis 0.4s ease-in-out;
+  flex: 1 1 50%;    // Updated: grow 1, shrink 1, basis 50%
+  // This allows items to grow and fill any tiny gaps.
+  transition: flex-basis 0.4s ease-in-out, flex-grow 0.4s ease-in-out; // Also transition flex-grow
   position: relative; // Needed for z-index stacking context
 
   &:hover {
