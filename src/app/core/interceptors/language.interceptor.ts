@@ -18,6 +18,7 @@ export const localizedApiInterceptor: HttpInterceptorFn = (req: HttpRequest<unkn
 
   const apiPrefix = inject(API_PREFIX);
   const currentLang = translateService?.currentLang || 'en'; // Ensure fallback if undefined
+  const supportedLangs = translateService?.getLangs() || ['en'];
 
   // console.log('Current language:', currentLang);
   // console.log('API prefix:', apiPrefix);
@@ -28,7 +29,7 @@ export const localizedApiInterceptor: HttpInterceptorFn = (req: HttpRequest<unkn
 
   const urlSegments = req.url.substring(apiPrefix.length).split('/');
   // console.log(urlSegments)
-  const hasLangPrefix = urlSegments.length > 0 && (urlSegments[0] === 'en' || urlSegments[0] === 'ar'); // Add more languages if needed
+  const hasLangPrefix = urlSegments.length > 0 && supportedLangs.includes(urlSegments[0]);
 
   if (hasLangPrefix) {
     return next(req); // Already localized
