@@ -1,14 +1,9 @@
 <main class="container-fluid container-md d-flex flex-column flex-md-row gap-4 py-5">
 <!--  sidebar-->
-  <aside class="col-3 d-none d-md-flex flex-column gap-3">
-    <app-user-widget [name]="userName" [phone]="userPhone"></app-user-widget>
+  <aside class="col-12 col-md-3 d-flex flex-column gap-3 mb-4 mb-md-0">
+    <app-user-widget [name]="userName" [phone]="userPhone" [image]="userImage"></app-user-widget>
     <app-profile-menu></app-profile-menu>
   </aside>
-
-  <div class="col-12 col-md-3 d-md-none d-flex flex-column gap-3">
-    <app-user-widget [name]="userName" [phone]="userPhone"></app-user-widget>
-    <app-profile-menu></app-profile-menu>
-  </div>
 
 <!--  content-->
   <div class="col-12 col-md-9">
