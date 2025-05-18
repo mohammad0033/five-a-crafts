@@ -10,7 +10,7 @@
     <!-- User Name (Heading for the section) -->
     <h3 class="fs-6 fw-bold mb-0 text-main-primary">{{name}}</h3>
     <!-- User Phone Number -->
-    <p dir="ltr" class="mb-0 text-secondary fs-08">{{phone}}</p>
+    <p dir="ltr" class="mb-0 text-secondary fs-08" [ngClass]="currentLang === 'ar' ? 'text-end' : 'text-start'">{{phone}}</p>
 
     <!-- Commented out button - if uncommented, it's already semantic -->
     <!--
