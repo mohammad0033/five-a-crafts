@@ -3,7 +3,7 @@ import {Category} from '../../../core/models/category';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {NgForOf, NgIf, SlicePipe} from '@angular/common';
 import {ProductCardComponent} from '../product-card/product-card.component';
-import {RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Product} from '../../../core/models/product';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
@@ -32,17 +32,23 @@ export class CategoryCollectionComponent implements OnInit {
   @Output() favoriteToggleRequested = new EventEmitter<Product>()
   isLoading: boolean = false
   currentLang!: string
+  currentRoute: string = ''
 
   protected readonly faArrowLeft = faArrowLeft;
   protected readonly faArrowRight = faArrowRight;
 
-  constructor(private translate: TranslateService) {}
+  constructor(private translate: TranslateService,
+              private route : ActivatedRoute) {}
 
   ngOnInit() {
     this.currentLang = this.translate.currentLang
     this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event: any) => {
       this.currentLang = event.lang
     })
+
+    this.currentRoute = this.route.snapshot.url[0]?.path
+    if (this.currentRoute) {
+    }
   }
 
   handleFavoriteToggle(product: Product) {
