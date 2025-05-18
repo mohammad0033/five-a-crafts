@@ -1,20 +1,23 @@
-<!-- Loading Template -->
-<div *ngIf="isLoading" class="d-flex justify-content-center align-items-center p-4 gap-3">
-  <span class="spinner-border spinner-border-sm text-main-primary" role="status" aria-hidden="true"></span>
-  <span>{{'profile.loadingOrders' | translate}}</span>
-</div>
+<section aria-labelledby="orders-heading">
+  <h2 id="orders-heading" class="visually-hidden">{{ 'profile.myOrders' | translate }}</h2>
+  <!-- Loading Template -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center p-4 gap-3">
+    <span class="spinner-border spinner-border-sm text-main-primary" role="status" aria-hidden="true"></span>
+    <span>{{'profile.loadingOrders' | translate}}</span>
+  </div>
 
-<!-- No Orders Template -->
-<div *ngIf="!isLoading && orders.length === 0" class="d-flex justify-content-center align-items-center p-4">
-  <p>{{'profile.noOrders' | translate}}</p>
-</div>
+  <!-- No Orders Template -->
+  <div *ngIf="!isLoading && orders.length === 0" class="d-flex justify-content-center align-items-center p-4">
+    <p>{{'profile.noOrders' | translate}}</p>
+  </div>
 
-<!-- Orders List -->
-<!-- Only show this section if not loading and there are orders -->
-<!-- Use ul for a list of items -->
-<ul *ngIf="!isLoading && orders.length > 0" class="list-unstyled p-0 d-flex flex-column gap-3">
-  <!-- Each order card is a list item -->
-  <li *ngFor="let order of orders">
-    <app-user-order-card [order]="order"></app-user-order-card>
-  </li>
-</ul>
+  <!-- Orders List -->
+  <!-- Only show this section if not loading and there are orders -->
+  <!-- Use ul for a list of items -->
+  <ul *ngIf="!isLoading && orders.length > 0" class="list-unstyled p-0 d-flex flex-column gap-3">
+    <!-- Each order card is a list item -->
+    <li *ngFor="let order of orders">
+      <app-user-order-card [order]="order"></app-user-order-card>
+    </li>
+  </ul>
+</section>
