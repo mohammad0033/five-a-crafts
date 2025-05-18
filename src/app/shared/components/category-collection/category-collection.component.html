@@ -1,8 +1,20 @@
 <section [attr.aria-labelledby]="'our-' + category.name + '-collection-heading'">
   <h2 [id]="'our-' + category.name + '-collection-heading'" class="visually-hidden">{{'home.ourCollections' | translate}}</h2>
-  <h3 class="fs-5 mb-3">{{'home.ourCollections' | translate}}</h3>
-  <h4 class="zapf-font fs-2" *ngIf="currentLang === 'en'">{{category.name}} {{'category.collection' | translate}}</h4>
-  <h4 class="zapf-font fs-2" *ngIf="currentLang === 'ar'">{{'category.collection' | translate}} {{category.name}}</h4>
+  <h3 class="fs-5 mb-3" *ngIf="currentRoute !== 'categories'">{{'home.ourCollections' | translate}}</h3>
+  <!--
+    Specific Category Collection Title:
+    - Render as H3 if the general H3 above is hidden (i.e., on 'categories' route) to maintain H2 -> H3 flow.
+    - Render as H4 if the general H3 above is shown (i.e., on non-'categories' route) for H2 -> H3 -> H4 flow.
+  -->
+  <ng-container *ngIf="currentRoute === 'categories'">
+    <h3 class="zapf-font fs-2" *ngIf="currentLang === 'en'">{{category.name}} {{'category.collection' | translate}}</h3>
+    <h3 class="zapf-font fs-2" *ngIf="currentLang === 'ar'">{{'category.collection' | translate}} {{category.name}}</h3>
+  </ng-container>
+
+  <ng-container *ngIf="currentRoute !== 'categories'">
+    <h4 class="zapf-font fs-2" *ngIf="currentLang === 'en'">{{category.name}} {{'category.collection' | translate}}</h4>
+    <h4 class="zapf-font fs-2" *ngIf="currentLang === 'ar'">{{'category.collection' | translate}} {{category.name}}</h4>
+  </ng-container>
   <p>{{category.description}}</p>
 
   <!-- Optional: Show a loading indicator -->
