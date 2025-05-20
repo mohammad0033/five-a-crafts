@@ -30,7 +30,7 @@ export class CategoryCollectionComponent implements OnInit {
   @Input() products : Product[] = []
   @Input() limitCount!: number
   @Output() favoriteToggleRequested = new EventEmitter<Product>()
-  isLoading: boolean = false
+  @Input() isLoading: boolean = false
   currentLang!: string
   currentRoute: string = ''
 
