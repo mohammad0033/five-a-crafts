@@ -13,18 +13,6 @@
   <div class="mb-5 d-flex d-sm-none justify-content-center categories-mobile-container overflow-hidden" *ngIf="categories.length > 0">
     <app-categories-splides [categories]="categories"></app-categories-splides>
   </div>
-
-  <div class="d-flex justify-content-center my-3 my-md-4">
-    <a type="button" class="btn btn-main-primary d-flex align-items-center gap-2 p-3 text-light" routerLink="/categories">
-      <span>
-        {{'home.allCategories' | translate}}
-      </span>
-      <span>
-        <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
-        <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
-      </span>
-    </a>
-  </div>
 </section>
 <!--category collections-->
 <ng-container *ngIf="categories.length > 0">

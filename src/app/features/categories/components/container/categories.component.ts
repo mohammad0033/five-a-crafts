@@ -2,14 +2,13 @@ import {Component, OnInit} from '@angular/core';
 import {PageMetadata} from '../../../../core/models/page-meta-data';
 import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-data';
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {CategoriesRowComponent} from '../../../../shared/components/categories-row/categories-row.component';
 import {
   CategoriesSplidesComponent
 } from '../../../../shared/components/categories-splides/categories-splides.component';
-import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {NgForOf, NgIf} from '@angular/common';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {CategoriesService} from '../../services/categories.service';
@@ -27,10 +26,8 @@ import {CategoryWithProducts} from '../../../../core/models/category-with-produc
     TranslatePipe,
     CategoriesRowComponent,
     CategoriesSplidesComponent,
-    FaIconComponent,
     NgForOf,
     NgIf,
-    RouterLink,
     CategoryCollectionComponent
   ],
   templateUrl: './categories.component.html',
