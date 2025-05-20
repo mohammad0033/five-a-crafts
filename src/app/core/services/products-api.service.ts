@@ -38,13 +38,9 @@ export class ProductsApiService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * Simulates fetching best-selling products from an API.
-   * Returns an Observable of Product array.
-   */
-  getBestSellingProducts(): Observable<Product[]> {
-    const mockBestSellers: Product[] = this.allMockProducts.slice(0, 7); // Use a slice from the main list
-    return of(mockBestSellers).pipe(delay(800));
+  getBestSellingProducts(): Observable<CommonApiResponse> {
+    let params = new HttpParams().set('category', 6); // category id 6 represents best-selling products
+    return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/products/`, { params: params });
   }
 
   getCandlesCollectionProducts(): Observable<Product[]> {
