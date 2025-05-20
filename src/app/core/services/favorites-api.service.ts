@@ -71,7 +71,7 @@ export class FavoritesApiService {
   public addFavorite(productId: number | string): Observable<Product> {
     // This observable is for the outcome of the "add" operation itself.
     return this._backendAddFavorite(productId).pipe(
-      tap(addedProduct => {
+      tap(() => {
         // After successful "backend" addition, refresh the favorites list
         this.loadFavorites();
       }),

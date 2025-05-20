@@ -1,5 +1,4 @@
 import {ProductImageData} from './product-image-data';
-import {ProductCategoryInfo} from './product-category-info';
 import {PageMetadata} from '../../../core/models/page-meta-data';
 import {Price} from '../../../core/models/price';
 
