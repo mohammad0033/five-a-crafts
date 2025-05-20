@@ -11,9 +11,9 @@ export const contactPageMetaResolver: ResolveFn<PageMetadata | null> = (
   const contentService = inject(ContentApiService);
 
   return contentService.getContactPageMetadata().pipe(
-    map(metadata => metadata),
+    map(metaData => metaData),
     catchError(error => {
-      console.error('Error fetching contact page metadata in resolver:', error);
+      console.error('Error fetching contact page metaData in resolver:', error);
       return of(null); // Return null on error
     })
   );
