@@ -11,11 +11,11 @@ export const categoriesPageMetaResolver: ResolveFn<PageMetadata | null> = (
   const contentService = inject(ContentApiService);
 
   // Assume contentService has a method getCategoriesPageMetadata()
-  // This would fetch metadata for the main categories overview page
+  // This would fetch metaData for the main categories overview page
   return contentService.getCategoriesPageMetadata().pipe(
-    map(metadata => metadata),
+    map(metaData => metaData),
     catchError(error => {
-      console.error('Error fetching categories page metadata in resolver:', error);
+      console.error('Error fetching categories page metaData in resolver:', error);
       return of(null); // Return null on error
     })
   );
