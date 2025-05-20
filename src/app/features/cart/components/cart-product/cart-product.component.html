@@ -1,17 +1,17 @@
 <div class="d-flex gap-3 border border-1 border-secondary-subtle rounded-3 p-3 w-100">
-  <div class="image-container">
+  <div class="image-container" *ngIf="product.images">
     <!-- Consider adding alt text for accessibility -->
-    <img [src]="product.imageUrl" [alt]="product.altText || product.name">
+    <img [src]="product.images[0].original" [alt]="product.title">
   </div>
   <div class="d-flex flex-column w-100">
     <div class="d-flex justify-content-between align-items-center gap-2"> <!-- Changed to align-items-start -->
-      <h5 class="fs-6 m-0">{{product.name}}</h5>
+      <h5 class="fs-6 m-0">{{product.title}}</h5>
       <!-- Added (click) event, title, and cursor-pointer -->
       <button class="btn btn-link text-danger p-0"
               type="button"
               (click)="triggerRemoveItem()"
               [title]="'cart.removeItem' | translate"
-              [attr.aria-label]="('cart.removeItemFor' | translate: {productName: product.name})">
+              [attr.aria-label]="('cart.removeItemFor' | translate: {productName: product.title})">
         <fa-icon [icon]="faTrash"></fa-icon>
       </button>
     </div>
@@ -19,7 +19,7 @@
     <!-- <p class="small text-muted" *ngIf="item.variations">Color: Red, Size: M</p> -->
     <div class="d-flex justify-content-between align-items-center mt-auto"> <!-- Pushes price and quantity to bottom -->
       <div>
-        <span class="fw-bold">{{product.price}}</span> LE
+        <span class="fw-bold">{{product.price?.incl_tax}}</span> LE
       </div>
       <div class="d-flex align-items-center gap-2 border border-1 rounded-2 border-secondary-subtle w-fit">
         <button class="btn border-0 py-1 px-2" type="button"

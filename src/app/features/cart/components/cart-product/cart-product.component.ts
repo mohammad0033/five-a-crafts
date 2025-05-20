@@ -3,12 +3,14 @@ import {Product} from '../../../../core/models/product';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faMinus, faPlus, faTrash} from '@fortawesome/free-solid-svg-icons';
 import {TranslatePipe} from '@ngx-translate/core';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-cart-product',
   imports: [
     FaIconComponent,
-    TranslatePipe
+    TranslatePipe,
+    NgIf
   ],
   templateUrl: './cart-product.component.html',
   standalone: true,
