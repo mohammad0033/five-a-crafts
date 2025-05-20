@@ -48,7 +48,7 @@ export class CartService {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
     this.subtotal$ = this.cartItemsSource.pipe(
-      map(items => Number((items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)).toFixed(2))),
+      map(items => Number((items.reduce((acc, item) => acc + (item.product.price?.incl_tax! * item.quantity), 0)).toFixed(2))),
       startWith(0)
     );
 
