@@ -28,7 +28,7 @@ export class FavoritesApiService {
   private _backendAddFavorite(productId: number | string): Observable<Product> {
     const product = this.productsApiService.allMockProducts.find(p => p.id === productId);
     if (product) {
-      product.isFavorite = true; // Update mock data source
+      product.in_wishlist = true; // Update mock data source
       return of({ ...product, isFavorite: true }).pipe(delay(500)); // Return a copy
     }
     return throwError(() => new Error('Product not found for favoriting (backend sim)'));
@@ -37,7 +37,7 @@ export class FavoritesApiService {
   private _backendRemoveFavorite(productId: number | string): Observable<void> {
     const product = this.productsApiService.allMockProducts.find(p => p.id === productId);
     if (product) {
-      product.isFavorite = false; // Update mock data source
+      product.in_wishlist = false; // Update mock data source
       return of(undefined).pipe(delay(500)); // Simulate success
     }
     return throwError(() => new Error('Product not found for unfavoriting (backend sim)'));
