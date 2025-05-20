@@ -8,6 +8,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {RouterLink} from '@angular/router';
 import {FavoritesApiService} from '../../../core/services/favorites-api.service';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
+import {ProductImageData} from '../../../features/product-details/models/product-image-data';
 
 @UntilDestroy()
 @Component({
@@ -43,13 +44,13 @@ export class ProductCardComponent implements OnInit {
       this.favoritesApiService.isFavorite(this.product.id)
         .pipe(untilDestroyed(this))
         .subscribe(isFav => {
-          console.log(`Card [${this.product.id} - ${this.product.name}]: Received isFav = ${isFav}. Current isActuallyFavorite = ${this.isActuallyFavorite}`);
+          console.log(`Card [${this.product.id} - ${this.product.title}]: Received isFav = ${isFav}. Current isActuallyFavorite = ${this.isActuallyFavorite}`);
           if (this.isActuallyFavorite !== isFav) {
-            console.log(`Card [${this.product.id} - ${this.product.name}]: Updating isActuallyFavorite from ${this.isActuallyFavorite} to ${isFav}`);
+            console.log(`Card [${this.product.id} - ${this.product.title}]: Updating isActuallyFavorite from ${this.isActuallyFavorite} to ${isFav}`);
             this.isActuallyFavorite = isFav;
             // this.cdr.detectChanges(); // Explicitly trigger change detection
           } else {
-            console.log(`Card [${this.product.id} - ${this.product.name}]: isFav (${isFav}) is same as isActuallyFavorite. No UI change needed unless forced.`);
+            console.log(`Card [${this.product.id} - ${this.product.title}]: isFav (${isFav}) is same as isActuallyFavorite. No UI change needed unless forced.`);
             // Even if the value is the same, if an external event (like loadFavorites) triggers this,
             // it's good to ensure Angular checks this component.
             // this.cdr.detectChanges();
@@ -61,10 +62,10 @@ export class ProductCardComponent implements OnInit {
   }
 
   onToggleFavorite(event: MouseEvent): void {
-    console.log(`Card [${this.product.id} - ${this.product.name}]: onToggleFavorite called.`);
+    console.log(`Card [${this.product.id} - ${this.product.title}]: onToggleFavorite called.`);
     event.stopPropagation(); // Good practice
 
-    console.log(`Card [${this.product.id} - ${this.product.name}]: isActuallyFavorite = ${this.isActuallyFavorite}`);
+    console.log(`Card [${this.product.id} - ${this.product.title}]: isActuallyFavorite = ${this.isActuallyFavorite}`);
 
     // Trigger animation optimistically if it's about to become a favorite
     if (!this.isActuallyFavorite) {
@@ -74,5 +75,13 @@ export class ProductCardComponent implements OnInit {
       }, 500);
     }
     this.favoriteToggleRequested.emit(this.product);
+  }
+
+  getProductFirstImage(): ProductImageData | null {
+    if (this.product.images && this.product.images.length > 0) {
+      return this.product.images[0];
+    } else {
+      return null;
+    }
   }
 }

@@ -1,10 +1,10 @@
 <article class="card product-card border-0 shadow-sm rounded-3" (mouseenter)="hover = true" (mouseleave)="hover = false" [ngClass]="{ 'hovered': hover }">
   <figure class="m-0 rounded-3 overflow-hidden">
-    <img [src]="product.imageUrl" class="card-img-top" [alt]="product.altText" loading="lazy">
+    <img [src]="getProductFirstImage()?.original" class="card-img-top" [alt]="product.title" loading="lazy">
   </figure>
   <section class="card-body d-flex flex-column justify-content-between">
     <header class="d-flex align-items-center justify-content-between">
-      <h2 class="card-title fw-bold h5">{{ product.name }}</h2>
+      <h2 class="card-title fw-bold h5">{{ product.title }}</h2>
       <fa-icon
         [icon]="isActuallyFavorite ? faHeartSolid : faHeartRegular"
         class="favorite-icon cursor-pointer"
@@ -20,12 +20,12 @@
       {{ product.description | slice:0:70 }}{{ product.description.length! > 70 ? '...' : '' }}
     </p>
     <div>
-      <p class="fw-semibold product-card-price" aria-label="Product price">{{ product.price }} LE</p>
+      <p class="fw-semibold product-card-price" aria-label="Product price">{{ product.price?.incl_tax ? product.price?.incl_tax : 0 }} LE</p>
       <div class="button-placeholder">
         <a class="btn btn-outline-main-primary more-details-btn w-100 py-2 d-none d-md-block"
-           [attr.aria-label]="'View more details about ' + product.name" [routerLink]="['/products', product.id]">{{'product.moreDetails' | translate}}</a>
+           [attr.aria-label]="'View more details about ' + product.title" [routerLink]="['/products', product.id]">{{'product.moreDetails' | translate}}</a>
         <a class="btn btn-outline-main-primary w-100 py-2 d-md-none fs-08"
-           [attr.aria-label]="'View more details about ' + product.name" [routerLink]="['/products', product.id]">{{'product.moreDetails' | translate}}</a>
+           [attr.aria-label]="'View more details about ' + product.title" [routerLink]="['/products', product.id]">{{'product.moreDetails' | translate}}</a>
       </div>
     </div>
   </section>
