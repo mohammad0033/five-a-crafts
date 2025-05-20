@@ -32,8 +32,9 @@
     <app-category-collection
       *ngFor="let category of categories"
       [category]="category"
-      [products]="products"
+      [products]="category.products"
       [limitCount]="4"
+      [isLoading]="category.isLoadingProducts"
       (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-category-collection>
   </div>
 </ng-container>

@@ -13,12 +13,12 @@ import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {NgForOf, NgIf} from '@angular/common';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {CategoriesService} from '../../services/categories.service';
-import {Category} from '../../../../core/models/category';
 import {CategoryCollectionComponent} from '../../../../shared/components/category-collection/category-collection.component';
 import {Product} from '../../../../core/models/product';
-import {catchError, EMPTY, finalize, switchMap, tap, throwError} from 'rxjs';
-import {ProductsApiService} from '../../../../core/services/products-api.service';
+import {catchError, finalize, forkJoin, map, of, switchMap, tap, throwError} from 'rxjs';
 import {FavoritesApiService} from '../../../../core/services/favorites-api.service';
+import {ProductsService} from '../../../../core/services/products.service';
+import {CategoryWithProducts} from '../../../../core/models/category-with-products';
 
 @UntilDestroy()
 @Component({
@@ -38,9 +38,8 @@ import {FavoritesApiService} from '../../../../core/services/favorites-api.servi
   styleUrl: './categories.component.scss'
 })
 export class CategoriesComponent implements OnInit {
-  categories:Category[] = [];
-  categoryRows:any[] = [];
-  products : Product[] = []
+  categories:CategoryWithProducts[] = [];
+  categoryRows:CategoryWithProducts[][] = [];
   isLoading: boolean = false
   currentLang!: string
 
@@ -63,7 +62,7 @@ export class CategoriesComponent implements OnInit {
 
   constructor(private metaTagService: MetaTagService,
               private categoriesService: CategoriesService,
-              private productsApiService: ProductsApiService,
+              private productsService: ProductsService,
               private favoritesApiService: FavoritesApiService,
               private translate: TranslateService,
               private route: ActivatedRoute) {}
@@ -95,25 +94,52 @@ export class CategoriesComponent implements OnInit {
     this.isLoading = true;
     this.categoriesService.getCategoriesData().pipe(
       untilDestroyed(this),
-      tap(categories => {
-        console.log('Categories loaded:', categories);
-        this.categories = categories;
+      tap(fetchedCategories => {
+        console.log('Categories loaded:', fetchedCategories);
+        this.categories = fetchedCategories.map(cat => ({
+          ...cat,
+          products: [],
+          isLoadingProducts: true // To show loading per category collection if desired
+        }));
         // Split the data into chunks of 2
         this.categoryRows = []; // Reset the rows array
-        for (let i = 0; i < categories.length; i += 2) {
-          // Slice the original array and push the chunk (pair) into categoryRows
-          this.categoryRows.push(categories.slice(i, i + 2));
+        for (let i = 0; i < this.categories.length; i += 2) {
+          this.categoryRows.push(this.categories.slice(i, i + 2));
         }
       }),
       // Use switchMap to switch to the products observable *after* categories are processed
-      switchMap(() => {
-        // Only fetch products if the category was found
-        if (this.categories) {
-          return this.productsApiService.getCandlesCollectionProducts();
-        } else {
-          // If category wasn't found, return an empty observable or handle error
-          return EMPTY; // Or return throwError(() => new Error('Category not available'));
+      switchMap(initialCategories => { // initialCategories are the raw categories from categoriesService
+        if (!initialCategories || initialCategories.length === 0) {
+          // No categories, return an observable that emits an empty array
+          // to satisfy forkJoin's expected input.
+          return of([]);
         }
+        // Create an array of Observables, one for each category's products
+        const productObservables = initialCategories.map(category =>
+          this.productsService.getCategoryProducts(category.id.toString()).pipe(
+            map(products => ({ categoryId: category.id, products })), // Map to include categoryId for matching
+            catchError(err => {
+              console.error(`Error loading products for category ${category.name} (ID: ${category.id}):`, err);
+              // Return an observable with empty products for this category on error,
+              // so forkJoin doesn't fail completely.
+              return of({ categoryId: category.id, products: [] as Product[] });
+            })
+          )
+        );
+        // forkJoin will wait for all productObservables to complete
+        return forkJoin(productObservables);
+      }),
+      // The result of forkJoin (categoryProductResults) is an array of { categoryId: string, products: Product[] }
+      tap(categoryProductResults => {
+        // Assign fetched products to their respective categories
+        this.categories.forEach(category => {
+          const result = categoryProductResults.find(r => r.categoryId === category.id);
+          if (result) {
+            category.products = result.products;
+          }
+          category.isLoadingProducts = false; // Update loading state for this category
+          console.log(`Products for category ${category.name} (ID: ${category.id}):`, category.products);
+        });
       }),
       // finalize will run when the *entire* chain completes or errors
       finalize(() => {
@@ -122,16 +148,25 @@ export class CategoriesComponent implements OnInit {
       }),
       // Catch errors from *either* API call
       catchError(err => {
-        console.error('Error loading collections data:', err);
-        this.products = []; // Clear products on error
-        // Optionally, you could set an error message property to display in the template
-        return throwError(() => err); // Re-throw the error or return EMPTY/of([])
+        console.error('Error in the categories/products loading pipeline:', err);
+        // Ensure all individual loading states are false and products are cleared on a major error
+        this.categories.forEach(category => {
+          category.isLoadingProducts = false;
+          category.products = [];
+        });
+        return throwError(() => err); // Re-throw the error
       })
     ).subscribe({
-      next: (productsData) => {
-        this.products = productsData;
-        console.log('Candles Collection products loaded:', this.products);
+      next: () => {
+        // This 'next' callback receives the array of results from forkJoin.
+        // The main processing of assigning products to categories is done in the `tap` operator above.
+        console.log('All category product fetch operations completed and results processed.');
       },
+      error: (err) => {
+        // This error callback is for errors that might slip through the main catchError
+        // or are re-thrown by it.
+        console.error('Subscription error after pipeline processing:', err);
+      }
       // Error handling is now primarily done in the catchError operator
       // error: (err) => {} // This block is less necessary now but can be kept for specific final error actions
     });
