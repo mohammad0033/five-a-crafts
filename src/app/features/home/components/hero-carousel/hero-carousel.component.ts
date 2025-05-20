@@ -8,6 +8,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {RouterLink} from '@angular/router';
+import {SafeHtmlPipe} from '../../../../shared/pipes/safe-html.pipe';
 
 @UntilDestroy()
 @Component({
@@ -18,7 +19,8 @@ import {RouterLink} from '@angular/router';
     NgIf,
     TranslatePipe,
     FaIconComponent,
-    RouterLink
+    RouterLink,
+    SafeHtmlPipe
   ],
   templateUrl: './hero-carousel.component.html',
   standalone: true,
