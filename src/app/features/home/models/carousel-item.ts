@@ -1,7 +1,10 @@
 export interface CarouselItem {
-  imageUrl: string;
-  title?: string;
-  title2?: string;
-  description?: string;
-  altText?: string;
+  id: number;
+  name: string;
+  is_active: boolean;
+  notes: string;
+  content: string;
+  image: string;
+  image_small: string;
+  url: string;
 }
