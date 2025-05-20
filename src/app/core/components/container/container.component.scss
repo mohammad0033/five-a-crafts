@@ -16,6 +16,9 @@
 
 mat-progress-bar.loading-indicator,
 .main-content-area > mat-progress-bar {
+  position: fixed; /*  Positions the progress bar relative to the viewport */
+  top: 0;          /*  Aligns it to the top of the viewport */
+  left: 0;         /*  Aligns it to the left of the viewport */
   width: 100%;
   z-index: 10;
 }

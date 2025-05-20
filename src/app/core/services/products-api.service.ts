@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import {delay, Observable, of, throwError} from 'rxjs';
+import {delay, Observable, of} from 'rxjs';
 import {Product} from '../models/product';
-import {ProductDetailsData} from '../../features/product-details/models/product-details-data';
 import {ReviewsData} from '../../features/product-details/models/reviews-data';
 import {Review} from '../../features/product-details/models/review';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {CommonApiResponse} from '../models/common-api-response';
+import {Url} from '../constants/base-url';
 
 @Injectable({
   providedIn: 'root'
@@ -32,20 +34,9 @@ export class ProductsApiService {
     // Add more mock reviews for other product slugs as needed
   };
 
-  allMockProducts: Product[] = [
-    { id: 1, name: 'Lavender Bliss Candle', description:'A calming lavender scented candle.', imageUrl: 'https://picsum.photos/id/1060/300/300', price: 15.99,isFavorite: true, altText: 'A calming lavender scented candle' },
-    { id: 2, name: 'Ocean Breeze Pillar', description:'A refreshing ocean breeze scented pillar candle.', imageUrl: 'https://picsum.photos/id/1061/300/300', price: 12.50, isFavorite: true, altText: 'A blue pillar candle' },
-    { id: 3, name: 'Vanilla Dream Votive Set', description:'Sweet vanilla dream votive candle set.', imageUrl: 'https://picsum.photos/id/1062/300/300', price: 9.99,isFavorite: true, altText: 'Set of small vanilla votive candles' },
-    { id: 4, name: 'Cozy Cabin Tealights', description:'Warm and cozy cabin scented tealights.', imageUrl: 'https://picsum.photos/id/1063/300/300', price: 5.49,isFavorite: true, altText: 'Pack of tealight candles' },
-    { id: 5, name: 'Elegant Taper Candles (Pair)', description:'A pair of elegant taper candles for formal occasions.', imageUrl: 'https://picsum.photos/id/1064/300/300', price: 8.00, altText: 'Two tall taper candles' },
-    { id: 6, name: 'Mystery Scent Jar', description:'A mysterious and intriguing scented jar candle.', imageUrl: 'https://picsum.photos/id/1065/300/300', price: 18.00, altText: 'A jar candle with a question mark' },
-    { id: 7, name: 'Autumn Spice Delight', description:'A delightful autumn spice scented candle.', imageUrl: 'https://picsum.photos/id/1066/300/300', price: 16.50, altText: 'An orange candle with autumn spices' },
-    { id: 8, name: 'Forest Pine Cones', description:'Decorative pine cones with a hint of forest scent.', imageUrl: 'https://picsum.photos/id/1067/300/300', price: 7.99,isFavorite: true, altText: 'A collection of forest pine cones' },
-    { id: 9, name: 'Handcrafted Wooden Spoon', description:'A beautifully handcrafted wooden spoon for your kitchen.', imageUrl: 'https://picsum.photos/id/1068/300/300', price: 11.00, altText: 'Handcrafted wooden spoon' },
-    { id: 10, name: 'Ceramic Mug Set', description:'Set of two artisanal ceramic mugs.', imageUrl: 'https://picsum.photos/id/1069/300/300', price: 22.50, altText: 'Two ceramic mugs' },
-  ];
+  allMockProducts: Product[] = [];
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   /**
    * Simulates fetching best-selling products from an API.
@@ -59,108 +50,19 @@ export class ProductsApiService {
   getCandlesCollectionProducts(): Observable<Product[]> {
     // Filter products that are likely candles for this collection
     const mockCandlesCollection: Product[] = this.allMockProducts.filter(
-      p => p.name.toLowerCase().includes('candle') || p.name.toLowerCase().includes('votive') || p.name.toLowerCase().includes('tealights')
+      p => p.title.toLowerCase().includes('candle') || p.title.toLowerCase().includes('votive') || p.title.toLowerCase().includes('tealights')
     ).slice(0,8);
     return of(mockCandlesCollection).pipe(delay(800));
   }
 
+  getCategoryProducts(categoryId: string): Observable<CommonApiResponse> {
+    let params = new HttpParams().set('category', categoryId);
+    return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/products/`, { params: params });
+  }
+
   // Rename method to reflect it fetches full details
-  getProductDetails(productSlug: string): Observable<ProductDetailsData> {
-    // --- Mock Data Simulation ---
-    // In a real app: return this.http.get<ProductDetailsData>(`/api/products/${productSlug}`);
-
-    let mockProductData: ProductDetailsData | null = null;
-
-    // Example specific product
-    if (productSlug === 'lavender-bliss-jar') {
-      mockProductData = {
-        id: 'prod_123',
-        slug: 'lavender-bliss-jar',
-        name: 'Lavender Bliss Jar Candle',
-        description: 'Experience tranquility with our Lavender Bliss Jar Candle. Hand-poured using sustainable soy wax and infused with pure lavender essential oil, this candle provides hours of calming aroma. Perfect for relaxation and creating a peaceful atmosphere in any room.',
-        price: 19.99,
-        sku: 'LBJC-01',
-        stockQuantity: 50,
-        imageUrl: 'https://picsum.photos/id/1061/300/300',
-        images: [
-          { url: 'https://picsum.photos/id/1061/300/300', altText: 'Lavender Bliss Jar Candle front view' },
-          { url: 'https://picsum.photos/id/1062/300/300', altText: 'Lavender Bliss Jar Candle burning' },
-          { url: 'https://picsum.photos/id/1063/300/300', altText: 'Lavender Bliss Jar Candle side view' },
-          { url: 'https://picsum.photos/id/1064/300/300', altText: 'Lavender Bliss Jar Candle candle holder' },
-          { url: 'https://picsum.photos/id/1065/300/300', altText: 'Lavender Bliss Jar Candle candle holder' },
-          { url: 'https://picsum.photos/id/1066/300/300', altText: 'Lavender Bliss Jar Candle candle holder' }
-        ],
-        category: {
-          id: 'cat_01',
-          name: 'Candles',
-          slug: 'candles'
-        },
-        metadata: { // Nested metadata
-          title: 'Lavender Bliss Jar Candle | Five A Crafts', // More specific title
-          description: 'Shop the Lavender Bliss Jar Candle at Five A Crafts. Hand-poured, sustainable soy wax candle with calming lavender scent.', // SEO-focused description
-          ogImageUrl: 'https://www.yourdomain.com/assets/og-image-lavender-candle.jpg',
-          twitterImageUrl: 'https://www.yourdomain.com/assets/twitter-image-lavender-candle.jpg'
-        },
-        variations: [
-          {
-            "id": "color",
-            "name": "Color",
-            "options": [
-              { "name": "White", "value": "white" },
-              { "name": "Black", "value": "black" },
-              { "name": "Off-white", "value": "offwhite" },
-              { "name": "Gold", "value": "gold_color" }
-            ]
-            // selectedValue could be pre-filled by the backend or set to a default
-          },
-          {
-            "id": "gold-paper",
-            "name": "Gold Paper",
-            "options": [
-              { "name": "Silver", "value": "silver_paper" },
-              { "name": "Gold", "value": "gold_paper" }
-            ]
-          },
-          // ... and so on for other variation categories like "Stones"
-        ]
-      };
-    } else if (productSlug === 'rustic-wooden-bowl') {
-      // Add another mock product example
-      mockProductData = {
-        id: 'prod_456',
-        slug: 'rustic-wooden-bowl',
-        name: 'Rustic Wooden Bowl',
-        description: 'Add a touch of natural charm to your home with this beautiful rustic wooden bowl. Hand-carved from sustainably sourced mango wood, each bowl features unique grain patterns. Ideal for serving salads, fruits, or as a decorative centerpiece.',
-        price: 34.50,
-        sku: 'RWB-01',
-        stockQuantity: 25,
-        imageUrl: 'https://www.yourdomain.com/assets/images/wooden-bowl-1.jpg',
-        images: [
-          { url: 'https://www.yourdomain.com/assets/images/wooden-bowl-1.jpg', altText: 'Rustic Wooden Bowl top view' },
-          { url: 'https://www.yourdomain.com/assets/images/wooden-bowl-2.jpg', altText: 'Rustic Wooden Bowl side view' }
-        ],
-        category: {
-          id: 'cat_02',
-          name: 'Home Decor',
-          slug: 'home-decor'
-        },
-        metadata: {
-          title: 'Rustic Wooden Bowl | Hand-Carved Decor | Five A Crafts',
-          description: 'Discover our unique Rustic Wooden Bowl, hand-carved from sustainable mango wood. Perfect for serving or decoration. Shop now at Five A Crafts.',
-          ogImageUrl: 'https://www.yourdomain.com/assets/og-image-wooden-bowl.jpg',
-          twitterImageUrl: 'https://www.yourdomain.com/assets/twitter-image-wooden-bowl.jpg'
-        }
-      };
-    }
-
-    // Simulate API call result
-    if (mockProductData) {
-      return of(mockProductData).pipe(delay(800)); // Increase delay to see loading state
-    } else {
-      // Simulate a 'Not Found' scenario
-      console.error(`Mock product data not found for slug: ${productSlug}`);
-      return throwError(() => new Error('Product not found')); // Simulate HTTP 404
-    }
+  getProductDetails(productSlug: string): Observable<CommonApiResponse> {
+    return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/products/${productSlug}`);
   }
 
   getProductReviews(productSlug: string): Observable<ReviewsData> {
@@ -264,7 +166,7 @@ export class ProductsApiService {
 
   getFavoriteProducts(): Observable<Product[]> {
     // return all products with isFavorite === true
-    const mockFavoriteProducts: Product[] = this.allMockProducts.filter(p => p.isFavorite);
+    const mockFavoriteProducts: Product[] = this.allMockProducts.filter(p => p.in_wishlist);
     return of(mockFavoriteProducts).pipe(delay(300));
   }
 }
