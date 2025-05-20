@@ -1,21 +1,22 @@
 import {ProductImageData} from './product-image-data';
 import {ProductCategoryInfo} from './product-category-info';
 import {PageMetadata} from '../../../core/models/page-meta-data';
+import {Price} from '../../../core/models/price';
 
 export interface ProductDetailsData {
   id: string | number;
   slug: string;
-  name: string;
+  title: string;
+  product_class?: string;
   description: string; // Main product description for the page body
-  price: number;
-  sku?: string;
-  inStock?: boolean;
-  stockQuantity?: number;
-  isFavorite?: boolean;
-  imageUrl: string;
+  recommended_products: any[];
+  product_options: any[];
+  price: Price;
+  calculate_rating: any;
+  num_approved_reviews: number;
+  stock?: number;
+  in_wishlist?: boolean;
   images: ProductImageData[];
-  category: ProductCategoryInfo; // Include category info for breadcrumbs etc.
-  metadata: PageMetadata; // Nest the metadata within the main data object
-  variations?: any[];
-  // Add any other relevant product fields: attributes, reviews, etc.
+  rating: number | null;
+  metaData: PageMetadata;
 }
