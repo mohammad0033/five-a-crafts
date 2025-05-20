@@ -29,6 +29,7 @@ import {Product} from '../../../../core/models/product';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
 import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
 import {CartService} from '../../../../core/services/cart.service';
+import {Url} from '../../../../core/constants/base-url';
 
 @UntilDestroy()
 @Component({
@@ -146,6 +147,7 @@ export class ProductDetailsComponent implements OnInit {
 
     // Product data from resolver
     const resolvedProduct = this.route.snapshot.data['productData'] as ProductDetailsData | null;
+    console.log('Product data from resolver:', resolvedProduct);
     this.isLoading = true; // Start with loading true
 
     if (resolvedProduct) {
@@ -153,14 +155,14 @@ export class ProductDetailsComponent implements OnInit {
       this.initializeVariationsForm(); // Call this after product is set
       this.errorLoading = false;
       // Meta tags, images, stock setup
-      const canonicalUrl = `https://www.yourdomain.com/products/${this.product.slug}`;
+      const canonicalUrl = `${Url.baseUrl}/api/oscar/products/${this.product.slug}`;
       this.metaTagService.setTags(
-        this.product.metadata, this.fallbackMetaData,
+        this.product.metaData, this.fallbackMetaData,
         { canonicalUrl, ogType: 'product', twitterHandle: this.twitterHandle }
       );
-      this.productStock = this.product.stockQuantity;
+      this.productStock = this.product.stock;
       this.images = Array.isArray(this.product.images)
-        ? this.product.images.map(item => new ImageItem({ src: item.url, thumb: item.url }))
+        ? this.product.images.map(item => new ImageItem({ src: item.original, thumb: item.original }))
         : [];
 
       // Fetch reviews for this product
@@ -184,9 +186,9 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   private initializeVariationsForm(): void {
-    if (this.product && this.product.variations) {
+    if (this.product && this.product.product_options) {
       const groupConfig: { [key: string]: any } = {};
-      this.product.variations.forEach(category => {
+      this.product.product_options.forEach(category => {
         // Set initial value: either pre-selected from backend, or first option, or null
         const initialValue = category.selectedValue || (category.options.length > 0 ? category.options[0].value : null);
         groupConfig[category.id] = [initialValue, Validators.required]; // Example: make each variation required
@@ -198,7 +200,7 @@ export class ProductDetailsComponent implements OnInit {
       // Optional: If you still want to use category.selectedValue for display in the template
       // you can subscribe to form changes to update it, or derive it from form value.
       this.variationsForm.valueChanges.pipe(untilDestroyed(this)).subscribe(values => {
-        this.product?.variations?.forEach(cat => {
+        this.product?.product_options?.forEach(cat => {
           cat.selectedValue = values[cat.id];
         });
         console.log('Variation Form Values:', values);
@@ -349,19 +351,19 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   get categoryLink(): string | null {
-    return this.product ? `/categories/${this.product.category.slug}` : null;
+    return this.product ? `/categories/${this.product.product_class}` : null;
   }
 
   toggleFavorite(event: MouseEvent): void {
     event.stopPropagation();
     if (this.product) {
-      this.product.isFavorite = !this.product.isFavorite;
-      if (this.product.isFavorite) {
+      this.product.in_wishlist = !this.product.in_wishlist;
+      if (this.product.in_wishlist) {
         this.isAnimating = true;
         setTimeout(() => { this.isAnimating = false; }, 500);
       }
       this.favoriteToggled.emit(this.product);
-      console.log(`Favorite status for ${this.product.name}: ${this.product.isFavorite}`);
+      console.log(`Favorite status for ${this.product.title}: ${this.product.in_wishlist}`);
     } else {
       console.error('Product data is null. Cannot toggle favorite.');
     }
@@ -392,7 +394,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   private getSelectedVariations(): { [key: string]: string | undefined } | null { // Modified to return null for invalid
-    if (this.product && this.product.variations && this.product.variations.length > 0) {
+    if (this.product && this.product.product_options && this.product.product_options.length > 0) {
       if (this.variationsForm.invalid) {
         this.snackBar.open(this.translate.instant('product.selectVariationsError'), this.translate.instant('common.dismiss'), {
           ...this.snackBarConfig,
@@ -404,7 +406,7 @@ export class ProductDetailsComponent implements OnInit {
       }
       const formValues = this.variationsForm.value;
       const selections: { [key: string]: string | undefined } = {};
-      this.product.variations.forEach(category => {
+      this.product.product_options.forEach(category => {
         selections[category.name] = formValues[category.id];
       });
       return selections;
@@ -426,14 +428,14 @@ export class ProductDetailsComponent implements OnInit {
     }
     const selectedVariations = this.getSelectedVariations();
     // Check if variations were required and not selected (getSelectedVariations returns null)
-    if (selectedVariations === null && this.product.variations && this.product.variations.length > 0) {
+    if (selectedVariations === null && this.product.product_options && this.product.product_options.length > 0) {
       return; // Stop if variations were required but invalid/not selected
     }
 
-    console.log(`Buy It Now clicked for product: ${this.product.name}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
+    console.log(`Buy It Now clicked for product: ${this.product.title}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
 
     this.cartService.addItem(
-      this.product as Product, // Cast if ProductDetailsData is a superset of Product
+      this.product as unknown as Product, // Cast if ProductDetailsData is a superset of Product
       this.productQty,
       this.productStock,
       selectedVariations || {} // Pass empty object if selectedVariations is null (no variations)
@@ -456,7 +458,7 @@ export class ProductDetailsComponent implements OnInit {
 
     const selectedVariations = this.getSelectedVariations();
     // If variations are required and not selected, getSelectedVariations will show a snackbar and return null.
-    if (selectedVariations === null && this.product.variations && this.product.variations.length > 0) {
+    if (selectedVariations === null && this.product.product_options && this.product.product_options.length > 0) {
       return; // Stop if variations were required but invalid/not selected
     }
 
@@ -464,13 +466,13 @@ export class ProductDetailsComponent implements OnInit {
     // We assume ProductDetailsData has the necessary fields of the Product model
     // or you might need to map it to a Product object.
     this.cartService.addItem(
-      this.product as Product, // Cast if ProductDetailsData is a superset of Product
+      this.product as unknown as Product, // Cast if ProductDetailsData is a superset of Product
       this.productQty,
       this.productStock,
       selectedVariations || {}
     );
 
-    const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.name, quantity: this.productQty });
+    const message = this.translate.instant('product.addToCartConfirmation', { productName: this.product.title, quantity: this.productQty });
     this.snackBar.open(message, this.translate.instant('common.dismiss'), {
       ...this.snackBarConfig,
     });

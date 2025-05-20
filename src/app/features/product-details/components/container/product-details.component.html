@@ -22,12 +22,12 @@
         <p class="mb-1 d-flex gap-2">
           <span class="fw-medium">{{'product.category' | translate}}:</span>
           <!-- Improved category itemprop -->
-          <a class="link-dark text-decoration-none" *ngIf="categoryLink; else categoryText" [routerLink]="categoryLink" itemprop="category">{{product?.category?.name}}</a>
+          <a class="link-dark text-decoration-none" *ngIf="categoryLink; else categoryText" [routerLink]="categoryLink" itemprop="category">{{product?.product_class}}</a>
           <ng-template #categoryText>
-            <span itemprop="category">{{product?.category?.name}}</span>
+            <span itemprop="category">{{product?.product_class}}</span>
           </ng-template>
         </p>
-        <h1 class="h3 fw-medium" itemprop="name">{{product?.name}}</h1>
+        <h1 class="h3 fw-medium" itemprop="name">{{product?.title}}</h1>
         <!-- Add itemprop="image" for the main product image -->
         <meta *ngIf="product?.images?.[0]?.url as imageUrl" itemprop="image" [content]="imageUrl" />
         <!-- Optional: Add itemprop="sku" if SKU is available -->
@@ -47,10 +47,10 @@
       <section>
         <p class="h3 fw-medium m-0" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
           <meta itemprop="priceCurrency" content="EGP" />
-          <span itemprop="price">{{product?.price}}</span> LE
+          <span itemprop="price">{{product?.price?.incl_tax ? product?.price?.incl_tax : 0}}</span> LE
           <!-- You can also add availability here if applicable -->
-           <link itemprop="availability" href="https://schema.org/InStock" *ngIf="product?.inStock"/>
-           <link itemprop="availability" href="https://schema.org/OutOfStock" *ngIf="!product?.inStock"/>
+           <link itemprop="availability" href="https://schema.org/InStock" *ngIf="product?.stock && product?.stock! > 0"/>
+           <link itemprop="availability" href="https://schema.org/OutOfStock" *ngIf="!product?.stock || product?.stock === 0"/>
         </p>
       </section>
 
@@ -71,18 +71,18 @@
             </button>
           </div>
           <div *ngIf="product" class="mx-2"> <!-- mx-2 to align with the "Quantity" label -->
-            <ng-container *ngIf="product.inStock === false; else availableBlock">
+            <ng-container *ngIf="!product.stock || product.stock === 0; else availableBlock">
               <span class="text-danger fw-medium">{{ 'product.outOfStock' | translate }}</span>
             </ng-container>
             <ng-template #availableBlock>
               <!-- product.inStock is true or undefined here -->
-              <ng-container *ngIf="product.stockQuantity && product.stockQuantity > 0; else genericInStockBlock">
-            <span class="text-main-primary">
-              {{ product.stockQuantity }}
-              <span *ngIf="product.stockQuantity === 1">{{ 'product.itemLeft' | translate }}</span>
-              <span *ngIf="product.stockQuantity >= 2 && product.stockQuantity <= 10">{{ 'product.itemsLeft' | translate }}</span>
-              <span *ngIf="product.stockQuantity > 11">{{ 'product.itemLeft2' | translate }}</span>
-            </span>
+              <ng-container *ngIf="product.stock && product.stock > 0; else genericInStockBlock">
+                <span class="text-main-primary">
+                  {{ product.stock }}
+                  <span *ngIf="product.stock === 1">{{ 'product.itemLeft' | translate }}</span>
+                  <span *ngIf="product.stock >= 2 && product.stock <= 10">{{ 'product.itemsLeft' | translate }}</span>
+                  <span *ngIf="product.stock > 11">{{ 'product.itemLeft2' | translate }}</span>
+                </span>
               </ng-container>
               <ng-template #genericInStockBlock>
                 <!-- This case covers:
@@ -98,11 +98,11 @@
       </section>
 
       <!-- START: Product Variations Section -->
-      <section *ngIf="product?.variations && product?.variations?.length! > 0"
+      <section *ngIf="product?.product_options && product?.product_options?.length! > 0"
                class="d-flex flex-column gap-3 mt-3"
                aria-label="Product variations">
         <form [formGroup]="variationsForm">
-          <div *ngFor="let variationCategory of product?.variations" class="variation-category mb-3">
+          <div *ngFor="let variationCategory of product?.product_options" class="variation-category mb-3">
             <h3 class="h6 mb-2">{{ variationCategory.name }}:</h3>
             <div class="d-flex flex-wrap gap-2 variation-options" role="radiogroup" [attr.aria-labelledby]="variationCategory.id + '-label'">
               <span id="{{variationCategory.id}}-label" class="visually-hidden">{{variationCategory.name}}</span>
@@ -144,18 +144,18 @@
         <button class="btn btn-link link-dark p-0 text-decoration-none d-flex gap-2">
           <span>
           <fa-icon
-            [icon]="product?.isFavorite ? faHeartSolid : faHeartRegular"
+            [icon]="product?.in_wishlist ? faHeartSolid : faHeartRegular"
             class="favorite-icon cursor-pointer"
             [ngClass]="{
-              'favorite': product?.isFavorite,
+              'favorite': product?.in_wishlist,
               'animate-heartbeat': isAnimating
             }"
             (click)="toggleFavorite($event)"
-            [title]="(product?.isFavorite ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))">
+            [title]="(product?.in_wishlist ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))">
           </fa-icon>
           </span>
           <span>
-            {{(product?.isFavorite ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))}}
+            {{(product?.in_wishlist ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))}}
           </span>
         </button>
       </footer>
@@ -262,7 +262,7 @@
         <h3 class="visually-hidden">{{ 'product.customerReviewsList' | translate }}</h3>
         <ng-container *ngIf="visibleReviews.length > 0; else noReviewsTemplate">
           <article *ngFor="let review of visibleReviews" class="review-item pb-3 mb-3" itemprop="review" itemscope itemtype="https://schema.org/Review">
-            <meta itemprop="itemReviewed" [content]="product?.name" />
+            <meta itemprop="itemReviewed" [content]="product?.title" />
             <header class="d-flex flex-column gap-2 mb-2">
               <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
                 <meta itemprop="ratingValue" [content]="review.rating.toString()">
