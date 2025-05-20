@@ -2,7 +2,7 @@ import {ActivatedRouteSnapshot, ResolveFn, Router, RouterStateSnapshot} from '@a
 import {inject} from '@angular/core';
 import {ProductDetailsData} from '../models/product-details-data';
 import {catchError, EMPTY, Observable} from 'rxjs';
-import {ProductsApiService} from '../../../core/services/products-api.service';
+import {ProductsService} from '../../../core/services/products.service';
 
 export const productDetailsResolver: ResolveFn<ProductDetailsData | null> = (
   route: ActivatedRouteSnapshot, // We need the route to access parameters
@@ -10,7 +10,7 @@ export const productDetailsResolver: ResolveFn<ProductDetailsData | null> = (
 ): Observable<ProductDetailsData | null> => {
 
   // Inject the ProductsApiService
-  const productsService = inject(ProductsApiService);
+  const productsService = inject(ProductsService);
   const router = inject(Router); // Inject Router
   // Get the product slug from the route parameters
   const productSlug = route.paramMap.get('productSlug');
