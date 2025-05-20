@@ -12,9 +12,9 @@ export const aboutPageMetaResolver: ResolveFn<PageMetadata | null> = (
 
   // Assume contentService has a method getAboutPageMetadata()
   return contentService.getAboutPageMetadata().pipe( // Use the new method
-    map(metadata => metadata),
+    map(metaData => metaData),
     catchError(error => {
-      console.error('Error fetching about page metadata in resolver:', error);
+      console.error('Error fetching about page metaData in resolver:', error);
       return of(null); // Return null on error
     })
   );
