@@ -29,7 +29,7 @@ export class FavoritesApiService {
     const product = this.productsApiService.allMockProducts.find(p => p.id === productId);
     if (product) {
       product.in_wishlist = true; // Update mock data source
-      return of({ ...product, isFavorite: true }).pipe(delay(500)); // Return a copy
+      return of({ ...product, in_wishlist: true }).pipe(delay(500)); // Return a copy
     }
     return throwError(() => new Error('Product not found for favoriting (backend sim)'));
   }
@@ -100,7 +100,7 @@ export class FavoritesApiService {
   }
 
   // Helper to check if a product is a favorite, useful for individual cards
-  public isFavorite(productId: number | string): Observable<boolean> {
+  public in_wishlist(productId: number | string): Observable<boolean> {
     return this.favorites$.pipe(
       map(favorites => favorites.some(p => p.id === productId))
     );
