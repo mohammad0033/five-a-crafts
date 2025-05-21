@@ -162,5 +162,6 @@
   "common.saving": "جاري الحفظ...",
   "common.cancel": "إلغاء",
   "common.loading": "تحميل...",
-  "common.notProvided": "غير موجود"
+  "common.notProvided": "غير موجود",
+  "common.noImage": "لا يوجد صورة"
 }

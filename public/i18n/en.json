@@ -162,5 +162,6 @@
   "common.saving": "Saving...",
   "common.cancel": "Cancel",
   "common.loading": "Loading...",
-  "common.notProvided": "Not provided"
+  "common.notProvided": "Not provided",
+  "common.noImage": "No image"
 }
