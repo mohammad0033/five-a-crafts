@@ -9,7 +9,7 @@ import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
-import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, KeyValuePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatRadioModule} from '@angular/material/radio';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
@@ -34,6 +34,7 @@ import {CheckoutPiiData, PiiService} from '../../../../core/services/pii.service
     FaIconComponent,
     AsyncPipe,
     NgForOf,
+    KeyValuePipe,
     MatDialogModule, // Add MatDialogModule
     MatButtonModule,
     NgClass

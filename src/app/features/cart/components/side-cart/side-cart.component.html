@@ -15,11 +15,9 @@
         <!-- Added list-unstyled, m-0, p-0 to reset default list styles. Adjust as per your CSS setup. -->
         <li *ngFor="let item of items; trackBy: trackByCartItemId" class="cart-item">
           <app-cart-product
-            [product]="item.product"
-            [productQty]="item.quantity"
-            [productStock]="item.originalStock"
+            [item]="item"
             (quantityChange)="handleQuantityChange($event)"
-            (removeItem)="handleRemoveItem($event.toString())">
+            (removeItem)="handleRemoveItem($event)">
             <!-- Pass other relevant item details if app-cart-product needs them, e.g., selected variations -->
           </app-cart-product>
         </li>

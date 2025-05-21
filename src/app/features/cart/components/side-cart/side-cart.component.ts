@@ -70,21 +70,22 @@ export class SideCartComponent implements OnInit, OnDestroy {
     this.cartService.closeDrawer();
   }
 
-  handleQuantityChange(event: { productId: string | number; newQuantity: number }): void {
-    this.cartService.updateItemQuantity(event.productId, event.newQuantity);
+  // Event from CartProductComponent should now emit cartItemId and newQuantity
+  handleQuantityChange(event: { cartItemId: string; newQuantity: number }): void {
+    this.cartService.updateItemQuantity(event.cartItemId, event.newQuantity);
   }
 
-  handleRemoveItem(productId: string | number): void {
+  handleRemoveItem(cartItemId: string): void {
     // Optional: Add a confirmation dialog before removing
     // e.g., if (confirm(this.translate.instant('cart.confirmRemoveItem'))) { ... }
-    this.cartService.removeItem(productId);
+    console.log(`Removing item with cart ID: ${cartItemId}`);
+    this.cartService.removeItem(cartItemId);
   }
 
   // For *ngFor trackBy to improve performance when re-rendering lists
-  trackByCartItemId(index: number, item: CartItem): string | number {
-    // A truly unique ID per cart item instance would be best if items can have same product ID but different variations.
-    // For now, product.id is a good default if variations aren't distinguishing cart items.
-    return item.product.id;
+  // Use the unique cart item ID for trackBy
+  trackByCartItemId(index: number, item: CartItem): string {
+    return item.id;
   }
 
   closeCartAndNavigateToShop(): void {

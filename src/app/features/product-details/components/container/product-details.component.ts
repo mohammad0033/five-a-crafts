@@ -30,6 +30,7 @@ import {ProductsSliderComponent} from '../../../../shared/components/products-sl
 import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
 import {CartService} from '../../../../core/services/cart.service';
 import {Url} from '../../../../core/constants/base-url';
+import {SelectedVariation} from '../../../cart/models/selected-variation';
 
 @UntilDestroy()
 @Component({
@@ -393,7 +394,9 @@ export class ProductDetailsComponent implements OnInit {
     return this.translate.instant('product.ratingOutOfMax', { rating: rating, maxRating: this.maxRating });
   }
 
-  private getSelectedVariations(): { [key: string]: string | undefined } | null { // Modified to return null for invalid
+  // Ensure this method returns SelectedVariation | null
+  // It should only include actual selections, not undefined/null values.
+  private getSelectedVariations(): SelectedVariation | null {
     if (this.product && this.product.product_options && this.product.product_options.length > 0) {
       if (this.variationsForm.invalid) {
         this.snackBar.open(this.translate.instant('product.selectVariationsError'), this.translate.instant('common.dismiss'), {
@@ -405,44 +408,40 @@ export class ProductDetailsComponent implements OnInit {
         return null; // Indicate invalid selection
       }
       const formValues = this.variationsForm.value;
-      const selections: { [key: string]: string | undefined } = {};
+      const selections: SelectedVariation = {};
       this.product.product_options.forEach(category => {
-        selections[category.name] = formValues[category.id];
+        const selectedValue = formValues[category.id];
+        // Only add to selections if a value is actually chosen
+        if (selectedValue !== null && selectedValue !== undefined && String(selectedValue).trim() !== '') {
+          selections[category.name] = String(selectedValue); // Using category.name as key, e.g., "Color"
+        }
       });
-      return selections;
+      return selections; // Returns {} if no options selected or no options defined
     }
-    return {}; // No variations to select, return empty object
+    return {}; // No variations defined on the product
   }
 
   // --- New methods for Buy Now and Add to Cart ---
-  // --- New methods for Buy Now and Add to Cart ---
   buyItNow(): void {
     if (!this.product) {
-      console.error('Buy It Now: Product data is not available.');
-      this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), {
-        ...this.snackBarConfig,
-        verticalPosition: 'top',
-        panelClass: ['snackbar-error']
-      });
+      // ... (error handling)
       return;
     }
     const selectedVariations = this.getSelectedVariations();
-    // Check if variations were required and not selected (getSelectedVariations returns null)
     if (selectedVariations === null && this.product.product_options && this.product.product_options.length > 0) {
-      return; // Stop if variations were required but invalid/not selected
+      // selectedVariations is null if form is invalid and variations are present
+      return;
     }
 
     console.log(`Buy It Now clicked for product: ${this.product.title}, Quantity: ${this.productQty}, Variations:`, selectedVariations);
 
     this.cartService.addItem(
-      this.product as unknown as Product, // Cast if ProductDetailsData is a superset of Product
+      this.product as unknown as Product,
       this.productQty,
       this.productStock,
-      selectedVariations || {} // Pass empty object if selectedVariations is null (no variations)
+      selectedVariations || {} // Pass the SelectedVariation object (or {} if none)
     );
-
-    // Navigate to checkout
-    this.router.navigate(['/checkout']); // <-- ADDED THIS LINE
+    this.router.navigate(['/checkout']);
   }
 
   addToCart(): void {

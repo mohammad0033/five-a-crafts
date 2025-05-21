@@ -70,30 +70,28 @@ export class CartComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleQuantityChange(event: { productId: string | number; newQuantity: number }): void {
-    this.cartService.updateItemQuantity(event.productId, event.newQuantity);
+  // Updated to expect cartItemId
+  handleQuantityChange(event: { cartItemId: string; newQuantity: number }): void {
+    this.cartService.updateItemQuantity(event.cartItemId, event.newQuantity);
   }
 
-  handleRemoveItem(productId: string | number): void {
+  // Updated to expect cartItemId (string)
+  handleRemoveItem(cartItemId: string): void {
     // Optional: Add a confirmation dialog before removing
     // e.g., if (confirm(this.translate.instant('cart.confirmRemoveItem'))) { ... }
-    this.cartService.removeItem(productId);
+    this.cartService.removeItem(cartItemId);
   }
 
-  // For *ngFor trackBy to improve performance when re-rendering lists
-  trackByCartItemId(index: number, item: CartItem): string | number {
-    // A truly unique ID per cart item instance would be best if items can have same product ID but different variations.
-    // For now, product.id is a good default if variations aren't distinguishing cart items.
-    return item.product.id;
+  // Updated to use the unique cart item ID
+  trackByCartItemId(index: number, item: CartItem): string {
+    return item.id; // Use the unique cart item ID (string)
   }
 
   closeCartAndNavigateToShop(): void {
-    this.cartService.closeDrawer();
     this.router.navigate(['/categories']); // Adjust this route to your actual shop page
   }
 
   proceedToCheckout(): void {
-    this.cartService.closeDrawer();
     this.router.navigate(['/checkout']); // Adjust this route to your actual checkout page
     // console.log('Proceeding to checkout with items:', this.cartService.cartItems.value);
   }

@@ -120,6 +120,11 @@
                 <span class="fw-medium">{{ item.product.title || 'Product Name' }}</span>
               </div>
             </div>
+            <div *ngIf="item.selectedVariations" class="product-variations">
+              <small *ngFor="let variation of item.selectedVariations | keyvalue" class="d-block text-muted">
+                {{ variation.key }}: {{ variation.value }}
+              </small>
+            </div>
             <span class="fw-medium flex-shrink-0">x{{ item.quantity }}</span>
             <span class="fw-medium text-nowrap flex-shrink-0">{{ item.product.price }} {{ 'product.currencySymbol' | translate }}</span>
           </li>

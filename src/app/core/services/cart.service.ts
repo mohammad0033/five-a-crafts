@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { CartItem } from '../../features/cart/models/cart-item';
 import { Product } from '../models/product';
 import {isPlatformBrowser} from '@angular/common';
+import {SelectedVariation} from '../../features/cart/models/selected-variation';
 
 const CART_STORAGE_KEY = 'fiveACraftsShoppingCart';
 const BASE_DISCOUNT_STORAGE_KEY = 'fiveACraftsBaseDiscount';
@@ -82,6 +83,21 @@ export class CartService {
     }
   }
 
+  // --- Helper to generate a unique ID for a cart item based on product and variations ---
+  private generateCartItemId(productId: number, variations?: SelectedVariation): string {
+    const baseId = String(productId);
+    if (!variations || Object.keys(variations).length === 0) {
+      return baseId;
+    }
+    // Sort keys of variations for a consistent ID, regardless of object key order.
+    // Normalize keys and values for robustness (e.g., lowercase, replace spaces).
+    const sortedVariationKeys = Object.keys(variations).sort();
+    const variationString = sortedVariationKeys
+      .map(key => `${key.toLowerCase().replace(/\s+/g, '-')}_${String(variations[key]).toLowerCase().replace(/\s+/g, '-')}`)
+      .join(';'); // Use a separator that's unlikely in keys/values
+    return `${baseId}-${variationString}`;
+  }
+
   // --- LocalStorage Helper Methods with Expiration ---
   private saveDataWithExpiration<T>(key: string, data: T): void {
     if (this.isBrowser) {
@@ -142,43 +158,73 @@ export class CartService {
   private loadCartStateFromLocalStorage(): void {
     if (!this.isBrowser) return;
 
-    // Load Cart Items
     let loadedCartItems = this.loadDataWithExpiration<CartItem[]>(CART_STORAGE_KEY);
-    if (loadedCartItems === null || !Array.isArray(loadedCartItems) || !loadedCartItems.every(item =>
-      item && typeof item.product === 'object' && item.product !== null && typeof item.product.id !== 'undefined'
-    )) {
-      if (loadedCartItems !== null) console.warn('CartService: Loaded cart items were invalid or expired, resetting.');
-      loadedCartItems = []; // Default if expired, not found, or invalid
-    }
-    this.cartItemsSource.next(loadedCartItems);
-    this.saveCartItemsToLocalStorage(); // Always re-save to refresh expiration or save default
 
-    // Load Base Discount
+    // Updated validation to check for the new `id` field and other core properties
+    if (loadedCartItems === null || !Array.isArray(loadedCartItems) || !loadedCartItems.every(item =>
+        item &&
+        typeof item.id === 'string' && // CRUCIAL: Check for the new cart item ID
+        item.product && typeof item.product === 'object' && typeof item.product.id === 'number' &&
+        typeof item.quantity === 'number'
+      // item.selectedVariations is optional, so no strict check unless always expected
+    )) {
+      if (loadedCartItems !== null && Array.isArray(loadedCartItems)) {
+        console.warn('CartService: Loaded cart items were invalid or malformed. Attempting migration...');
+        // Attempt to migrate old items by generating IDs
+        const migratedItems: CartItem[] = [];
+        loadedCartItems.forEach(item => {
+          if (item && item.product && typeof item.product.id === 'number') {
+            // @ts-ignore - Old items might not have 'id' or 'selectedVariations' typed correctly
+            if (!item.id) {
+              // @ts-ignore
+              item.id = this.generateCartItemId(item.product.id, item.selectedVariations);
+              console.log(`CartService: Migrated cart item, generated ID: ${item.id} for product ${item.product.id}`);
+            }
+            // Ensure all required fields are present after potential migration
+            if (typeof item.id === 'string' && item.product && typeof item.quantity === 'number') {
+              migratedItems.push(item as CartItem);
+            } else {
+              console.warn('CartService: Could not fully migrate item, discarding:', item);
+            }
+          } else {
+            console.warn('CartService: Discarding invalid item during migration:', item);
+          }
+        });
+        loadedCartItems = migratedItems;
+      } else {
+        if (loadedCartItems !== null) console.warn('CartService: Loaded cart items were invalid or expired, resetting.');
+        loadedCartItems = []; // Default if expired, not found, or truly invalid
+      }
+    }
+
+    this.cartItemsSource.next(loadedCartItems);
+    // Always re-save to ensure new structure (with IDs) and refresh expiration
+    this.saveCartItemsToLocalStorage();
+
+    // ... (loading for discounts and shipping fee remains the same)
     let loadedBaseDiscount = this.loadDataWithExpiration<number>(BASE_DISCOUNT_STORAGE_KEY);
     if (loadedBaseDiscount === null || typeof loadedBaseDiscount !== 'number') {
       if (loadedBaseDiscount !== null) console.warn('CartService: Loaded base discount was invalid or expired, resetting.');
       loadedBaseDiscount = 30; // Default
     }
     this.baseDiscountAmountSource.next(loadedBaseDiscount);
-    this.saveBaseDiscountToLocalStorage(); // Always re-save
+    this.saveBaseDiscountToLocalStorage();
 
-    // Load Promo Discount
     let loadedPromoDiscount = this.loadDataWithExpiration<number>(PROMO_DISCOUNT_STORAGE_KEY);
     if (loadedPromoDiscount === null || typeof loadedPromoDiscount !== 'number') {
       if (loadedPromoDiscount !== null) console.warn('CartService: Loaded promo discount was invalid or expired, resetting.');
       loadedPromoDiscount = 0; // Default
     }
     this.promoDiscountAmountSource.next(loadedPromoDiscount);
-    this.savePromoDiscountToLocalStorage(); // Always re-save
+    this.savePromoDiscountToLocalStorage();
 
-    // Load Shipping Fee
     let loadedShippingFee = this.loadDataWithExpiration<number>(SHIPPING_FEE_STORAGE_KEY);
     if (loadedShippingFee === null || typeof loadedShippingFee !== 'number') {
       if (loadedShippingFee !== null) console.warn('CartService: Loaded shipping fee was invalid or expired, resetting.');
       loadedShippingFee = 50; // Default
     }
     this.shippingFeeSource.next(loadedShippingFee);
-    this.saveShippingFeeToLocalStorage(); // Always re-save
+    this.saveShippingFeeToLocalStorage();
   }
 
 
@@ -197,9 +243,11 @@ export class CartService {
     this.drawerOpen.next(false);
   }
 
-  addItem(product: Product, quantity: number, originalStock?: number, variations?: any): void {
+  addItem(product: Product, quantity: number, originalStock?: number, variations?: SelectedVariation): void {
     const currentItems = this.cartItemsSource.value;
-    const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
+    const cartItemId = this.generateCartItemId(product.id, variations);
+
+    const existingItemIndex = currentItems.findIndex(item => item.id === cartItemId);
 
     if (existingItemIndex > -1) {
       const updatedItems = [...currentItems];
@@ -210,16 +258,24 @@ export class CartService {
       }
       updatedItems[existingItemIndex].quantity = newQuantity;
       this.cartItemsSource.next(updatedItems);
+      console.log(`CartService: Updated quantity for item ${cartItemId} to ${newQuantity}`);
     } else {
-      const newItem: CartItem = { product, quantity, originalStock };
+      const newItem: CartItem = {
+        id: cartItemId,
+        product,
+        quantity,
+        originalStock,
+        selectedVariations: variations && Object.keys(variations).length > 0 ? variations : undefined
+      };
       this.cartItemsSource.next([...currentItems, newItem]);
+      console.log(`CartService: Added new item ${cartItemId} with quantity ${quantity}`, newItem);
     }
     this.saveCartItemsToLocalStorage();
   }
 
-  updateItemQuantity(productId: string | number, newQuantity: number): void {
+  updateItemQuantity(cartItemId: string, newQuantity: number): void {
     const currentItems = this.cartItemsSource.value;
-    const itemIndex = currentItems.findIndex(item => item.product.id === productId);
+    const itemIndex = currentItems.findIndex(item => item.id === cartItemId);
 
     if (itemIndex > -1) {
       const updatedItems = [...currentItems];
@@ -228,16 +284,28 @@ export class CartService {
         const stockLimit = itemToUpdate.originalStock;
         itemToUpdate.quantity = stockLimit !== undefined ? Math.min(newQuantity, stockLimit) : newQuantity;
       } else {
-        updatedItems.splice(itemIndex, 1);
+        updatedItems.splice(itemIndex, 1); // Remove if new quantity is 0 or less
       }
       this.cartItemsSource.next(updatedItems);
       this.saveCartItemsToLocalStorage();
+      console.log(`CartService: Item ${cartItemId} quantity updated to ${itemToUpdate.quantity}. Items in cart:`, updatedItems.length);
+    } else {
+      console.warn(`CartService: Item with cart ID ${cartItemId} not found for quantity update.`);
     }
   }
 
-  removeItem(productId: string | number): void {
-    const updatedItems = this.cartItemsSource.value.filter(item => item.product.id !== productId);
+  removeItem(cartItemId: string): void {
+    const currentItems = this.cartItemsSource.value;
+    const updatedItems = currentItems.filter(item => item.id !== cartItemId);
+
+    if (updatedItems.length < currentItems.length) {
+      console.log(`CartService: Item with cart ID ${cartItemId} found and removed.`);
+    } else {
+      console.warn(`CartService: Item with cart ID ${cartItemId} NOT found for removal. Cart items checked:`, currentItems.map(i => i.id));
+    }
+
     this.cartItemsSource.next(updatedItems);
+    console.log(`CartService: Updated cart items after attempting removal of ID ${cartItemId}:`, this.cartItemsSource.value);
     this.saveCartItemsToLocalStorage();
   }
 

@@ -12,21 +12,20 @@
 
       <ng-container *ngIf="cartItems$ | async as items; else emptyCart">
         <ul *ngIf="items.length > 0; else emptyCart" class="d-flex flex-column list-unstyled p-0 gap-3">
+          <!-- Pass the whole 'item' to app-cart-product -->
+          <!-- trackByCartItemId is already correctly defined in the component -->
           <li *ngFor="let item of items; trackBy: trackByCartItemId" class="cart-item">
             <app-cart-product
-              [product]="item.product"
-              [productQty]="item.quantity"
-              [productStock]="item.originalStock"
+              [item]="item"
               (quantityChange)="handleQuantityChange($event)"
-              (removeItem)="handleRemoveItem($event.toString())">
-              <!-- Pass other relevant item details if app-cart-product needs them, e.g., selected variations -->
+              (removeItem)="handleRemoveItem($event)"> <!-- $event is now cartItemId (string) -->
             </app-cart-product>
           </li>
         </ul>
       </ng-container>
       <ng-template #emptyCart>
         <div class="text-center d-flex flex-column h-100">
-          <fa-icon [icon]="faShoppingBag" size="3x" class="text-muted mb-3"></fa-icon> <!-- Example icon -->
+          <fa-icon [icon]="faShoppingBag" size="3x" class="text-muted mb-3"></fa-icon>
           <p class="text-muted">{{ 'cart.emptyMessage' | translate }}</p>
           <button class="btn btn-outline-main-primary" (click)="closeCartAndNavigateToShop()">
             {{ 'cart.continueShopping' | translate }}

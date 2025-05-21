@@ -1,38 +1,48 @@
 <div class="d-flex gap-3 border border-1 border-secondary-subtle rounded-3 p-3 w-100">
-  <div class="image-container" *ngIf="product.images">
-    <!-- Consider adding alt text for accessibility -->
-    <img [src]="product.images[0].original" [alt]="product.title">
+  <div class="image-container" *ngIf="item.product.images && item.product.images.length > 0">
+    <img [src]="item.product.images[0].original"
+         [alt]="item.product.title">
   </div>
+  <div class=" image-container rounded d-flex align-items-center justify-content-center"
+       *ngIf="!item.product.images || item.product.images.length === 0">
+    <small>{{ 'common.noImage' | translate }}</small> <!-- Fallback for no image -->
+  </div>
+
   <div class="d-flex flex-column w-100">
-    <div class="d-flex justify-content-between align-items-center gap-2"> <!-- Changed to align-items-start -->
-      <h5 class="fs-6 m-0">{{product.title}}</h5>
-      <!-- Added (click) event, title, and cursor-pointer -->
+    <div class="d-flex justify-content-between align-items-center gap-2">
+      <h5 class="fs-6 m-0 text-truncate">{{ item.product.title }}</h5>
       <button class="btn btn-link text-danger p-0"
               type="button"
               (click)="triggerRemoveItem()"
               [title]="'cart.removeItem' | translate"
-              [attr.aria-label]="('cart.removeItemFor' | translate: {productName: product.title})">
+              [attr.aria-label]="('cart.removeItemFor' | translate: {productName: item.product.title})">
         <fa-icon [icon]="faTrash"></fa-icon>
       </button>
     </div>
-    <!-- Optional: Display variations if applicable -->
-    <!-- <p class="small text-muted" *ngIf="item.variations">Color: Red, Size: M</p> -->
-    <div class="d-flex justify-content-between align-items-center mt-auto"> <!-- Pushes price and quantity to bottom -->
+
+    <!-- Display selected variations -->
+    <div *ngIf="item.selectedVariations && variationKeys.length > 0" class="product-variations text-muted small mt-1 mb-1">
+      <span *ngFor="let key of variationKeys; let isLast = last">
+        {{ key }}: {{ item.selectedVariations![key] }}<span *ngIf="!isLast">, </span>
+      </span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-auto">
       <div>
-        <span class="fw-bold">{{product.price?.incl_tax}}</span> LE
+        <span class="fw-bold">{{ item.product.price?.incl_tax }}</span> LE
       </div>
       <div class="d-flex align-items-center gap-2 border border-1 rounded-2 border-secondary-subtle w-fit">
         <button class="btn border-0 py-1 px-2" type="button"
                 [attr.aria-label]="'product.decreaseQuantity' | translate"
                 (click)="decreaseProductQty()"
-                [disabled]="productQty <= 1">
+                [disabled]="item.quantity <= 1">
           <fa-icon [icon]="faMinus"></fa-icon>
         </button>
-        <span class="mx-2" aria-live="polite">{{ productQty }}</span>
+        <span class="mx-2" aria-live="polite">{{ item.quantity }}</span>
         <button class="btn border-0 py-1 px-2" type="button"
                 [attr.aria-label]="'product.increaseQuantity' | translate"
                 (click)="increaseProductQty()"
-                [disabled]="productStock !== undefined && productQty >= productStock">
+                [disabled]="item.originalStock !== undefined && item.quantity >= item.originalStock">
           <fa-icon [icon]="faPlus"></fa-icon>
         </button>
       </div>
