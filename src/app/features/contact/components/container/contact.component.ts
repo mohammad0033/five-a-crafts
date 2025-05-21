@@ -3,10 +3,13 @@ import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-dat
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
 import {ActivatedRoute} from '@angular/router';
 import {PageMetadata} from '../../../../core/models/page-meta-data';
+import {ContactSectionComponent} from '../../../../shared/components/contact-section/contact-section.component';
 
 @Component({
   selector: 'app-contact',
-  imports: [],
+  imports: [
+    ContactSectionComponent
+  ],
   templateUrl: './contact.component.html',
   standalone: true,
   styleUrl: './contact.component.scss'
