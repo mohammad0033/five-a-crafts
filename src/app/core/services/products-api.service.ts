@@ -161,7 +161,7 @@ export class ProductsApiService {
   }
 
   getFavoriteProducts(): Observable<Product[]> {
-    // return all products with isFavorite === true
+    // return all products with in_wishlist === true
     const mockFavoriteProducts: Product[] = this.allMockProducts.filter(p => p.in_wishlist);
     return of(mockFavoriteProducts).pipe(delay(300));
   }
