@@ -3,7 +3,7 @@ import {Price} from './price';
 
 export interface Product {
   url?: string;
-  id: string | number;
+  id: number;
   title: string;
   description: string;
   images?: ProductImageData[];
