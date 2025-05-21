@@ -1,0 +1,75 @@
+<main class="p-3 p-md-5 d-flex flex-column">
+  <header class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <h2 class="h5 m-0">{{ 'cart.yourCart' | translate }}</h2>
+    </div>
+  </header>
+
+  <div class="d-flex flex-column flex-md-row gap-3">
+
+<!--    items container-->
+    <section class="cart-items-container col-12 col-md-6"  aria-labelledby="cart-heading">
+
+      <ng-container *ngIf="cartItems$ | async as items; else emptyCart">
+        <ul *ngIf="items.length > 0; else emptyCart" class="d-flex flex-column list-unstyled gap-3">
+          <li *ngFor="let item of items; trackBy: trackByCartItemId" class="cart-item">
+            <app-cart-product
+              [product]="item.product"
+              [productQty]="item.quantity"
+              [productStock]="item.originalStock"
+              (quantityChange)="handleQuantityChange($event)"
+              (removeItem)="handleRemoveItem($event.toString())">
+              <!-- Pass other relevant item details if app-cart-product needs them, e.g., selected variations -->
+            </app-cart-product>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #emptyCart>
+        <div class="text-center d-flex flex-column h-100">
+          <fa-icon [icon]="faShoppingBag" size="3x" class="text-muted mb-3"></fa-icon> <!-- Example icon -->
+          <p class="text-muted">{{ 'cart.emptyMessage' | translate }}</p>
+          <button class="btn btn-outline-main-primary" (click)="closeCartAndNavigateToShop()">
+            {{ 'cart.continueShopping' | translate }}
+          </button>
+        </div>
+      </ng-template>
+    </section>
+
+<!--    order summary-->
+    <section class="col-12 col-md-6 p-3 rounded-2 border border-1 border-secondary-subtle" aria-labelledby="order-summary-heading">
+      <h3 class="h5 mb-3">{{ 'cart.orderSummary' | translate }}</h3>
+
+      <dl class="mb-0">
+        <div class="d-flex justify-content-between mb-2">
+          <dt class="text-secondary fw-normal">{{ 'cart.subtotal' | translate }}</dt>
+          <dd class="m-0">{{ (subtotal$ | async) || 0 }} LE</dd>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+          <dt class="text-secondary fw-normal">{{ 'cart.discount' | translate }}</dt>
+          <dd class="m-0 text-danger">-{{ (discount$ | async) || 0 }} LE</dd>
+        </div>
+
+        <div class="d-flex justify-content-between mb-3"> <!-- mb-3 to give space before hr -->
+          <dt class="text-secondary fw-normal">{{ 'cart.shippingFee' | translate }}</dt>
+          <dd class="m-0">{{ (shippingFee$ | async) || 0 }} LE</dd>
+        </div>
+      </dl>
+
+      <hr class="border border-1 border-secondary-subtle my-3">
+
+      <dl class="mb-3"> <!-- Total can also be part of the same DL or a new one -->
+        <div class="d-flex justify-content-between fw-bold">
+          <dt>{{ 'cart.total' | translate }}</dt>
+          <dd class="m-0">{{ (totalAmount$ | async) || 0 }} LE</dd>
+        </div>
+      </dl>
+
+      <button class="w-100 btn btn-main-primary text-white py-2" (click)="proceedToCheckout()" [disabled]="!((cartItems$ | async)?.length)">
+        {{ 'cart.proceedToCheckout' | translate }}
+      </button>
+    </section>
+  </div>
+</main>
+
+<app-contact-section></app-contact-section>

@@ -1,0 +1,145 @@
+<section aria-labelledby="userInfoSectionHeading">
+  <h2 id="userInfoSectionHeading" class="mb-3">{{ 'profile.myInfo' | translate }}</h2>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="text-center p-4 d-flex align-items-center gap-2">
+    <div class="spinner-border spinner-border-sm text-main-primary" role="status">
+      <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
+    </div>
+    <p class="m-0">{{ isLoadingSave ? ('common.saving' | translate) : ('profile.loadingUserInfo' | translate) }}</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <!-- View Mode -->
+    <div *ngIf="!isEditMode" class="p-3 rounded-2 border border-1 border-secondary-subtle">
+      <div class="d-flex justify-content-end mb-2">
+        <button type="button" class="btn btn-outline-main-primary btn-sm d-flex align-items-center gap-2" (click)="enterEditMode()">
+          <fa-icon [icon]="faEdit"></fa-icon>
+          <span>{{ 'common.edit' | translate }}</span>
+        </button>
+      </div>
+      <dl class="row">
+        <dt class="col-sm-4 fw-medium">{{'form.title' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('name')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.company' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('company')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.address' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('address')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.apartment' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('apartment')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.city' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('city')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.governorate' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('governorate')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.phone' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('phone')?.value || ('common.notProvided' | translate) }}</dd>
+
+        <dt class="col-sm-4 fw-medium">{{'form.email' | translate}}:</dt>
+        <dd class="col-sm-8">{{ userInfoForm.get('email')?.value || ('common.notProvided' | translate) }}</dd>
+      </dl>
+    </div>
+
+    <!-- Edit Mode -->
+    <div *ngIf="isEditMode">
+      <form [formGroup]="userInfoForm" (ngSubmit)="saveUserInfo()" aria-labelledby="userInfoSectionHeading">
+        <div class="p-3 rounded-2 border border-1 border-secondary-subtle">
+          <div class="d-flex flex-column gap-3">
+
+            <!-- first name-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-first-name">{{'form.title' | translate}} <span class="text-danger">*</span></label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="name" id="edit-first-name" matInput>
+                <mat-error *ngIf="userInfoForm.controls['name'].hasError('required')">
+                  {{ 'form.required' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- company name-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-company-name">{{'form.company' | translate}}</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="company" id="edit-company-name" matInput>
+              </mat-form-field>
+            </div>
+
+            <!-- address-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-address">{{'form.address' | translate}} <span class="text-danger">*</span></label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="address" id="edit-address" matInput>
+                <mat-error *ngIf="userInfoForm.controls['address'].hasError('required')">
+                  {{ 'form.required' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- apartment-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-apartment">{{'form.apartment' | translate}}</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="apartment" id="edit-apartment" matInput>
+              </mat-form-field>
+            </div>
+
+            <!-- city-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-city">{{'form.city' | translate}} <span class="text-danger">*</span></label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="city" id="edit-city" matInput>
+                <mat-error *ngIf="userInfoForm.controls['city'].hasError('required')">
+                  {{ 'form.required' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- governorate-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-governorate">{{'form.governorate' | translate}}</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="governorate" id="edit-governorate" matInput>
+              </mat-form-field>
+            </div>
+
+            <!-- phone-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-phone">{{'form.phone' | translate}} <span class="text-danger">*</span></label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="phone" id="edit-phone" matInput type="tel">
+                <mat-error *ngIf="userInfoForm.controls['phone'].hasError('required')">
+                  {{ 'form.required' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- email-->
+            <div class="d-flex flex-column">
+              <label class="mb-1" for="edit-email">{{'form.email' | translate}} <span class="text-danger">*</span></label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input formControlName="email" id="edit-email" matInput type="email">
+                <mat-error *ngIf="userInfoForm.controls['email'].hasError('required')">
+                  {{ 'form.required' | translate }}
+                </mat-error>
+                <mat-error *ngIf="userInfoForm.controls['email'].hasError('email')">
+                  {{ 'form.invalidEmail' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-outline-main-primary" (click)="cancelEdit()">{{ 'common.cancel' | translate }}</button>
+          <button type="submit" class="btn btn-main-primary" [disabled]="userInfoForm.invalid || !userInfoForm.dirty">{{ 'common.saveChanges' | translate }}</button>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+</section>

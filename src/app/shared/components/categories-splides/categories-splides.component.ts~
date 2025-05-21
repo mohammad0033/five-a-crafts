@@ -1,0 +1,52 @@
+import {Component, Input, OnInit} from '@angular/core';
+import {NgForOf, NgIf} from '@angular/common';
+import {NgxSplideModule} from 'ngx-splide';
+import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
+import {TranslateService} from '@ngx-translate/core';
+import {RouterLink} from '@angular/router';
+
+@UntilDestroy()
+@Component({
+  selector: 'app-categories-splides',
+  imports: [
+    NgForOf,
+    NgIf,
+    NgxSplideModule,
+    RouterLink
+  ],
+  templateUrl: './categories-splides.component.html',
+  standalone: true,
+  styleUrl: './categories-splides.component.scss'
+})
+export class CategoriesSplidesComponent implements OnInit {
+  @Input() categories: any[] = []
+  currentLang!: string
+  splideOptions = {
+    perPage: 4,
+    perMove: 1,
+    gap: '1rem',
+    autoplay: false,
+    pagination: true,
+    loop: true,
+    breakpoints: {
+      768: {
+        perPage: 1,
+      }
+    }
+  };
+
+  rtlSplideOptions = {
+    ...this.splideOptions,
+    direction: "rtl" as "rtl"
+  }
+
+  constructor(private translate: TranslateService) {
+  }
+
+  ngOnInit() {
+    this.currentLang = this.translate.currentLang
+    this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event: any) => {
+      this.currentLang = event.lang
+    })
+  }
+}
