@@ -124,6 +124,16 @@ export class ContentApiService {
     return of(mockMetadata).pipe(delay(200)); //Simulate delay
   }
 
+  getProductsPageMetadata(): Observable<PageMetadata> {
+    const mockMetadata: PageMetadata = {
+      title: 'API: Shop by Product | Five A Crafts',
+      description: 'API: Browse all products available at Five A Crafts, including candles, gifts, home decor, and craft supplies.',
+      // ogImageUrl: 'https://api.yourdomain.com/images/products-og.jpg', // Optional specific image
+    };
+    // Simulate network delay
+    return of(mockMetadata).pipe(delay(200)); // Simulate delay
+  }
+
   getContactPageMetadata(): Observable<PageMetadata> {
     const mockMetadata: PageMetadata = {
       title: 'API: Contact Five A Crafts | Get in Touch',
