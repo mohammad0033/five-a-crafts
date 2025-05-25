@@ -10,7 +10,6 @@ export const categoriesPageMetaResolver: ResolveFn<PageMetadata | null> = (
 ): Observable<PageMetadata | null> => {
   const contentService = inject(ContentApiService);
 
-  // Assume contentService has a method getCategoriesPageMetadata()
   // This would fetch metaData for the main categories overview page
   return contentService.getCategoriesPageMetadata().pipe(
     map(metaData => metaData),
