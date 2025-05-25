@@ -63,7 +63,7 @@ export const routes: Routes = [
         }
       },
       {
-        path: 'products', // Product route
+        path: 'category/:categorySlug', // Category route
         loadComponent: () =>
           import('./features/products/components/container/products.component').then(
             (m) => m.ProductsComponent),
