@@ -1,7 +1,7 @@
 <div class="d-flex">
   <!-- Loop through categories -->
   <div *ngFor="let category of categories" class="category-card-wrapper px-2">
-    <a [routerLink]="['/category', category.slug]"
+    <a [routerLink]="['/category', category.id]"
        class="card category-card text-white text-center position-relative overflow-hidden text-decoration-none d-block"
        [attr.aria-label]="'View category: ' + category?.name">
 
