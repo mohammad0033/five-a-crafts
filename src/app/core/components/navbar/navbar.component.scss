@@ -23,7 +23,10 @@
   }
 }
 
-// Inside navbar.component.scss
+.image-container{
+  width: 4rem;
+  height: 4rem;
+}
 
 .navbar-nav {
   .nav-item.dropdown {

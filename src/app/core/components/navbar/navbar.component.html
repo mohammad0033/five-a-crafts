@@ -88,7 +88,12 @@
                      [ngClass]="currentLang === 'en' ? 'text-start' : 'text-end'"
                      [routerLink]="['/category', category.id]"
                      ngbDropdownItem>
-                    {{ category.name }}
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="image-container rounded-2 overflow-hidden">
+                        <img class="w-100" [src]="category.image" [alt]="category.name">
+                      </div>
+                      <p class="m-0">{{ category.name }}</p>
+                    </div>
                   </a>
                 </div>
               </ng-container>
