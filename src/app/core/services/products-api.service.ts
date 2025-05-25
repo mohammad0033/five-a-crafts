@@ -208,7 +208,7 @@ export class ProductsApiService {
     }
 
     if (categories && categories.length > 0) {
-      params = params.set('categories', categories.join(','));
+      params = params.set('category', categories.join(','));
     }
 
     if (colors && colors.length > 0) {
