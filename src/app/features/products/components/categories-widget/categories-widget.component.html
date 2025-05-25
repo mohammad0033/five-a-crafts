@@ -1,0 +1,28 @@
+<section class="categories-widget p-3 border border-1 border-secondary-subtle rounded-2 d-flex flex-column gap-4">
+  <h2 class="text-main-primary fs-6 fw-bold">
+    <span class="border-bottom border-3 border-main-primary p-2">
+      {{'product.categories' | translate}}
+    </span>
+  </h2>
+
+  <form [formGroup]="categoryForm" class="d-flex flex-column gap-2" *ngIf="availableCategories && availableCategories.length > 0; else noCategoriesAvailable">
+    <div formArrayName="selectedCategories" role="group" [attr.aria-label]="'product.selectCategoriesAriaLabel' | translate">
+      <!--
+        The 'product.selectCategoriesAriaLabel' translation key should provide a descriptive label
+        for the group of checkboxes, e.g., "Select product categories to filter by".
+      -->
+      <div *ngFor="let category of availableCategories; let i = index" class="category-checkbox-item">
+        <mat-checkbox [formControlName]="i">
+          {{ category.name }}
+        </mat-checkbox>
+      </div>
+    </div>
+  </form>
+
+  <!-- Template to display when no categories are available -->
+  <ng-template #noCategoriesAvailable>
+    <p>{{'products.noCategoriesAvailable' | translate}}</p>
+    <!-- Ensure you have a translation key like 'product.noCategoriesAvailable'
+         e.g., "No categories available at the moment." -->
+  </ng-template>
+</section>
