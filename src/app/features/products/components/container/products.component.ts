@@ -1,11 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {SearchWidgetComponent} from '../search-widget/search-widget.component';
-import {CategoriesWidgetComponent} from '../categories-widget/categories-widget.component';
-import {ColorsWidgetComponent} from '../colors-widget/colors-widget.component';
+// import {CategoriesWidgetComponent} from '../categories-widget/categories-widget.component';
+// import {ColorsWidgetComponent} from '../colors-widget/colors-widget.component';
 import {map, Observable, of, shareReplay} from 'rxjs';
 import {Category} from '../../../../core/models/category';
 import {CategoriesService} from '../../../../core/services/categories.service';
-import {AsyncPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {ProductsService} from '../../../../core/services/products.service';
 import {Color} from '../../../../core/models/color';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
@@ -46,8 +46,8 @@ export interface SortOptionDisplay {
   selector: 'app-products',
   imports: [
     SearchWidgetComponent,
-    CategoriesWidgetComponent,
-    ColorsWidgetComponent,
+    // CategoriesWidgetComponent,
+    // ColorsWidgetComponent,
     AsyncPipe,
     TranslatePipe,
     NgIf,
@@ -60,7 +60,7 @@ export interface SortOptionDisplay {
     ProductCardComponent,
     MatSidenavModule, // Add MatSidenavModule
     MatDividerModule,
-    NgTemplateOutlet,
+    // NgTemplateOutlet,
     // Add MatDividerModule
   ],
   providers: [{provide: MatPaginatorIntl, useClass: CustomPaginatorIntl}],
@@ -70,8 +70,8 @@ export interface SortOptionDisplay {
 })
 export class ProductsComponent implements OnInit{
   // Get references to the child components
-  @ViewChild(CategoriesWidgetComponent) categoriesWidget!: CategoriesWidgetComponent;
-  @ViewChild(ColorsWidgetComponent) colorsWidget!: ColorsWidgetComponent;
+  // @ViewChild(CategoriesWidgetComponent) categoriesWidget!: CategoriesWidgetComponent;
+  // @ViewChild(ColorsWidgetComponent) colorsWidget!: ColorsWidgetComponent;
   @ViewChild(SearchWidgetComponent) searchWidget!: SearchWidgetComponent;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('filterDrawer') filterDrawer!: MatDrawer; // ViewChild for the drawer
@@ -146,6 +146,13 @@ export class ProductsComponent implements OnInit{
     // For a general products listing, this might be null or a generic PageMetadata object.
     const resolvedMetaData = this.route.snapshot.data['metaData'] as PageMetadata | null;
 
+    // get categorySlug from route.snapshot.paramMap
+    const categorySlug = this.route.snapshot.paramMap.get('categorySlug');
+    console.log('categorySlug:', categorySlug);
+    if (categorySlug) {
+      this.selectedCategories = [Number(categorySlug)];
+    }
+
     // Call the service to set tags for the Products page
     this.metaTagService.setTags(
       resolvedMetaData,
@@ -218,46 +225,46 @@ export class ProductsComponent implements OnInit{
   }
 
   // Method to handle category selection changes from the widget
-  handleCategorySelection(selectedCategories: number[]): void {
-    console.log('Selected categories received in parent:', selectedCategories);
-    this.selectedCategories = selectedCategories;
-    // Now you can use the 'selectedCategories' array to filter products
-    // (e.g., call a service to fetch products based on selected categories)
-  }
+  // handleCategorySelection(selectedCategories: number[]): void {
+  //   console.log('Selected categories received in parent:', selectedCategories);
+  //   this.selectedCategories = selectedCategories;
+  //   // Now you can use the 'selectedCategories' array to filter products
+  //   // (e.g., call a service to fetch products based on selected categories)
+  // }
 
   // Method to handle color selection changes from the widget
-  onColorSelectionChanged(selectedColors: string[]): void {
-    console.log('Selected colors received in parent:', selectedColors);
-    this.selectedColors = selectedColors;
-    // Now you can use the 'selectedColors' array to filter products
-    // (e.g., call a service to fetch products based on selected colors)
-  }
+  // onColorSelectionChanged(selectedColors: string[]): void {
+  //   console.log('Selected colors received in parent:', selectedColors);
+  //   this.selectedColors = selectedColors;
+  //   // Now you can use the 'selectedColors' array to filter products
+  //   // (e.g., call a service to fetch products based on selected colors)
+  // }
 
   // Updated to work with MatDrawer
-  applyFiltersAndCloseDrawer(isDrawer: boolean | null, drawer: MatDrawer) {
-    this.resetPaginationAndFetch();
-    if (isDrawer) {
-      drawer.close();
-    }
-  }
+  // applyFiltersAndCloseDrawer(isDrawer: boolean | null, drawer: MatDrawer) {
+  //   this.resetPaginationAndFetch();
+  //   if (isDrawer) {
+  //     drawer.close();
+  //   }
+  // }
 
   // Updated to work with MatDrawer
-  clearFiltersAndCloseDrawer(isDrawer: boolean | null, drawer: MatDrawer) {
-    this.selectedCategories = [];
-    this.selectedColors = [];
-    this.currentSearchQuery = '';
-    this.currentSortOption = SortOption.NONE;
-
-    if (this.categoriesWidget) this.categoriesWidget.clearSelection();
-    if (this.colorsWidget) this.colorsWidget.clearSelection();
-    if (this.searchWidget) this.searchWidget.clearSearch();
-
-    this.resetPaginationAndFetch();
-    if (isDrawer) {
-      drawer.close();
-    }
-    console.log('Filters cleared');
-  }
+  // clearFiltersAndCloseDrawer(isDrawer: boolean | null, drawer: MatDrawer) {
+  //   this.selectedCategories = [];
+  //   this.selectedColors = [];
+  //   this.currentSearchQuery = '';
+  //   this.currentSortOption = SortOption.NONE;
+  //
+  //   // if (this.categoriesWidget) this.categoriesWidget.clearSelection();
+  //   // if (this.colorsWidget) this.colorsWidget.clearSelection();
+  //   if (this.searchWidget) this.searchWidget.clearSearch();
+  //
+  //   this.resetPaginationAndFetch();
+  //   if (isDrawer) {
+  //     drawer.close();
+  //   }
+  //   console.log('Filters cleared');
+  // }
 
   setSortOption(option: SortOption): void {
     this.currentSortOption = option;
