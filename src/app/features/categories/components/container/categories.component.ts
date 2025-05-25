@@ -11,7 +11,7 @@ import {
 } from '../../../../shared/components/categories-splides/categories-splides.component';
 import {NgForOf, NgIf} from '@angular/common';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
-import {CategoriesService} from '../../services/categories.service';
+import {CategoriesService} from '../../../../core/services/categories.service';
 import {CategoryCollectionComponent} from '../../../../shared/components/category-collection/category-collection.component';
 import {Product} from '../../../../core/models/product';
 import {catchError, finalize, forkJoin, map, of, switchMap, tap, throwError} from 'rxjs';

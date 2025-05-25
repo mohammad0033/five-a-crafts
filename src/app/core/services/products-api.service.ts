@@ -6,6 +6,8 @@ import {Review} from '../../features/product-details/models/review';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {CommonApiResponse} from '../models/common-api-response';
 import {Url} from '../constants/base-url';
+import {Color} from '../models/color';
+import {SortOption} from '../../features/products/components/container/products.component';
 
 @Injectable({
   providedIn: 'root'
@@ -41,14 +43,6 @@ export class ProductsApiService {
   getBestSellingProducts(): Observable<CommonApiResponse> {
     let params = new HttpParams().set('category', 6); // category id 6 represents best-selling products
     return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/products/`, { params: params });
-  }
-
-  getCandlesCollectionProducts(): Observable<Product[]> {
-    // Filter products that are likely candles for this collection
-    const mockCandlesCollection: Product[] = this.allMockProducts.filter(
-      p => p.title.toLowerCase().includes('candle') || p.title.toLowerCase().includes('votive') || p.title.toLowerCase().includes('tealights')
-    ).slice(0,8);
-    return of(mockCandlesCollection).pipe(delay(800));
   }
 
   getCategoryProducts(categoryId: string): Observable<CommonApiResponse> {
@@ -164,5 +158,82 @@ export class ProductsApiService {
     // return all products with in_wishlist === true
     const mockFavoriteProducts: Product[] = this.allMockProducts.filter(p => p.in_wishlist);
     return of(mockFavoriteProducts).pipe(delay(300));
+  }
+
+  /**
+   * Fetches all filterable product colors from the API.
+   * This is an example; your API endpoint might be different.
+   * It could be /api/product-filters/colors or /api/colors
+   */
+  getProductFilterColors(): Observable<CommonApiResponse> { // Assuming API returns CommonApiResponse
+    // Adjust the endpoint as per your API design
+    // return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/colors/`); // Example endpoint
+
+    // Example mock if you don't have the backend yet:
+
+    const mockColors: Color[] = [
+      { id: 'red', name: 'Red', hexCode: '#FF0000' },
+      { id: 'black', name: 'Black', hexCode: '#000000' },
+      { id: 'white', name: 'White', hexCode: '#FFFFFF' },
+      { id: 'blue', name: 'Blue', hexCode: '#0000FF' },
+      { id: 'green', name: 'Green', hexCode: '#008000' },
+      { id: 'yellow', name: 'Yellow', hexCode: '#FFFF00' },
+      { id: 'orange', name: 'Orange', hexCode: '#FFA500' },
+    ];
+
+    const mockResponse: CommonApiResponse = {
+      status: true,
+      filters: {},
+      message: 'Success',
+      data: mockColors
+    };
+    return of(mockResponse).pipe(delay(200));
+
+  }
+
+  getProducts(page?: number,
+              page_size?: number,
+              categories?:number[],
+              colors?:string[],
+              searchQuery?: string,
+              sortOption?: SortOption): Observable<CommonApiResponse> {
+    let params = new HttpParams();
+
+    if (page) {
+      params = params.set('page', page.toString());
+    }
+
+    if (page_size) {
+      params = params.set('page_size', page_size.toString());
+    }
+
+    if (categories && categories.length > 0) {
+      params = params.set('category', categories.join(','));
+    }
+
+    if (colors && colors.length > 0) {
+      params = params.set('colors', colors.join(','));
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      params = params.set('title', searchQuery.trim());
+    }
+
+    if (sortOption) {
+      let apiSortParam = '';
+      // Map your SortOption enum to API-expected 'ordering' values
+      // Example: Django REST framework often uses 'field' for asc, '-field' for desc
+      switch (sortOption) {
+        case SortOption.NAME_ASC: apiSortParam = 'title'; break; // Assuming API field is 'title'
+        case SortOption.NAME_DESC: apiSortParam = '-title'; break;
+        case SortOption.PRICE_ASC: apiSortParam = 'stockrecords__price'; break; // Or 'price'
+        case SortOption.PRICE_DESC: apiSortParam = '-stockrecords__price'; break; // Or '-price'
+      }
+      if (apiSortParam) {
+        params = params.set('ordering', apiSortParam);
+      }
+    }
+
+    return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/products/`, { params: params });
   }
 }

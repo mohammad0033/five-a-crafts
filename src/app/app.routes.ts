@@ -6,6 +6,7 @@ import {contactPageMetaResolver} from './features/contact/reslover/contact-page-
 import {productDetailsResolver} from './features/product-details/resolver/product-details.resolver';
 import {profileResolver} from './features/profile/resolvers/profile.resolver';
 import {orderDetailsResolver} from './features/profile/resolvers/order-details.resolver';
+import {productsPageMetaResolver} from './features/products/resolver/products-page-meta.resolver';
 
 export const routes: Routes = [
   {
@@ -59,6 +60,21 @@ export const routes: Routes = [
         data: {
           // Static fallback description
           description: 'Explore all product categories offered by Five A Crafts.'
+        }
+      },
+      {
+        path: 'category/:categorySlug', // Category route
+        loadComponent: () =>
+          import('./features/products/components/container/products.component').then(
+            (m) => m.ProductsComponent),
+        // 2. Add resolver and static fallbacks
+        resolve: {
+          metaData: productsPageMetaResolver // Use the product resolver
+        },
+        title: 'Products | Five A Crafts', // Static fallback title
+        data: {
+          // Static fallback description
+          description: 'Explore all products offered by Five A Crafts.'
         }
       },
       {

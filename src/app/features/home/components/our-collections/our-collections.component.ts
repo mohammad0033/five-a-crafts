@@ -9,7 +9,7 @@ import {
 } from '../../../../shared/components/category-collection/category-collection.component';
 import {Category} from '../../../../core/models/category';
 import {NgIf} from '@angular/common';
-import {CategoriesService} from '../../../categories/services/categories.service';
+import {CategoriesService} from '../../../../core/services/categories.service';
 import {FavoritesApiService} from '../../../../core/services/favorites-api.service';
 import {ProductsService} from '../../../../core/services/products.service';
 

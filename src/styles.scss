@@ -88,7 +88,7 @@ body.ar {
 }
 
 .border-main-primary{
-  border-color: var(--primary-color);
+  border-color: var(--primary-color) !important;
 }
 
 .border-main-secondary{
@@ -185,6 +185,24 @@ gallery-thumb{
 // hide mat-form-field error
 mat-form-field.promo-code div.mat-mdc-form-field-subscript-wrapper{
   display: none!important;
+}
+
+.sort-controls {
+  .sort-dropdown-trigger {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    display: inline-flex; // Helps align icon and text
+    align-items: center;
+  }
+
+  .sort-direction-icon {
+    vertical-align: middle; // Helps with alignment
+  }
+}
+
+// Style for the active sort menu item
+.active-sort-item {
+  background-color: var(--primary-color) !important;
 }
 
 @media (max-width: 767.98px) {

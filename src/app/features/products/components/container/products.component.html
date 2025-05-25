@@ -1,0 +1,201 @@
+<!--<mat-drawer-container class="products-container" [hasBackdrop]="isSmallScreen$ | async">-->
+<!--  <mat-drawer #filterDrawer-->
+<!--              [mode]="(isSmallScreen$ | async) ? 'over' : 'side'"-->
+<!--              [opened]="!((isSmallScreen$ | async) ?? true)"-->
+<!--              position="start"-->
+<!--              class="filter-drawer side bg-white">-->
+<!--    &lt;!&ndash; Reusable filter widgets template &ndash;&gt;-->
+<!--    <ng-container *ngTemplateOutlet="filterWidgets; context: { isSmallScreenValue: (isSmallScreen$ | async), drawerInstance: filterDrawer }"></ng-container>-->
+<!--  </mat-drawer>-->
+
+<!--  <mat-drawer-content class="product-list-content bg-white rounded-4">-->
+<!--    <div class="content-wrapper p-3 p-md-4">-->
+
+<!--      &lt;!&ndash; Buttons to toggle drawer and sort menu on small screens &ndash;&gt;-->
+<!--      <div class="d-flex justify-content-between align-items-center mb-3" *ngIf="isSmallScreen$ | async">-->
+<!--        <button mat-icon-button color="primary" (click)="filterDrawer.toggle()"-->
+<!--                [attr.aria-label]="'products.showFilters' | translate">-->
+<!--          <mat-icon>filter_list</mat-icon>-->
+<!--        </button>-->
+<!--        <button mat-icon-button [matMenuTriggerFor]="sortMenu" color="primary"-->
+<!--                [attr.aria-label]="'products.sortBy' | translate">-->
+<!--          <mat-icon>sort</mat-icon>-->
+<!--        </button>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Sort Controls for larger screens &ndash;&gt;-->
+<!--      <div class="sort-controls d-flex justify-content-end mb-3" *ngIf="!(isSmallScreen$ | async)">-->
+<!--        <button mat-stroked-button [matMenuTriggerFor]="sortMenu"-->
+<!--                class="sort-dropdown-trigger d-flex align-items-center">-->
+<!--          <ng-container *ngIf="getCurrentSortOptionDisplay() as currentDisplay; else defaultSortText">-->
+<!--            <span class="mx-1">{{ currentDisplay.baseTranslationKey | translate }}</span>-->
+<!--            <mat-icon class="ms-1 sort-direction-icon fs-5" *ngIf="currentDisplay.directionIcon">{{ currentDisplay.directionIcon }}</mat-icon>-->
+<!--          </ng-container>-->
+<!--          <ng-template #defaultSortText>-->
+<!--            <span>{{ 'products.sortBy' | translate }}</span>-->
+<!--          </ng-template>-->
+<!--          <mat-icon class="ms-1">arrow_drop_down</mat-icon>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--      <mat-menu #sortMenu="matMenu" xPosition="before">-->
+<!--        <button mat-menu-item *ngFor="let option of sortOptions" (click)="setSortOption(option.value)"-->
+<!--                [ngClass]="{'active-sort-item': currentSortOption === option.value}">-->
+<!--          <span [class.fw-bold]="currentSortOption === option.value">-->
+<!--            {{ option.baseTranslationKey | translate }}-->
+<!--          </span>-->
+<!--          <mat-icon *ngIf="option.directionIcon" class="ms-1 sort-direction-icon fs-5">{{ option.directionIcon }}</mat-icon>-->
+<!--        </button>-->
+<!--      </mat-menu>-->
+
+<!--      &lt;!&ndash; Product Grid &ndash;&gt;-->
+<!--      <div class="product-grid mb-3">-->
+<!--        <div *ngIf="isLoadingProducts" class="loading-indicator text-center py-5">-->
+<!--          <p>{{ 'product.loadingProducts' | translate }}</p>-->
+<!--        </div>-->
+<!--        <div *ngIf="!(isLoadingProducts) && (productsToDisplay$ | async) as products">-->
+<!--          <div *ngIf="products.length > 0; else noProductsFound">-->
+<!--            <div class="row g-3">-->
+<!--              <div *ngFor="let product of products" class="col-6 col-lg-4 d-flex">-->
+<!--                <app-product-card [product]="product"-->
+<!--                                  (favoriteToggleRequested)="handleFavoriteToggle(product)"-->
+<!--                                  class="w-100"></app-product-card>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <ng-template #noProductsFound>-->
+<!--            <div class="text-center py-5">-->
+<!--              <p>{{ 'product.noProducts' | translate }}</p>-->
+<!--&lt;!&ndash;              <button mat-button color="primary" (click)="clearFiltersAndCloseDrawer(isSmallScreen$ | async, filterDrawer)">{{ 'products.clearFiltersAndRetry' | translate }}</button>&ndash;&gt;-->
+<!--            </div>-->
+<!--          </ng-template>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; MatPaginator &ndash;&gt;-->
+<!--      <mat-paginator class="bg-white" *ngIf="totalProducts > 0 && (productsToDisplay$ | async)?.length! > 0"-->
+<!--                     [length]="totalProducts"-->
+<!--                     [pageSize]="pageSize"-->
+<!--                     [pageIndex]="currentPageIndex"-->
+<!--                     [pageSizeOptions]="pageSizeOptions"-->
+<!--                     (page)="handlePageEvent($event)"-->
+<!--                     aria-label="Select page of products">-->
+<!--      </mat-paginator>-->
+<!--    </div>-->
+<!--  </mat-drawer-content>-->
+<!--</mat-drawer-container>-->
+
+<!--&lt;!&ndash; Define the reusable filter widgets template &ndash;&gt;-->
+<!--<ng-template #filterWidgets let-isSmallScreenValue="isSmallScreenValue" let-drawerInstance="drawerInstance">-->
+<!--  <div class="filter-widgets-content d-flex flex-column gap-2 p-3">-->
+<!--    <div class="d-flex justify-content-end align-items-center mb-3" *ngIf="isSmallScreenValue">-->
+<!--      <button mat-icon-button (click)="drawerInstance.close()" [attr.aria-label]="'common.close' | translate">-->
+<!--        <mat-icon>close</mat-icon>-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    <app-search-widget (search)="handleSearch($event)"></app-search-widget>-->
+
+<!--    <div class="d-flex gap-2 mt-3" [ngClass]="{'flex-column': isSmallScreenValue}" *ngIf="selectedCategories.length > 0 || selectedColors.length > 0">-->
+<!--      <button class="btn btn-main-primary flex-grow-1" (click)="applyFiltersAndCloseDrawer(isSmallScreenValue, drawerInstance)">{{ 'products.applyFilters' | translate }}</button>-->
+<!--      <button class=" btn btn-outline-main-primary flex-grow-1" (click)="clearFiltersAndCloseDrawer(isSmallScreenValue, drawerInstance)">{{ 'products.clearFilters' | translate }}</button>-->
+<!--    </div>-->
+
+<!--    <app-categories-widget [availableCategories]="filterableCategories$ | async"-->
+<!--                           (categorySelectionChange)="handleCategorySelection($event)" class="mt-3"></app-categories-widget>-->
+
+<!--&lt;!&ndash;    <app-colors-widget [availableColors]="filterableColors$ | async"&ndash;&gt;-->
+<!--&lt;!&ndash;                       (colorSelectionChange)="onColorSelectionChanged($event)" class="mt-3"></app-colors-widget>&ndash;&gt;-->
+<!--  </div>-->
+<!--</ng-template>-->
+
+
+<div class="container-fluid p-3 p-md-5">
+
+  <!-- Controls Bar start-->
+  <div class="controls-bar d-flex justify-content-between align-items-center mb-4">
+    <app-search-widget class="col-9 col-sm-6 col-md-4" (search)="handleSearch($event)"></app-search-widget>
+
+    <!-- Buttons to toggle sort menu on small screens -->
+    <div class="d-flex justify-content-end align-items-center" *ngIf="isSmallScreen$ | async"> <!-- Removed mb-3 from here as parent has mb-4 -->
+      <button mat-icon-button [matMenuTriggerFor]="sortMenu" color="primary"
+              [attr.aria-label]="'products.sortBy' | translate">
+        <mat-icon>sort</mat-icon>
+      </button>
+    </div>
+
+    <!-- Sort controls for larger screens -->
+    <div class="sort-controls d-flex justify-content-end" *ngIf="!(isSmallScreen$ | async)"> <!-- Removed mb-3 from here as parent has mb-4 -->
+      <button mat-stroked-button [matMenuTriggerFor]="sortMenu"
+              class="sort-dropdown-trigger d-flex align-items-center">
+        <ng-container *ngIf="getCurrentSortOptionDisplay() as currentDisplay; else defaultSortText">
+          <span class="mx-1">{{ currentDisplay.baseTranslationKey | translate }}</span>
+          <mat-icon class="ms-1 sort-direction-icon fs-5" *ngIf="currentDisplay.directionIcon">{{ currentDisplay.directionIcon }}</mat-icon>
+        </ng-container>
+        <ng-template #defaultSortText>
+          <span>{{ 'products.sortBy' | translate }}</span>
+        </ng-template>
+        <mat-icon class="ms-1">arrow_drop_down</mat-icon>
+      </button>
+    </div>
+    <mat-menu #sortMenu="matMenu" xPosition="before">
+      <button mat-menu-item *ngFor="let option of sortOptions" (click)="setSortOption(option.value)"
+              [ngClass]="{'active-sort-item': currentSortOption === option.value}">
+          <span [class.fw-bold]="currentSortOption === option.value">
+            {{ option.baseTranslationKey | translate }}
+          </span>
+        <mat-icon *ngIf="option.directionIcon" class="ms-1 sort-direction-icon fs-5">{{ option.directionIcon }}</mat-icon>
+      </button>
+    </mat-menu>
+  </div>
+  <!-- Controls Bar end -->
+
+  <!-- Product Listing Section start -->
+  <section aria-labelledby="products-list-heading">
+    <h1 id="products-list-heading" class="visually-hidden">{{ 'products.mainTitle' | translate }}</h1>
+
+    <div class="product-grid mb-3">
+      <div *ngIf="isLoadingProducts" class="loading-indicator text-center py-5">
+        <p>{{ 'product.loadingProducts' | translate }}</p>
+      </div>
+      <div *ngIf="!(isLoadingProducts) && (productsToDisplay$ | async) as products">
+        <div *ngIf="products.length > 0; else noProductsFound">
+          <div class="row g-3">
+            <div *ngFor="let product of products" class="col-6 col-lg-4 d-flex">
+              <!-- app-product-card uses <article> internally, which is semantically correct for each item -->
+              <app-product-card [product]="product"
+                                (favoriteToggleRequested)="handleFavoriteToggle(product)"
+                                class="w-100"></app-product-card>
+            </div>
+          </div>
+        </div>
+        <ng-template #noProductsFound>
+          <!-- Added role="alert" for better accessibility on status change -->
+          <div class="text-center py-5" role="alert">
+            <p>{{ 'product.noProducts' | translate }}</p>
+            <!-- <button mat-button color="primary" (click)="clearFiltersAndCloseDrawer(isSmallScreen$ | async, filterDrawer)">{{ 'products.clearFiltersAndRetry' | translate }}</button> -->
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </section>
+  <!-- Product Listing Section end -->
+
+  <!-- Pagination Navigation start -->
+  <!--
+    Wrap paginator in <nav> for semantic grouping of navigation links.
+    Ensure you have a translation for 'products.pagination.ariaLabel', e.g., "Product list pagination".
+  -->
+  <nav *ngIf="totalProducts > 0 && (productsToDisplay$ | async)?.length! > 0"
+       [attr.aria-label]="'products.pagination' | translate">
+    <mat-paginator class="bg-transparent d-flex justify-content-center"
+                   [length]="totalProducts"
+                   [pageSize]="pageSize"
+                   [pageIndex]="currentPageIndex"
+                   [pageSizeOptions]="pageSizeOptions"
+                   (page)="handlePageEvent($event)"
+                   [attr.aria-label]="'products.selectPage' | translate"> <!-- Specific label for the paginator itself -->
+    </mat-paginator>
+  </nav>
+  <!-- Pagination Navigation end -->
+
+</div>

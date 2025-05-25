@@ -1,0 +1,33 @@
+<!--<section class="search-widget p-3 border border-1 border-secondary-subtle rounded-2 d-flex flex-column gap-4">-->
+<!--  <h2 class="text-main-primary fs-6 fw-bold">-->
+<!--    <span class="border-bottom border-3 border-main-primary p-2">-->
+<!--      {{'product.search' | translate}}-->
+<!--    </span>-->
+<!--  </h2>-->
+<!--  &lt;!&ndash; Keep the form for accessibility, even if the primary trigger is typing &ndash;&gt;-->
+<!--  <form role="search" (submit)="$event.preventDefault(); handleFormSubmit()" class="w-100">-->
+<!--    <mat-form-field class="w-100" appearance="outline">-->
+<!--      <mat-label>{{'product.searchStore' | translate}}</mat-label>-->
+<!--      <input matInput [formControl]="searchControl"/>-->
+<!--      <button mat-icon-button matSuffix *ngIf="searchControl.value && searchControl.value.length > 0"-->
+<!--              (click)="clearSearch()" type="button" [attr.aria-label]="'product.clearSearch' | translate">-->
+<!--        <mat-icon>close</mat-icon>-->
+<!--      </button>-->
+<!--    </mat-form-field>-->
+<!--    &lt;!&ndash; Visually hidden submit button for accessibility &ndash;&gt;-->
+<!--    <button type="submit" class="visually-hidden">{{'product.search' | translate}}</button>-->
+<!--  </form>-->
+<!--</section>-->
+
+<section class="search-widget">
+  <!-- Keep the form for accessibility, even if the primary trigger is typing -->
+  <form role="search" (submit)="$event.preventDefault(); handleFormSubmit()" class="w-100">
+    <mat-form-field class="w-100" appearance="outline">
+      <mat-label>{{'product.searchStore' | translate}}</mat-label>
+      <input matInput [formControl]="searchControl"/>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <!-- Visually hidden submit button for accessibility -->
+    <button type="submit" class="visually-hidden">{{'product.search' | translate}}</button>
+  </form>
+</section>
