@@ -205,6 +205,27 @@ mat-form-field.promo-code div.mat-mdc-form-field-subscript-wrapper{
   background-color: var(--primary-color) !important;
 }
 
+// Custom styles for Bootstrap dropdown items
+.dropdown-menu {
+  .dropdown-item {
+    // Style for hover and focus states
+    &:hover,
+    &:focus {
+      background-color: var(--primary-color);
+      color: #fff; // Using white text for better contrast with your primary color
+    }
+
+    // Style for the active state (when item is clicked)
+    // and for items that have an .active class
+    &.active,
+    &:active {
+      background-color: var(--primary-color);
+      color: #fff; // Using white text
+      // text-decoration: none; // Bootstrap typically handles this
+    }
+  }
+}
+
 @media (max-width: 767.98px) {
   .mat-drawer{
     width: 20.6875rem!important;
