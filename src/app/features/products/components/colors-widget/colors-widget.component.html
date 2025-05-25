@@ -1,0 +1,31 @@
+<section class="colors-widget p-3 border border-1 border-secondary-subtle rounded-2 d-flex flex-column gap-4">
+  <h2 class="text-main-primary fs-6 fw-bold">
+    <span class="border-bottom border-3 border-main-primary p-2">
+      {{'product.colors' | translate}}
+    </span>
+  </h2>
+
+  <form [formGroup]="colorForm" class="d-flex flex-column gap-2" *ngIf="availableColors && availableColors.length > 0; else noColorsAvailable">
+    <div formArrayName="selectedColors" role="group" [attr.aria-label]="'product.selectColorsAriaLabel' | translate">
+      <!--
+        The 'product.selectColorsAriaLabel' translation key should provide a descriptive label
+        for the group of checkboxes, e.g., "Select product colors to filter by".
+      -->
+      <div *ngFor="let color of availableColors; let i = index" class="color-checkbox-item">
+        <mat-checkbox [formControlName]="i">
+          {{ color.name }} <!-- Assuming color names don't need individual translation keys -->
+          <!-- If color.name itself is a translation key, then {{ color.name | translate }} is correct -->
+          <!-- Optional: Display a color swatch -->
+          <span *ngIf="color.hexCode" class="color-swatch" [style.background-color]="color.hexCode"></span>
+        </mat-checkbox>
+      </div>
+    </div>
+  </form>
+
+  <!-- Template to display when no colors are available -->
+  <ng-template #noColorsAvailable>
+    <p>{{'product.noColorsAvailable' | translate}}</p>
+    <!-- Ensure you have a translation key like 'product.noColorsAvailable'
+         e.g., "No colors available at the moment." -->
+  </ng-template>
+</section>
