@@ -1,0 +1,54 @@
+// C:/Ongoing projects/five-a-crafts/src/app/features/products/components/container/products.component.scss
+.side {
+  width: 18.875rem!important; // This will be the width for the drawer (approx 302px)
+}
+
+:host {
+  display: block;
+}
+
+.products-container {
+  display: block;
+  width: 100%;
+}
+
+.filter-drawer {
+  border-right: 1px solid rgba(0, 0, 0, .06); // Softer border
+}
+
+.product-list-content {
+  // This is the mat-drawer-content
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Ensure it takes full height of its container
+  min-height: 60rem;
+
+  .content-wrapper {
+    overflow-y: auto; // Allow content within to scroll
+    flex-grow: 1; // Take up available space
+  }
+}
+
+
+// Ensure filter widgets inside the drawer have some breathing room
+.filter-widgets-content {
+  .mat-h3 {
+    font-size: 1.25rem; // Adjust title size in drawer
+  }
+
+  .d-flex.flex-column { // For stacked apply/clear buttons when in drawer mode on small screen
+    .mat-mdc-button { // Target Material buttons
+      width: 100%;
+      &:not(:last-child) {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}
+
+// Ensure paginator is not shown if there are no products to display
+mat-paginator {
+  &[hidden] {
+    display: none !important;
+  }
+}
