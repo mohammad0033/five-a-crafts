@@ -61,44 +61,86 @@
           <li class="nav-item">
             <a class="nav-link" routerLink="/about" routerLinkActive="active">{{ 'aboutUs' | translate }}</a>
           </li>
+
+<!--          simple dropdown trigger-->
           <li class="nav-item dropdown" ngbDropdown #categoriesDropdown="ngbDropdown">
-              <a class="nav-link dropdown-toggle"
-                 ngbDropdownToggle
-                 [routerLink]="isDesktop ? '/categories' : null"
-                 [class.active]="isCategoriesOrProductsLinkActive()"
-                 role="button"
-                 id="navbarDropdownCategories"
-                 (click)="closeDropdownOnDesktopClick()">
-                  {{ 'categories' | translate }}
-              </a>
-            <!-- Mega Menu Structure -->
-            <div class="dropdown-menu mega-menu p-0 p-md-4"
-                 *ngIf="megaMenuColumns"
-                 ngbDropdownMenu
-                 aria-labelledby="navbarDropdownCategories">
-              <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-3 my-md-0 px-3 px-md-0">
-                <div class="col mb-3 d-flex flex-column align-items-start" *ngFor="let column of megaMenuColumns">
-                  <h5 class="mb-3">{{ column.header }}</h5>
-                  <ul class="list-unstyled p-0 w-100" [ngClass]="currentLang === 'ar' ? 'text-end' : 'text-start'">
-                    <ng-container *ngFor="let item of column.items">
-                      <li *ngIf="!item.isShopAll">
-                        <a class="dropdown-item" [href]="item.link" ngbDropdownItem>{{ item.label }}</a>
-                      </li>
-                      <li *ngIf="item.isShopAll">
-                        <hr class="dropdown-divider d-lg-none">
-                        <a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" [href]="item.link" ngbDropdownItem>
-                          <span>{{ item.label | translate }}</span>
-                          <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>
-                          <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>
-                        </a>
-                      </li>
-                    </ng-container>
-                  </ul>
+            <a class="nav-link dropdown-toggle"
+               ngbDropdownToggle
+               [routerLink]="isDesktop ? '/categories' : null"
+               [class.active]="isCategoriesOrProductsLinkActive()"
+               role="button"
+               id="navbarDropdownCategories"
+               (click)="closeDropdownOnDesktopClick()">
+              {{ 'categories' | translate }}
+            </a>
+            <!-- Simple Dropdown Menu Structure -->
+            <div class="dropdown-menu m-0 p-0"
+              ngbDropdownMenu
+              aria-labelledby="navbarDropdownCategories">
+              <!-- Use async pipe to subscribe to categories$ -->
+              <ng-container *ngIf="categories$ | async as categoriesList; else loadingCategories">
+                <div class="d-flex flex-column gap-3 p-3">
+                  <a *ngIf="categoriesList.length === 0" class="dropdown-item disabled text-muted" ngbDropdownItem>
+                    {{ 'navbar.noCategoriesFound' | translate }} <!-- Create this translation key -->
+                  </a>
+                  <a *ngFor="let category of categoriesList"
+                     class="dropdown-item rounded-2"
+                     [ngClass]="currentLang === 'en' ? 'text-start' : 'text-end'"
+                     [routerLink]="['/category', category.id]"
+                     ngbDropdownItem>
+                    {{ category.name }}
+                  </a>
                 </div>
-              </div>
+              </ng-container>
+              <ng-template #loadingCategories>
+                <a class="dropdown-item disabled text-muted" ngbDropdownItem>
+                  {{ 'navbar.loadingCategories' | translate }}...
+                </a>
+              </ng-template>
             </div>
-            <!-- End Mega Menu Structure -->
+            <!-- End Simple Dropdown Menu Structure -->
           </li>
+
+<!--          mega menu trigger start-->
+<!--          <li class="nav-item dropdown" ngbDropdown #categoriesDropdown="ngbDropdown">-->
+<!--              <a class="nav-link dropdown-toggle"-->
+<!--                 ngbDropdownToggle-->
+<!--                 [routerLink]="isDesktop ? '/categories' : null"-->
+<!--                 [class.active]="isCategoriesOrProductsLinkActive()"-->
+<!--                 role="button"-->
+<!--                 id="navbarDropdownCategories"-->
+<!--                 (click)="closeDropdownOnDesktopClick()">-->
+<!--                  {{ 'categories' | translate }}-->
+<!--              </a>-->
+<!--            &lt;!&ndash; Mega Menu Structure &ndash;&gt;-->
+<!--            <div class="dropdown-menu mega-menu p-0 p-md-4"-->
+<!--                 *ngIf="megaMenuColumns"-->
+<!--                 ngbDropdownMenu-->
+<!--                 aria-labelledby="navbarDropdownCategories">-->
+<!--              <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-3 my-md-0 px-3 px-md-0">-->
+<!--                <div class="col mb-3 d-flex flex-column align-items-start" *ngFor="let column of megaMenuColumns">-->
+<!--                  <h5 class="mb-3">{{ column.header }}</h5>-->
+<!--                  <ul class="list-unstyled p-0 w-100" [ngClass]="currentLang === 'ar' ? 'text-end' : 'text-start'">-->
+<!--                    <ng-container *ngFor="let item of column.items">-->
+<!--                      <li *ngIf="!item.isShopAll">-->
+<!--                        <a class="dropdown-item" [href]="item.link" ngbDropdownItem>{{ item.label }}</a>-->
+<!--                      </li>-->
+<!--                      <li *ngIf="item.isShopAll">-->
+<!--                        <hr class="dropdown-divider d-lg-none">-->
+<!--                        <a class="dropdown-item fw-bold fs-08 d-flex align-items-center gap-2" [href]="item.link" ngbDropdownItem>-->
+<!--                          <span>{{ item.label | translate }}</span>-->
+<!--                          <fa-icon [icon]="faArrowRight" *ngIf="currentLang === 'en'"></fa-icon>-->
+<!--                          <fa-icon [icon]="faArrowLeft" *ngIf="currentLang === 'ar'"></fa-icon>-->
+<!--                        </a>-->
+<!--                      </li>-->
+<!--                    </ng-container>-->
+<!--                  </ul>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; End Mega Menu Structure &ndash;&gt;-->
+<!--          </li>-->
+<!--          mega menu trigger end-->
           <li class="nav-item">
             <a class="nav-link" routerLink="/contact" routerLinkActive="active">{{ 'contactUs' | translate }}</a>
           </li>

@@ -7,7 +7,7 @@ import {
   PLATFORM_ID,
   ViewChild
 } from '@angular/core';
-import {isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faArrowLeft, faArrowRight, faSearch, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 import {faHeart, faUser} from '@fortawesome/free-regular-svg-icons';
@@ -15,11 +15,13 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Router, RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
-import {map} from "rxjs";
-import {ContentApiService, MegaMenuData} from '../../services/content-api.service';
+import {map, Observable} from "rxjs";
+import {ContentApiService} from '../../services/content-api.service';
 import {NgbDropdown, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 import {CartService} from '../../services/cart.service';
 import {FavoritesApiService} from '../../services/favorites-api.service';
+import {Category} from '../../models/category';
+import {CategoriesService} from '../../services/categories.service';
 
 @UntilDestroy()
 @Component({
@@ -32,7 +34,8 @@ import {FavoritesApiService} from '../../services/favorites-api.service';
     NgIf,
     NgForOf,
     NgbDropdownModule,
-    NgClass
+    NgClass,
+    AsyncPipe
   ],
   templateUrl: './navbar.component.html',
   standalone: true,
@@ -51,7 +54,10 @@ export class NavbarComponent implements OnInit{
   isDesktop: boolean = false;
   private readonly desktopBreakpoint = '(min-width: 768px)';
   // Property to hold the mega menu data
-  megaMenuColumns: MegaMenuData | null = null;
+  // megaMenuColumns: MegaMenuData | null = null;
+
+  // Property to hold categories for the simple dropdown
+  categories$: Observable<Category[]> | undefined; // Use Observable for categories
   currentLang!: string;
   cartItemsCount: number = 0;
   favoritesCount: number = 0;
@@ -61,6 +67,7 @@ export class NavbarComponent implements OnInit{
         @Inject(PLATFORM_ID) private platformId: Object,
         private cdRef: ChangeDetectorRef,
         private contentService: ContentApiService, // Inject ContentApiService
+        private categoriesService: CategoriesService,
         private router: Router,
         private translate: TranslateService,
         private favoritesApiService: FavoritesApiService,
@@ -68,7 +75,8 @@ export class NavbarComponent implements OnInit{
 
     ngOnInit(): void {
       this.trackScreenSize();
-      this.loadMegaMenuData();
+      // this.loadMegaMenuData();
+      this.loadCategories(); // Call to load categories
 
       this.currentLang = this.translate.currentLang
 
@@ -111,21 +119,30 @@ export class NavbarComponent implements OnInit{
     }
   }
 
-  private loadMegaMenuData(): void {
-    this.contentService.getMegaMenuData()
+  // Method to load categories
+  private loadCategories(): void {
+    this.categories$ = this.categoriesService.getCategoriesData()
       .pipe(
         untilDestroyed(this) // Auto-unsubscribe when component is destroyed
-      )
-      .subscribe({
-        next: (data) => {
-          this.megaMenuColumns = data;
-          this.cdRef.markForCheck(); // Trigger change detection for OnPush
-        },
-        error: (error) => {
-          console.error('Error loading mega menu data:', error);
-        }
-      });
+        // No need to call markForCheck here, async pipe will handle it
+      );
   }
+
+  // private loadMegaMenuData(): void {
+  //   this.contentService.getMegaMenuData()
+  //     .pipe(
+  //       untilDestroyed(this) // Auto-unsubscribe when component is destroyed
+  //     )
+  //     .subscribe({
+  //       next: (data) => {
+  //         this.megaMenuColumns = data;
+  //         this.cdRef.markForCheck(); // Trigger change detection for OnPush
+  //       },
+  //       error: (error) => {
+  //         console.error('Error loading mega menu data:', error);
+  //       }
+  //     });
+  // }
 
   changeLanguage(lang: string) {
     this.translate.use(lang);
@@ -152,7 +169,8 @@ export class NavbarComponent implements OnInit{
     } as const; // Use 'as const' for stricter type checking on the options object
 
     return this.router.isActive('/categories', isActiveOptions) ||
-      this.router.isActive('/products', isActiveOptions);
+      this.router.isActive('/products', isActiveOptions) ||
+      this.router.isActive('/category', isActiveOptions);
   }
 
   // Method to open the cart
