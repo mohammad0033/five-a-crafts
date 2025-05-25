@@ -93,6 +93,8 @@
   "products.price": "Price",
   "products.name": "Name",
   "products.clearFiltersAndRetry": "Clear filters and retry",
+  "products.mainTitle": "Products - Five A Crafts",
+  "products.pagination": "Product list pagination",
   "paginator.itemsPerPageLabel": "Items per page:",
   "paginator.nextPageLabel": "Next page",
   "paginator.previousPageLabel": "Previous page",

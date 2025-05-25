@@ -93,6 +93,8 @@
   "products.price": "السعر",
   "products.name": "الاسم",
   "products.clearFiltersAndRetry": "حذف الفلاتر واعادة المحاولة",
+  "products.mainTitle": "منتجات - Five A Crafts",
+  "products.pagination": "قائمة المنتجات",
   "paginator.itemsPerPageLabel": "منتجات لكل صفحة:",
   "paginator.nextPageLabel": "الصفحة التالية",
   "paginator.previousPageLabel": "الصفحة السابقة",
