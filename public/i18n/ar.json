@@ -141,6 +141,7 @@
   "authDialog.cancel": "إلغاء",
   "profile.editProfile": "تعديل",
   "profile.myInfo": "بياناتي",
+  "profile.myAddresses": "عناويني",
   "profile.myOrders": "طلباتي",
   "profile.loadingOrders": "تحميل الطلبات...",
   "profile.noOrders": "لا يوجد طلبات حاليا.",
