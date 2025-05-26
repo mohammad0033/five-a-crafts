@@ -146,6 +146,16 @@ export const routes: Routes = [
             // No resolver needed
           },
           {
+            path: 'addresses',
+            loadComponent: () =>
+              import('./features/profile/components/user-addresses/user-addresses.component').then(
+                (m) => m.UserAddressesComponent
+              ),
+            // Add static title for UX
+            title: 'Your Addresses | Five A Crafts'
+            // No resolver needed
+          },
+          {
           path: 'orders',
           loadComponent: () =>
             import('./features/profile/components/user-orders/user-orders.component').then(

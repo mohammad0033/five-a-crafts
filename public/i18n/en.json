@@ -141,6 +141,7 @@
   "authDialog.cancel": "Cancel",
   "profile.editProfile": "Edit",
   "profile.myInfo": "My Info",
+  "profile.myAddresses": "My Addresses",
   "profile.myOrders": "My Orders",
   "profile.loadingOrders": "Loading orders...",
   "profile.noOrders": "You haven't placed any orders yet.",

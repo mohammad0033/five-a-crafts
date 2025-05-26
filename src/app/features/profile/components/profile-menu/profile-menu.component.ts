@@ -3,7 +3,7 @@ import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faUser} from '@fortawesome/free-regular-svg-icons';
 import {TranslatePipe} from '@ngx-translate/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
-import {faShoppingBag} from '@fortawesome/free-solid-svg-icons';
+import {faMapLocationDot, faShoppingBag} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-profile-menu',
@@ -21,4 +21,5 @@ export class ProfileMenuComponent {
 
   protected readonly faUser = faUser;
   protected readonly faShoppingBag = faShoppingBag;
+  protected readonly faMapLocationDot = faMapLocationDot;
 }

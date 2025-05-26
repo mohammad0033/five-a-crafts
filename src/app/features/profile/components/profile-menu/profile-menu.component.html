@@ -7,6 +7,12 @@
       </a>
     </li>
     <li class="col-6 col-md-12">
+      <a class="d-flex align-items-center gap-3 p-3 text-muted text-decoration-none w-100 h-100" routerLink="addresses" routerLinkActive="active">
+        <fa-icon [icon]="faMapLocationDot"></fa-icon>
+        <span>{{'profile.myAddresses' | translate}}</span>
+      </a>
+    </li>
+    <li class="col-6 col-md-12">
       <a class="d-flex align-items-center gap-3 p-3 text-muted text-decoration-none w-100 h-100" routerLink="orders" routerLinkActive="active">
         <fa-icon [icon]="faShoppingBag"></fa-icon>
         <span>{{'profile.myOrders' | translate}}</span>
