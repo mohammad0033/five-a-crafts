@@ -1,0 +1,14 @@
+<section class="search-widget">
+  <!-- Keep the form for accessibility, even if the primary trigger is typing -->
+  <form role="search" (submit)="$event.preventDefault(); handleFormSubmit()" class="w-100">
+    <mat-form-field class="w-100" appearance="outline">
+      <mat-label>{{'product.searchStore' | translate}}</mat-label>
+      <input matInput [formControl]="searchControl"/>
+      <mat-spinner class="mx-3" matSuffix *ngIf="isLoadingSearchResults" [diameter]="24" mode="indeterminate"></mat-spinner>
+      <!-- Show search icon when not loading -->
+      <mat-icon matSuffix *ngIf="!isLoadingSearchResults">search</mat-icon>
+    </mat-form-field>
+    <!-- Visually hidden submit button for accessibility -->
+    <button type="submit" class="visually-hidden">{{'product.search' | translate}}</button>
+  </form>
+</section>
