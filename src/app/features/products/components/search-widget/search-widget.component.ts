@@ -7,7 +7,6 @@ import {MatInputModule} from '@angular/material/input';
 // import {NgIf} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 // import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import {faSearch} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-search-widget',
@@ -68,6 +67,4 @@ export class SearchWidgetComponent implements OnInit {
     this.searchControl.setValue('');
     // The valueChanges subscription will emit an empty string due to the updated filter logic.
   }
-
-  protected readonly faSearch = faSearch;
 }

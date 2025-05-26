@@ -209,6 +209,7 @@ mat-form-field.promo-code div.mat-mdc-form-field-subscript-wrapper{
 .dropdown-menu {
   .dropdown-item {
     // Style for hover and focus states
+    transition: all 0.2s ease-in-out;
     &:hover,
     &:focus {
       background-color: var(--primary-color);

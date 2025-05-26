@@ -15,13 +15,15 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Router, RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
-import {map, Observable} from "rxjs";
-import {ContentApiService} from '../../services/content-api.service';
+import {map, Observable, of} from "rxjs";
 import {NgbDropdown, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 import {CartService} from '../../services/cart.service';
 import {FavoritesApiService} from '../../services/favorites-api.service';
 import {Category} from '../../models/category';
 import {CategoriesService} from '../../services/categories.service';
+import {SearchComponent} from '../search/search.component';
+import {ProductsService} from '../../services/products.service';
+import {Product} from '../../models/product';
 
 @UntilDestroy()
 @Component({
@@ -35,7 +37,8 @@ import {CategoriesService} from '../../services/categories.service';
     NgForOf,
     NgbDropdownModule,
     NgClass,
-    AsyncPipe
+    AsyncPipe,
+    SearchComponent,
   ],
   templateUrl: './navbar.component.html',
   standalone: true,
@@ -44,6 +47,7 @@ import {CategoriesService} from '../../services/categories.service';
 })
 export class NavbarComponent implements OnInit{
   @ViewChild('categoriesDropdown') categoriesDropdown!: NgbDropdown;
+  @ViewChild(SearchComponent) searchComponentInstance?: SearchComponent;
   protected readonly faUser = faUser;
   protected readonly faSearch = faSearch;
   protected readonly faHeart = faHeart;
@@ -61,13 +65,18 @@ export class NavbarComponent implements OnInit{
   currentLang!: string;
   cartItemsCount: number = 0;
   favoritesCount: number = 0;
+  currentSearchQuery: string = '';
+  productsToDisplay$: Observable<Product[]> = of([]);
+  totalProducts = 0;
+  isLoadingSearchResults: boolean = false;
 
+  isSearchVisible = false;
     constructor(
         private breakpointObserver: BreakpointObserver,
         @Inject(PLATFORM_ID) private platformId: Object,
         private cdRef: ChangeDetectorRef,
-        private contentService: ContentApiService, // Inject ContentApiService
         private categoriesService: CategoriesService,
+        private productsService: ProductsService,
         private router: Router,
         private translate: TranslateService,
         private favoritesApiService: FavoritesApiService,
@@ -176,5 +185,82 @@ export class NavbarComponent implements OnInit{
   // Method to open the cart
   openCart(): void {
     this.cartService.openDrawer();
+  }
+
+  // Method to toggle search input visibility
+  toggleSearch(): void {
+    this.isSearchVisible = !this.isSearchVisible;
+    if (!this.isSearchVisible) {
+      // If hiding search, clear query, results, and the input in SearchComponent
+      this.currentSearchQuery = '';
+      this.productsToDisplay$ = of([]);
+      this.totalProducts = 0;
+      this.isLoadingSearchResults = false;
+      if (this.searchComponentInstance && this.searchComponentInstance.searchControl.value) {
+        this.searchComponentInstance.clearSearch(); // This will also trigger (search) event with ""
+      }
+    }
+    this.cdRef.markForCheck();
+  }
+
+  handleSearch(query: string): void {
+    const trimmedQuery = query.trim();
+    // Update currentSearchQuery immediately for UI responsiveness (e.g. showing "No results for '...'"")
+    this.currentSearchQuery = trimmedQuery;
+
+    if (!trimmedQuery) {
+      // Query is empty (cleared search)
+      this.productsToDisplay$ = of([]);
+      this.totalProducts = 0;
+      this.isLoadingSearchResults = false;
+      this.cdRef.markForCheck();
+      return; // Do not fetch
+    }
+
+    // The SearchComponent already filters for query.length >= 3 or query.length === 0.
+    // So, if trimmedQuery is not empty here, it's a valid search term.
+    this.fetchProducts();
+  }
+
+  fetchProducts(): void {
+    // Double-check, though handleSearch should prevent this
+    if (!this.currentSearchQuery) {
+      this.productsToDisplay$ = of([]);
+      this.isLoadingSearchResults = false;
+      this.cdRef.markForCheck();
+      return;
+    }
+
+    this.isLoadingSearchResults = true;
+    this.productsToDisplay$ = of([]); // Clear previous results while loading new ones
+    this.cdRef.markForCheck();
+
+    // console.log('Fetching products with query:', this.currentSearchQuery);
+
+    this.productsService.getProducts(
+      1,
+      10, // Page size for dropdown, adjust as needed
+      undefined, // categories
+      undefined, // colors
+      this.currentSearchQuery, // search query
+      undefined  // sort
+    ).pipe(
+      untilDestroyed(this)
+    ).subscribe({
+      next: (response) => {
+        this.productsToDisplay$ = of(response.products);
+        this.totalProducts = response.totalCount;
+        this.isLoadingSearchResults = false;
+        // console.log('Products fetched:', response.products.length, 'Total:', response.totalCount);
+        this.cdRef.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error fetching products:', err);
+        this.productsToDisplay$ = of([]);
+        this.totalProducts = 0;
+        this.isLoadingSearchResults = false;
+        this.cdRef.markForCheck();
+      }
+    });
   }
 }

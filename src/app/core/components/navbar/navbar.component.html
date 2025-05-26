@@ -11,7 +11,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <!-- Mobile Search -->
-        <button type="button" class="btn rounded-circle p-2 border-0">
+        <button type="button" class="btn rounded-circle p-2 border-0" (click)="toggleSearch()" aria-label="Open search bar">
           <fa-icon [icon]="faSearch"></fa-icon>
         </button>
       </div>
@@ -157,7 +157,7 @@
         <!-- === Desktop Only: Icons Group (Right Aligned) === -->
         <!-- These icons are hidden on mobile and appear right-aligned on desktop -->
         <div class="d-none d-md-flex gap-2 align-items-center" [ngClass]="currentLang === 'en' ? 'ms-auto' : 'me-auto'">
-          <button type="button" class="btn rounded-circle p-2 border-0"> <!-- Desktop Search -->
+          <button type="button" class="btn rounded-circle p-2 border-0" (click)="toggleSearch()" aria-label="Open search bar">
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
           <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" routerLink="/favorites"> <!-- Desktop Heart -->
@@ -190,4 +190,26 @@
 
     </div> <!-- End Container -->
   </nav>
+
+  <!-- Search Component - Appears below the navbar when visible -->
+  <div class="d-flex flex-column justify-content-center align-items-center mx-3 mx-md-5 position-relative" *ngIf="isSearchVisible">
+    <app-search class="col-12 col-md-9" (search)="handleSearch($event)"
+                [isLoadingSearchResults]="isLoadingSearchResults"></app-search>
+    <div *ngIf="(productsToDisplay$ | async)?.length! > 0" class="search-results gap-3 col-12 col-md-9 p-3 rounded-3">
+<!--      search card-->
+      <a class="text-decoration-none cursor-pointer search-card p-2 rounded-3"
+         [routerLink]="['/products', product.id]"
+         (click)="toggleSearch()"
+         *ngFor="let product of productsToDisplay$ | async">
+        <div class="d-flex gap-3">
+          <div class="image-container rounded-2 overflow-hidden">
+            <img [src]="product.images ? product.images[0].original : null " alt="{{product.title}}" class="w-100">
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <p class="m-0">{{ product.title }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
 </header>

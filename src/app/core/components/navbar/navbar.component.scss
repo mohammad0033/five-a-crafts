@@ -28,6 +28,29 @@
   height: 4rem;
 }
 
+.search-results{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--primary-color);
+  background-color: var(--background-color);
+  z-index: 20;
+  height: 20rem;
+  transform: translateY(60%);
+  overflow-y: auto;
+}
+
+.search-card{
+  background-color: transparent !important;
+  color: black;
+  transition: all 0.2s ease-in-out;
+}
+
+.search-card:hover{
+  background-color: var(--primary-color) !important;
+  color: white!important;
+}
+
 .navbar-nav {
   .nav-item.dropdown {
 
@@ -53,7 +76,7 @@
       height: 0;
 
       /* Keep general appearance styles */
-      border: 1px solid var(--primary-color);
+      border: 1px solid var(--primary-color) !important;
       border-radius: .5rem;
       background-clip: padding-box;
       background-color: #fff;
