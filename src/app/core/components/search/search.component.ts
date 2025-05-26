@@ -1,32 +1,35 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
-import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {Component, EventEmitter, Output, OnInit, Input} from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import {debounceTime, distinctUntilChanged, filter} from 'rxjs';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-// import {NgIf} from '@angular/common';
-import {MatIconModule} from '@angular/material/icon';
-// import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {MatProgressSpinner} from '@angular/material/progress-spinner'; // For translations
 
 @Component({
-  selector: 'app-search-widget',
+  selector: 'app-search',
+  standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
-    // NgIf,
-    TranslatePipe,
-    // FaIconComponent,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule,
+    TranslateModule,
+    MatProgressSpinner
   ],
-  templateUrl: './search-widget.component.html',
-  standalone: true,
-  styleUrl: './search-widget.component.scss'
+  templateUrl: './search.component.html',
+  styleUrls: ['./search.component.scss'] // Corrected to styleUrls
 })
-export class SearchWidgetComponent implements OnInit {
+export class SearchComponent implements OnInit{
   searchControl = new FormControl('');
 
   @Output() search = new EventEmitter<string>();
+  @Input() isLoadingSearchResults: boolean = false;
 
   ngOnInit(): void {
     this.searchControl.valueChanges.pipe(
