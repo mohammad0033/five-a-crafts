@@ -98,7 +98,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.metaService.updateTag({ name: 'robots', content: 'noindex, nofollow' });
 
     // Attempt to load PII if user is already logged in
-    if (this.authService.getIsLoggedIn()) {
+    // if (this.authService.getIsLoggedIn()) {
+    if (true) {
       this.loadSavedPii();
     }
 
@@ -108,18 +109,18 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     });
 
     // Listen for login status changes to load/clear PII from form
-    this.authService.isLoggedIn$.pipe(untilDestroyed(this)).subscribe(isLoggedIn => {
-      if (isLoggedIn) {
-        this.loadSavedPii(); // User just logged in
-      } else {
-        // User logged out, clear PII from form and uncheck saveInfo
-        this.checkoutForm.patchValue({
-          name: '', company: '', address: '', apartment: '',
-          city: '', governorate: '', phone: '', email: '',
-          saveInfo: false
-        });
-      }
-    });
+    // this.authService.isLoggedIn$.pipe(untilDestroyed(this)).subscribe(isLoggedIn => {
+    //   if (isLoggedIn) {
+    //     this.loadSavedPii(); // User just logged in
+    //   } else {
+    //     // User logged out, clear PII from form and uncheck saveInfo
+    //     this.checkoutForm.patchValue({
+    //       name: '', company: '', address: '', apartment: '',
+    //       city: '', governorate: '', phone: '', email: '',
+    //       saveInfo: false
+    //     });
+    //   }
+    // });
 
     // Subscribe to promoDiscount$ to update local state if it changes elsewhere or on init
     this.cartService.promoDiscount$.pipe(untilDestroyed(this)).subscribe(promoAmount => {
@@ -234,7 +235,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.authService.getIsLoggedIn()) {
+    // if (this.authService.getIsLoggedIn()) {
+    if (true) {
       this._proceedWithOrderPlacement();
     } else {
       const dialogRef = this.dialog.open(AuthDialogComponent, {
@@ -259,7 +261,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     const formValue = this.checkoutForm.value;
 
     // PII Saving/Clearing Logic using PiiService
-    if (this.authService.getIsLoggedIn()) {
+    // if (this.authService.getIsLoggedIn()) {
+    if (true) {
       if (formValue.saveInfo) {
         const piiToSave: CheckoutPiiData = {
           name: formValue.name,
@@ -294,7 +297,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       this.checkoutForm.enable();
       // Determine if PII should be reloaded or form fully reset
-      const userIsLoggedIn = this.authService.getIsLoggedIn();
+      // const userIsLoggedIn = this.authService.getIsLoggedIn();
+      const userIsLoggedIn = true
       const shouldSaveInfo = formValue.saveInfo;
 
       if (userIsLoggedIn && shouldSaveInfo) {

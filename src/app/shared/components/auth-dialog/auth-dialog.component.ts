@@ -20,17 +20,17 @@ import {MatButton} from '@angular/material/button';
 export class AuthDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<AuthDialogComponent>,
-    private mockAuthService: AuthService,
+    private authService: AuthService,
     private translate: TranslateService // Inject TranslateService if you use the pipe in the template
   ) {}
 
   onLogin(): void {
-    this.mockAuthService.login();
+    // this.authService.login();
     this.dialogRef.close(true); // Close dialog and indicate success
   }
 
   onRegister(): void {
-    this.mockAuthService.register();
+    // this.authService.register();
     this.dialogRef.close(true); // Close dialog and indicate success
   }
 

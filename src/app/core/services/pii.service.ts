@@ -25,12 +25,12 @@ export class PiiService {
 
   constructor(private authService: AuthService) {
     // Listen to logout events to clear mock PII
-    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
-      if (!isLoggedIn) {
-        this.mockServerPiiStorage = null;
-        console.log('PiiService (Mock): User logged out, PII cleared from mock server storage.');
-      }
-    });
+    // this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+    //   if (!isLoggedIn) {
+    //     this.mockServerPiiStorage = null;
+    //     console.log('PiiService (Mock): User logged out, PII cleared from mock server storage.');
+    //   }
+    // });
   }
 
   /**
@@ -39,7 +39,8 @@ export class PiiService {
    * @returns Observable indicating success or failure.
    */
   savePii(piiData: CheckoutPiiData): Observable<{ success: boolean; message: string }> {
-    if (!this.authService.getIsLoggedIn()) {
+    // if (!this.authService.getIsLoggedIn()) {
+    if (false) {
       console.warn('PiiService (Mock): User not logged in. Cannot save PII.');
       return of({ success: false, message: 'User not authenticated (mock)' }).pipe(delay(300));
     }
@@ -61,7 +62,8 @@ export class PiiService {
    * @returns Observable containing PII data or null.
    */
   loadPii(): Observable<CheckoutPiiData | null> {
-    if (!this.authService.getIsLoggedIn()) {
+    // if (!this.authService.getIsLoggedIn()) {
+    if (false) {
       console.warn('PiiService (Mock): User not logged in. Cannot load PII.');
       return of(null).pipe(delay(300));
     }
@@ -86,7 +88,8 @@ export class PiiService {
    * @returns Observable indicating success or failure.
    */
   clearPii(): Observable<{ success: boolean; message: string }> {
-    if (!this.authService.getIsLoggedIn()) {
+    // if (!this.authService.getIsLoggedIn()) {
+    if (false) {
       console.warn('PiiService (Mock): User not logged in. Cannot clear PII.');
       return of({ success: false, message: 'User not authenticated (mock)' }).pipe(delay(300));
     }
