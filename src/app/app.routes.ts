@@ -7,6 +7,7 @@ import {productDetailsResolver} from './features/product-details/resolver/produc
 import {profileResolver} from './features/profile/resolvers/profile.resolver';
 import {orderDetailsResolver} from './features/profile/resolvers/order-details.resolver';
 import {productsPageMetaResolver} from './features/products/resolver/products-page-meta.resolver';
+import {authGuard} from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -114,7 +115,8 @@ export const routes: Routes = [
             (m) => m.FavoritesComponent
           ),
         // Add static title for UX
-        title: 'Your Favorites | Five A Crafts'
+        title: 'Your Favorites | Five A Crafts',
+        canActivate: [authGuard]
         // No resolver needed
         // No static description needed in data
       },
@@ -129,6 +131,7 @@ export const routes: Routes = [
         resolve: {
           profilePageData: profileResolver // Use a descriptive key
         },
+        canActivate: [authGuard],
         children: [
           {
             path: '',
@@ -210,6 +213,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'not-found',
   }
 ];
