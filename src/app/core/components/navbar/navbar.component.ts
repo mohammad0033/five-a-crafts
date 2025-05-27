@@ -15,7 +15,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Router, RouterLink, RouterLinkActive} from "@angular/router";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
 import {BreakpointObserver} from "@angular/cdk/layout";
-import {map, Observable, of} from "rxjs";
+import {map, Observable, of, take} from "rxjs";
 import {NgbDropdown, NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 import {CartService} from '../../services/cart.service';
 import {FavoritesApiService} from '../../services/favorites-api.service';
@@ -24,6 +24,13 @@ import {CategoriesService} from '../../services/categories.service';
 import {SearchComponent} from '../search/search.component';
 import {ProductsService} from '../../services/products.service';
 import {Product} from '../../models/product';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {AuthService} from '../../services/auth.service';
+import {LoginComponent} from '../../../features/auth/components/login/login.component';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {ResetPasswordComponent} from '../../../features/auth/components/reset-password/reset-password.component';
+import {RegisterComponent} from '../../../features/auth/components/register/register.component';
+import {ForgotPasswordComponent} from '../../../features/auth/components/forgot-password/forgot-password.component';
 
 @UntilDestroy()
 @Component({
@@ -39,6 +46,8 @@ import {Product} from '../../models/product';
     NgClass,
     AsyncPipe,
     SearchComponent,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './navbar.component.html',
   standalone: true,
@@ -69,18 +78,23 @@ export class NavbarComponent implements OnInit{
   productsToDisplay$: Observable<Product[]> = of([]);
   totalProducts = 0;
   isLoadingSearchResults: boolean = false;
-
   isSearchVisible = false;
+  isAuthenticated$: Observable<boolean>;
+
     constructor(
-        private breakpointObserver: BreakpointObserver,
-        @Inject(PLATFORM_ID) private platformId: Object,
-        private cdRef: ChangeDetectorRef,
-        private categoriesService: CategoriesService,
-        private productsService: ProductsService,
-        private router: Router,
-        private translate: TranslateService,
-        private favoritesApiService: FavoritesApiService,
-        private cartService: CartService) {}
+      private breakpointObserver: BreakpointObserver,
+      @Inject(PLATFORM_ID) private platformId: Object,
+      private cdRef: ChangeDetectorRef,
+      private categoriesService: CategoriesService,
+      private productsService: ProductsService,
+      protected router: Router,
+      private translate: TranslateService,
+      private favoritesApiService: FavoritesApiService,
+      private cartService: CartService,
+      private authService: AuthService,
+      private dialog: MatDialog,
+      private snackBar: MatSnackBar) {
+      this.isAuthenticated$ = this.authService.isAuthenticated$;}
 
     ngOnInit(): void {
       this.trackScreenSize();
@@ -90,7 +104,8 @@ export class NavbarComponent implements OnInit{
       this.currentLang = this.translate.currentLang
 
       this.translate.onLangChange.pipe(untilDestroyed(this)).subscribe((event) => {
-        this.currentLang = event.lang
+        this.currentLang = event.lang;
+        this.cdRef.markForCheck();
       })
 
       // Load initial favorites and subscribe to count updates
@@ -261,6 +276,122 @@ export class NavbarComponent implements OnInit{
         this.isLoadingSearchResults = false;
         this.cdRef.markForCheck();
       }
+    });
+  }
+
+  /**
+   * Handles access to routes that require authentication.
+   * If authenticated, navigates to the target route.
+   * If not, opens a login dialog and handles subsequent dialog actions.
+   * @param targetRoute The route to navigate to upon successful authentication.
+   * @param itemKey A key for the item being accessed (e.g., 'profile', 'favorites') for the dialog message.
+   */
+  handleAuthNavigation(targetRoute: string, itemKey: 'profile' | 'favorites'): void {
+    this.authService.isAuthenticated$.pipe(take(1)).subscribe(isAuth => {
+      if (isAuth) {
+        this.router.navigate([targetRoute]);
+      } else {
+        // Prepare the translatable message
+        const itemDisplayName = this.translate.instant(itemKey === 'profile' ? 'profile' : 'favorite');
+        const dialogMessage = this.translate.instant('auth.loginRequiredDialogMessage', { item: itemDisplayName });
+
+        this.openLoginDialog(targetRoute, dialogMessage);
+      }
+    });
+  }
+
+  /**
+   * Opens the Login dialog and handles its results, including subsequent dialogs.
+   * @param intendedRoute The route the user was trying to access.
+   * @param preambleMessage Optional message to display in the login dialog.
+   */
+  openLoginDialog(intendedRoute?: string, preambleMessage?: string): void {
+    const loginDialogRef = this.dialog.open(LoginComponent, {
+      width: '450px',
+      maxWidth: '90vw',
+      data: {
+        source: 'navbarDialog', // Indicate this dialog was opened from Navbar
+        intendedRoute: intendedRoute,
+        preambleMessage: preambleMessage
+      },
+      autoFocus: 'dialog',
+      // disableClose: true // Prevent closing by clicking outside or ESC initially
+    });
+
+    loginDialogRef.afterClosed().subscribe(result => {
+      if (result?.loggedIn && result?.returnUrl) {
+        // User logged in successfully from the dialog
+        this.router.navigate([result.returnUrl]);
+      } else if (result?.navigateTo) {
+        // User clicked Register or Forgot Password link in the dialog (old behavior, less ideal now)
+        // This case might become less relevant with the new dialog flow
+        this.router.navigate([result.navigateTo]);
+      } else if (result?.action === 'openRegisterDialog') {
+        // User clicked "Register" in the Login dialog
+        this.openRegisterDialog(result.intendedRoute); // Open Register dialog
+      } else if (result?.action === 'openForgotPasswordDialog') {
+        // User clicked "Forgot Password" in the Login dialog
+        this.openForgotPasswordDialog(result.intendedRoute); // Open Forgot Password flow
+      }
+      // If dialog is closed without action, do nothing.
+    });
+  }
+
+  /**
+   * Opens the Register dialog and handles its results.
+   * @param intendedRoute The route the user was trying to access before the login/register flow.
+   */
+  openRegisterDialog(intendedRoute?: string): void {
+    const registerDialogRef = this.dialog.open(RegisterComponent, {
+      width: '450px',
+      maxWidth: '90vw',
+      // disableClose: true
+    });
+
+    registerDialogRef.afterClosed().subscribe(result => {
+      if (result?.registered) {
+        // Registration successful, show success message and re-open login dialog
+        this.snackBar.open(this.translate.instant('auth.registrationSuccessMessage'), this.translate.instant('common.dismiss'), { duration: 5000 });
+        this.openLoginDialog(intendedRoute, this.translate.instant('auth.registrationSuccessLoginPrompt'));
+      } else if (result?.action === 'backToLogin') {
+        // User clicked "Back to Login" in the Register dialog, re-open login dialog
+        this.openLoginDialog(intendedRoute, this.translate.instant('auth.welcomeBackLoginPrompt'));
+      }
+      // If dialog is closed without action, do nothing.
+    });
+  }
+
+  /**
+   * Opens the Forgot Password dialog flow and handles its results.
+   * @param intendedRoute The route the user was trying to access before the login/forgot password flow.
+   */
+  openForgotPasswordDialog(intendedRoute?: string): void {
+    const forgotPasswordDialogRef = this.dialog.open(ForgotPasswordComponent, {
+      width: '400px',
+      maxWidth: '90vw',
+      // disableClose: true
+    });
+
+    forgotPasswordDialogRef.afterClosed().subscribe(fpResult => {
+      if (fpResult?.emailSent && fpResult?.email) {
+        // OTP sent successfully, open the Reset Password dialog
+        const resetPasswordDialogRef = this.dialog.open(ResetPasswordComponent, {
+          width: '450px',
+          maxWidth: '90vw',
+          // disableClose: true,
+          data: { email: fpResult.email }
+        });
+
+        resetPasswordDialogRef.afterClosed().subscribe(rpResult => {
+          if (rpResult?.passwordReset) {
+            // Password reset successful, show success message and re-open login dialog
+            this.snackBar.open(this.translate.instant('auth.passwordResetSuccessMessage'), this.translate.instant('common.dismiss'), { duration: 5000 });
+            this.openLoginDialog(intendedRoute, this.translate.instant('auth.passwordResetSuccessLoginPrompt'));
+          }
+          // If reset password dialog is closed without action, do nothing.
+        });
+      }
+      // If forgot password dialog is closed without action, do nothing.
     });
   }
 }

@@ -1,9 +1,14 @@
-<div>
-  <div class="d-flex align-items-center gap-3 mb-4">
+<div class="p-5">
+  <div class="d-flex align-items-center justify-content-center gap-3 mb-4">
     <div class="image-container">
       <img class="w-100" src="images/logo.png" alt="logo">
     </div>
-    <h1>{{ 'register' | translate }}</h1>
+    <h1 class="fs-4">{{ 'register' | translate }}</h1>
+  </div>
+
+  <!-- Registration Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger text-center mb-3">
+    {{ errorMessage }}
   </div>
 
   <form [formGroup]="registerForm" (ngSubmit)="submitRegister()" class="d-flex flex-column gap-3">
@@ -39,19 +44,24 @@
       <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
         {{ 'form.password' | translate }} {{ 'form.required' | translate }}
       </mat-error>
-      <!-- You can add more password validators here (e.g., minlength) -->
+      <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
+        {{ 'auth.passwordMinLength' | translate: { length: 8 } }} <!-- Assuming minLength 8 -->
+      </mat-error>
     </mat-form-field>
 
     <!-- Register Button -->
-    <button mat-raised-button color="primary" type="submit" [disabled]="registerForm.invalid" class="w-100">
-      {{ 'register' | translate }}
+    <button type="submit" [disabled]="registerForm.invalid || isLoading" class="w-100 text-light btn btn-main-primary d-flex align-items-center justify-content-center">
+      <span *ngIf="isLoading" class="spinner-border spinner-border-sm mx-2" role="status" aria-hidden="true"></span>
+      <span *ngIf="!isLoading">{{ 'register' | translate }}</span>
+      <span *ngIf="isLoading">{{ 'common.loading' | translate }}</span>
     </button>
 
   </form>
 
   <!-- Login Link -->
-  <div class="mt-4 text-center">
-    <span>{{ 'auth.alreadyAccount' | translate }} </span> <!-- Add this key to your i18n files -->
-    <a routerLink="/login" class="text-decoration-none fw-bold">{{ 'login' | translate }}</a>
+  <div class="mt-4 text-center d-flex align-items-center justify-content-center gap-2">
+    <span>{{ 'auth.alreadyAccount' | translate }} </span>
+    <!-- Changed to call the backToLogin method -->
+    <a (click)="backToLogin()" class="text-decoration-none fw-bold cursor-pointer text-main-primary">{{ 'login' | translate }}</a>
   </div>
 </div>

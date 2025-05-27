@@ -24,7 +24,8 @@
 
       <!-- === Mobile Only: Right Group (Heart + Bag) === -->
       <div class="d-flex align-items-center d-md-none gap-1">
-        <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" routerLink="/favorites">
+        <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2"
+         (click)="handleAuthNavigation('/favorites', 'favorites')">
           <fa-icon [icon]="faHeart"></fa-icon>
           <span *ngIf="favoritesCount > 0">
             {{ favoritesCount }}
@@ -150,8 +151,12 @@
             <a class="nav-link" routerLink="/contact" routerLinkActive="active">{{ 'contactUs' | translate }}</a>
           </li>
           <li class="nav-item d-block d-md-none">
-            <a class="nav-link" routerLink="/profile" routerLinkActive="active">{{ 'profile' | translate }}</a>
-          </li>
+          <!-- Changed routerLink to (click) -->
+          <a class="nav-link" (click)="handleAuthNavigation('/profile', 'profile')"
+             [class.active]="router.isActive('/profile', {paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'})">
+            {{ 'profile' | translate }}
+          </a>
+        </li>
         </ul>
 
         <!-- === Desktop Only: Icons Group (Right Aligned) === -->
@@ -160,14 +165,16 @@
           <button type="button" class="btn rounded-circle p-2 border-0" (click)="toggleSearch()" aria-label="Open search bar">
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
-          <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" routerLink="/favorites"> <!-- Desktop Heart -->
+          <a type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2"
+           (click)="handleAuthNavigation('/favorites', 'favorites')"> <!-- Desktop Heart -->
             <fa-icon [icon]="faHeart"></fa-icon>
             <span *ngIf="favoritesCount > 0">
               {{ favoritesCount }}
               <span class="visually-hidden">favorite items</span>
             </span>
           </a>
-          <a type="button" class="btn rounded-circle p-2 border-0" routerLink="/profile"> <!-- User Icon -->
+          <a type="button" class="btn rounded-circle p-2 border-0"
+             (click)="handleAuthNavigation('/profile', 'profile')"> <!-- User Icon -->
             <fa-icon [icon]="faUser"></fa-icon>
           </a>
           <button type="button" class="btn rounded-circle p-2 border-0 d-flex align-items-center gap-2" (click)="openCart()"> <!-- Desktop Bag -->
