@@ -1,12 +1,15 @@
-import { Injectable, inject, PLATFORM_ID, NgZone } from '@angular/core';
+import {Injectable, inject, PLATFORM_ID, NgZone, makeStateKey, TransferState} from '@angular/core';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import {AuthApiService} from './auth-api.service';
 import {User} from '../../features/auth/models/user';
 import {LoginCredentials} from '../../features/auth/models/login-credentials';
 import {RegisterPayload} from '../../features/auth/models/register-payload';
+
+// Define a key for storing the user in TransferState
+const USER_STATE_KEY = makeStateKey<User | null>('currentUser');
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +19,7 @@ export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone); // For running navigation inside Angular's zone
+  private transferState = inject(TransferState);
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -23,12 +27,9 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(
-    // @Inject(REQUEST) private request?: any // Optional: For Express, if you need to inspect cookies on server
-  ) {
-    // Attempt to load initial auth state when the service is instantiated
-    // This is crucial for SSR and for when the app loads in the browser
-    this.checkInitialAuthenticationState().subscribe();
+  constructor() {
+    // Initialize authentication state based on the platform
+    this.initializeAuthState();
   }
 
   private updateAuthState(user: User | null): void {
@@ -36,30 +37,62 @@ export class AuthService {
     this.isAuthenticatedSubject.next(!!user);
   }
 
-  /**
-   * Checks the initial authentication state.
-   * On the server, this might be less relevant if pages are protected server-side first.
-   * On the client, this calls the backend to verify the session cookie.
-   */
-  checkInitialAuthenticationState(): Observable<User | null> {
+  private initializeAuthState(): void {
     if (isPlatformBrowser(this.platformId)) {
-      return this.authApiService.checkStatus().pipe(
+      // Client-side:
+      // 1. Try to get user from TransferState (if SSR'd with an authenticated user)
+      const userFromState = this.transferState.get(USER_STATE_KEY, null);
+      if (userFromState) {
+        this.updateAuthState(userFromState);
+        this.transferState.remove(USER_STATE_KEY); // Clean up state after use
+        return; // User state initialized from TransferState
+      }
+
+      // 2. If not in TransferState, check status via API (browser will send cookie)
+      // This handles cases like direct client navigation or if SSR rendered logged-out state.
+      this.authApiService.checkStatus().pipe(
         tap(user => this.updateAuthState(user)),
         catchError(() => {
           this.updateAuthState(null);
           return of(null); // User is not authenticated
         })
+      ).subscribe();
+
+    } else if (isPlatformServer(this.platformId)) {
+      // Server-side:
+      // The user state should ideally be determined by your server integration layer
+      // (e.g., in server.ts by inspecting the request cookie) and placed into TransferState *before*
+      // this service is instantiated or this method is called.
+      const userFromState = this.transferState.get(USER_STATE_KEY, null);
+      if (userFromState) {
+        // If user was already put into TransferState by server-side pre-processing
+        this.updateAuthState(userFromState);
+      } else {
+        // If not pre-filled by server logic, the server renders as logged out.
+        // We generally AVOID making new blocking HTTP calls from AuthService constructor/init
+        // on the server to an external API for auth status due to performance.
+        this.updateAuthState(null);
+      }
+    }
+  }
+
+  /**
+   * Explicitly checks authentication status, primarily for client-side use after initial load
+   * or if needing to re-verify.
+   */
+  checkCurrentServerOrApiStatus(): Observable<User | null> {
+    if (isPlatformBrowser(this.platformId)) {
+      return this.authApiService.checkStatus().pipe(
+        tap(user => this.updateAuthState(user)),
+        catchError(() => {
+          this.updateAuthState(null);
+          return of(null);
+        })
       );
     } else if (isPlatformServer(this.platformId)) {
-      // On the server, the auth state for the initial render is typically determined
-      // by the backend framework handling the SSR request and its session/cookie management.
-      // If you had a way to pass initial user data from server to client (e.g., via TransferState),
-      // you could use it here. For now, we assume the client-side checkStatus is primary
-      // after hydration.
-      // If `this.request` (from @nguniversal/express-engine) was injected, you could potentially
-      // inspect `this.request.cookies` here, but it's often simpler to let the client
-      // `checkStatus()` after hydration.
-      return of(null); // Default to not authenticated on server for this service's state
+      // On the server, the initial state is set by `initializeAuthState` via TransferState.
+      // This method, if called on server, would reflect that already determined state.
+      return of(this.currentUserSubject.value);
     }
     return of(null);
   }

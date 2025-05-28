@@ -14,6 +14,14 @@ import { TranslateLoader } from '@ngx-translate/core'; // Import TranslateLoader
 import { TranslateServerLoader } from './app/core/translate-loader/translate-server.loader'; // Your new server loader
 import { SERVER_ASSETS_PATH } from './app/core/tokens/server-assets-path.token'; // Token for assets path
 
+// +++ Import TransferState for passing data from server to client, and User model +++
+import { TransferState, makeStateKey } from '@angular/core'; // Angular's TransferState for state transfer and makeStateKey for creating unique keys
+import { User } from './app/features/auth/models/user'; // The User model definition
+
+// +++ Define a unique key for storing the current user's state in TransferState +++
+// This key will be used by both the server (to set) and the client (AuthService, to get)
+const USER_STATE_KEY = makeStateKey<User | null>('currentUser');
+
 // --- Path Setup ---
 // Determines the directory of the current server file (e.g., /dist/your-project/server)
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
@@ -53,8 +61,9 @@ app.get(
  * Handle all other GET requests (application routes like '/', '/about', etc.)
  * by rendering the Angular application on the server.
  * This acts as a catch-all for non-static-asset GET requests.
+ * // +++ Changed to an async function to allow 'await' for API calls (e.g., fetching user profile) +++
  */
-app.get('*', (req, res, next) => { // Changed from '**' to '*' for better clarity and to ensure it's the catch-all after static assets
+app.get('*', async (req, res, next) => { // Make this handler async
   const { protocol, originalUrl, baseUrl, headers } = req; // Destructure request properties
 
   // --- Language Detection and Cookie Management ---
@@ -92,6 +101,65 @@ app.get('*', (req, res, next) => { // Changed from '**' to '*' for better clarit
     }
   );
 
+  // +++ Initialize a new TransferState instance for this specific request +++
+  // This will hold any state we want to transfer from the server to the client.
+  const transferState = new TransferState();
+
+  // +++ Server-Side Authentication Check and User State Transfer +++
+  try {
+    // +++ Define the name of your authentication cookie (must match what your backend sets) +++
+    const authTokenCookieName = 'your-auth-cookie-name'; // <<<<----- IMPORTANT: Replace with your actual auth cookie name
+    // +++ Attempt to retrieve the authentication token from the request's cookies +++
+    const authToken = req.cookies[authTokenCookieName];
+
+    if (authToken) {
+      // +++ If an auth token cookie is found, attempt to validate it and fetch user details +++
+      // This typically involves making a server-to-server call to your backend API's user profile/status endpoint.
+      // Ensure your API server and SSR server can communicate (e.g., correct URLs, not blocked by firewalls).
+      // Modern Node.js (v18+) has 'fetch' built-in. For older versions, you might need 'node-fetch' or 'axios'.
+      try {
+        // +++ Define the URL for your backend API endpoint that returns user details based on the token/cookie +++
+        const profileApiUrl = 'http://localhost:8000/api/user/profile/'; // <<<<----- IMPORTANT: Replace with your actual API endpoint
+
+        // +++ Make the API call, forwarding the authentication cookie +++
+        // The 'Cookie' header is manually constructed here to pass the specific auth token.
+        const response = await fetch(profileApiUrl, {
+          headers: {
+            'Cookie': `${authTokenCookieName}=${authToken}`
+            // Add any other headers your API might require for server-to-server communication
+          }
+        });
+
+        if (response.ok) {
+          // +++ If the API call is successful and returns user data +++
+          const user: User = await response.json();
+          // +++ Store the fetched user object in TransferState using the predefined key +++
+          // This makes the user data available to the Angular app during SSR and for client-side hydration.
+          transferState.set(USER_STATE_KEY, user);
+        } else {
+          // +++ If the API call fails (e.g., token invalid, API error), log a warning +++
+          console.warn(`SSR: Auth token found but profile fetch failed with status ${response.status}. User will be treated as unauthenticated for this render.`);
+          // +++ Set user state to null in TransferState, indicating no authenticated user +++
+          transferState.set(USER_STATE_KEY, null);
+        }
+      } catch (apiError) {
+        // +++ If there's an error during the API call itself (e.g., network issue) +++
+        console.error('SSR: Error calling profile API to fetch user details:', apiError);
+        // +++ Set user state to null in TransferState as a fallback +++
+        transferState.set(USER_STATE_KEY, null);
+      }
+    } else {
+      // +++ If no authentication token cookie is found in the request +++
+      // +++ Set user state to null in TransferState, indicating an unauthenticated user for this render +++
+      transferState.set(USER_STATE_KEY, null);
+    }
+  } catch (error) {
+    // +++ Catch any unexpected errors during the server-side authentication check +++
+    console.error('SSR: Unexpected error during authentication pre-check:', error);
+    // +++ Ensure user state is set to null in TransferState as a safe fallback +++
+    transferState.set(USER_STATE_KEY, null);
+  }
+
   // --- Angular SSR Rendering ---
   commonEngine
     .render({
@@ -102,15 +170,13 @@ app.get('*', (req, res, next) => { // Changed from '**' to '*' for better clarit
       providers: [ // Providers available to the Angular application during server-side rendering
         { provide: APP_BASE_HREF, useValue: baseUrl }, // Provides the base URL of the application
         { provide: INITIAL_LANG, useValue: requestLang }, // Provides the detected language to the Angular app
-        // Provide the path to the browser assets for the TranslateServerLoader.
-        // Your i18n files (e.g., en.json, ar.json) are in 'dist/five-a-crafts/browser/i18n/'
-        // because 'public/i18n/' is copied to the root of 'browserDistFolder'.
         { provide: SERVER_ASSETS_PATH, useValue: browserDistFolder },
-        // Explicitly provide TranslateServerLoader using its own class as the token and implementation.
-        // This ensures Angular knows how to create and inject TranslateServerLoader.
         { provide: TranslateServerLoader, useClass: TranslateServerLoader },
-        // Now, when TranslateLoader is requested, use the existing instance of TranslateServerLoader.
-        { provide: TranslateLoader, useExisting: TranslateServerLoader }
+        { provide: TranslateLoader, useExisting: TranslateServerLoader },
+        // +++ Provide the populated TransferState instance to Angular's dependency injection system +++
+        // This makes the 'transferState' (which may contain the user data) available to services like AuthService
+        // when they are instantiated on the server during the rendering process.
+        { provide: TransferState, useValue: transferState }
       ],
     })
     .then((html) => res.send(html)) // Send the rendered HTML back to the client
