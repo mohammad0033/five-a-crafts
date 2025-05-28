@@ -31,6 +31,8 @@ import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/materi
 import {CartService} from '../../../../core/services/cart.service';
 import {Url} from '../../../../core/constants/base-url';
 import {SelectedVariation} from '../../../cart/models/selected-variation';
+import {RecentlyViewedService} from '../../../../core/services/recently-viewed.service';
+import {ProductImageData} from '../../models/product-image-data';
 
 @UntilDestroy()
 @Component({
@@ -126,7 +128,8 @@ export class ProductDetailsComponent implements OnInit {
     private snackBar: MatSnackBar,
     private datePipe: DatePipe,
     private fb: FormBuilder,
-    private cartService: CartService) {
+    private cartService: CartService,
+    private recentlyViewedService: RecentlyViewedService) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.variationsForm = this.fb.group({}); // Initialize an empty group
   }
@@ -166,6 +169,32 @@ export class ProductDetailsComponent implements OnInit {
         ? this.product.images.map(item => new ImageItem({ src: item.original, thumb: item.original }))
         : [];
 
+      // Add to recently viewed (client-side only)
+      if (this.isBrowser && this.product) {
+        // Map ProductDetailsData to the Product model structure expected by RecentlyViewedService and ProductCardComponent
+        const productForRecentlyViewed: Product = {
+          id: this.product.id, // Ensure ProductDetailsData has 'id'
+          slug: this.product.slug,
+          title: this.product.title,
+          description: this.product.description,
+          price: this.product.price, // If Product.price is a number: this.product.price?.incl_tax
+                                     // If Product.price is an object, ensure compatibility
+          images: this.product.images?.map((img: ProductImageData) => ({
+            id: img.id,
+            code: img.code,
+            original: img.original,
+            caption: img.caption,
+            display_order: img.display_order,
+            date_created: img.date_created
+          })),
+          product_class: this.product.product_class,
+          stock: this.product.stock,
+          in_wishlist: this.product.in_wishlist, // Optional: if your ProductCard shows wishlist status
+          // Add other fields if your Product model requires them and ProductDetailsData provides them
+        };
+        this.recentlyViewedService.addProduct(productForRecentlyViewed);
+      }
+
       // Fetch reviews for this product
       this.loadProductReviews(this.product.slug);
       // isLoading will be set to false after reviews are also loaded or fail
@@ -184,13 +213,15 @@ export class ProductDetailsComponent implements OnInit {
     this.productsYouMayLike$ = this.productsApiService.getProductsYouMayLike();
 
     // get recently viewed
-    this.recentlyViewedProducts$ = this.productsApiService.getRecentlyViewedProducts();
+    this.recentlyViewedProducts$ = this.recentlyViewedService.getRecentlyViewedProducts();
   }
 
   private initializeVariationsForm(): void {
     if (this.product && this.product.product_options) {
+      console.log('Product options:', this.product.product_options);
       const groupConfig: { [key: string]: any } = {};
       this.product.product_options.forEach(category => {
+        console.log('Category:', category);
         // Set initial value: either pre-selected from backend, or first option, or null
         const initialValue = category.selectedValue || (category.options.length > 0 ? category.options[0].value : null);
         groupConfig[category.id] = [initialValue, Validators.required]; // Example: make each variation required
