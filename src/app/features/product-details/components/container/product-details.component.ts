@@ -218,27 +218,37 @@ export class ProductDetailsComponent implements OnInit {
 
   private initializeVariationsForm(): void {
     if (this.product && this.product.product_options) {
-      console.log('Product options:', this.product.product_options);
       const groupConfig: { [key: string]: any } = {};
-      this.product.product_options.forEach(category => {
-        console.log('Category:', category);
-        // Set initial value: either pre-selected from backend, or first option, or null
-        const initialValue = category.selectedValue || (category.options.length > 0 ? category.options[0].value : null);
-        groupConfig[category.id] = [initialValue, Validators.required]; // Example: make each variation required
-        // If you don't want to pre-select, you can set initialValue to null
-        // and remove category.selectedValue from your interface or ignore it here.
+      this.product.product_options.forEach(optionType => {
+        // Map get_choices to options with name and value
+        const options = optionType.get_choices.map((choice: string[]) => ({
+          name: choice[1], // Assuming the second element is the display name
+          value: choice[0]  // Assuming the first element is the value to submit
+        }));
+
+        // Set initial value: either pre-selected from backend (if available in your real data), or first option, or null
+        const initialValue = options.length > 0 ? options[0].value : null;
+
+        groupConfig[String(optionType.id)] = [initialValue, Validators.required]; // Make each variation required
+
+        // Add options to the optionType for use in the template
+        optionType.options = options;
       });
       this.variationsForm = this.fb.group(groupConfig);
-
-      // Optional: If you still want to use category.selectedValue for display in the template
-      // you can subscribe to form changes to update it, or derive it from form value.
+      console.log(this.variationsForm); // <--- Add this line
       this.variationsForm.valueChanges.pipe(untilDestroyed(this)).subscribe(values => {
         this.product?.product_options?.forEach(cat => {
-          cat.selectedValue = values[cat.id];
+          // Find the selected option based on the form value
+          const selectedOption = cat.options.find((opt: { value: any; }) => opt.value === values[String(cat.id)]);
+          cat.selectedValue = selectedOption ? selectedOption.value : null;
         });
         console.log('Variation Form Values:', values);
       });
     }
+  }
+
+  onVariationChange(categoryName: string, optionName: string, optionValue: any) {
+    console.log(`Selected variation: Category: ${categoryName}, Option: ${optionName}, Value: ${optionValue}`);
   }
 
   private initReviewForm(): void {

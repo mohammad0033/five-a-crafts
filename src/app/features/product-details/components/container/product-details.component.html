@@ -57,7 +57,7 @@
       <section class="d-flex flex-column gap-3" aria-label="Product quantity selector">
         <span class="text-secondary mx-2">{{'product.quantity' | translate}}</span>
         <div class="d-flex align-items-center gap-3">
-          <div class="d-flex align-items-center gap-3 border border-1 rounded-2 border-secondary-subtle w-fit">
+          <div *ngIf="product?.stock && product?.stock! > 0" class="d-flex align-items-center gap-3 border border-1 rounded-2 border-secondary-subtle w-fit">
             <button class="btn border-0" type="button"
                     [attr.aria-label]="'product.decreaseQuantity' | translate"
                     (click)="decreaseProductQty()">
@@ -106,38 +106,30 @@
             <h3 class="h6 mb-2">{{ variationCategory.name }}:</h3>
             <div class="d-flex flex-wrap gap-2 variation-options" role="radiogroup" [attr.aria-labelledby]="variationCategory.id + '-label'">
               <span id="{{variationCategory.id}}-label" class="visually-hidden">{{variationCategory.name}}</span>
-              <ng-container *ngFor="let option of variationCategory.options; let i = index">
+              <ng-container *ngFor="let option of variationCategory.options; let i = index;">
                 <input type="radio"
                        class="btn-check"
                        [formControlName]="variationCategory.id"
                        [name]="variationCategory.id"
                        [id]="variationCategory.id + '-' + option.value"
                        [value]="option.value"
-                       autocomplete="off">
-                <label class="btn"
-                       [ngClass]="{
-                    'btn-outline-main-primary': variationsForm.get(variationCategory.id)?.value === option.value,
-                    'bg-light-grey': variationsForm.get(variationCategory.id)?.value !== option.value
-                 }"
-                       [for]="variationCategory.id + '-' + option.value">
+                       autocomplete="off"
+                       (change)="onVariationChange(variationCategory.name, option.name, option.value)">
+
+                <label class="btn bg-secondary-subtle"
+                       [for]="variationCategory.id + '-' + option.value" [ngClass]=" { 'btn-outline-main-primary': variationsForm.get(variationCategory.id.toString())?.value === option.value }">
                   {{ option.name }}
                 </label>
               </ng-container>
             </div>
-            <!-- Optional: Display validation errors for this category -->
-            <!--
-            <div *ngIf="variationsForm.get(variationCategory.id)?.invalid && variationsForm.get(variationCategory.id)?.touched" class="text-danger fs-08 mt-1">
-              Please select a {{ variationCategory.name | lowercase }}.
-            </div>
-            -->
           </div>
         </form>
       </section>
       <!-- END: Product Variations Section -->
 
       <section class="d-grid gap-2 mt-3">
-        <button class="btn btn-main-primary py-2 text-white" (click)="buyItNow()">{{'product.buyItNow' | translate}}</button>
-        <button class="btn btn-outline-main-primary py-2" (click)="addToCart()">{{'product.addToCart' | translate}}</button>
+        <button class="btn btn-main-primary py-2 text-white" (click)="buyItNow()" [disabled]="!product?.stock || product?.stock === 0">{{'product.buyItNow' | translate}}</button>
+        <button class="btn btn-outline-main-primary py-2" (click)="addToCart()" [disabled]="!product?.stock || product?.stock === 0">{{'product.addToCart' | translate}}</button>
       </section>
 
       <footer class="mt-3">
