@@ -3,7 +3,7 @@ import {PageMetadata} from '../../../core/models/page-meta-data';
 import {Price} from '../../../core/models/price';
 
 export interface ProductDetailsData {
-  id: string | number;
+  id: number;
   slug: string;
   title: string;
   product_class?: string;
@@ -14,7 +14,7 @@ export interface ProductDetailsData {
   calculate_rating: any;
   num_approved_reviews: number;
   stock?: number;
-  in_wishlist?: boolean;
+  in_wishlist: boolean;
   images: ProductImageData[];
   rating: number | null;
   metaData: PageMetadata;
