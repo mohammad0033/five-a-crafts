@@ -8,13 +8,14 @@ import {ProductDetailsData} from '../../features/product-details/models/product-
 import {Color} from '../models/color';
 import {SortOption} from '../../features/products/components/container/products.component';
 import {PaginatedProductsResponse} from '../models/paginated-products-response';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductsService {
 
-  constructor(private productsApiService: ProductsApiService) { }
+  constructor(private productsApiService: ProductsApiService,private router: Router) { }
 
   getCategoryProducts(categoryId: string): Observable<Product[]> {
     return this.productsApiService.getCategoryProducts(categoryId).pipe(
@@ -111,6 +112,7 @@ export class ProductsService {
       }),
       catchError(error => {
         console.error('Error fetching products in ProductsService:', error);
+        this.router.navigate(['/not-found']);
         return of({ products: [], totalCount: 0 }); // Return a default empty response on error
       })
     );

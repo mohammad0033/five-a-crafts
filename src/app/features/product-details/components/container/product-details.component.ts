@@ -175,7 +175,8 @@ export class ProductDetailsComponent implements OnInit {
       this.isLoading = false; // Finished loading attempt (failed)
       this.errorLoading = true;
       console.error('Failed to load product details from resolver.');
-      const canonicalUrl = `https://www.yourdomain.com/`;
+      const canonicalUrl = `https://fivecraft-front.beelogico.com//`;
+      this.router.navigate(['/not-found']); // Or your preferred 404 route
       this.metaTagService.setTags(null, this.fallbackMetaData, { canonicalUrl, ogType: 'website', twitterHandle: this.twitterHandle });
     }
 
