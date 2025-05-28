@@ -1,5 +1,5 @@
 export interface ProductImageData {
-  id: string | number;
+  id: number;
   code: string;
   original: string;
   caption: string;
