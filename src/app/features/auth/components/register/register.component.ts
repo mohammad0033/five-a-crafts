@@ -7,7 +7,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {NgIf} from '@angular/common';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AuthApiService} from '../../../../core/services/auth-api.service';
+import {AuthService} from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -32,7 +32,7 @@ export class RegisterComponent implements OnInit {
   errorMessage: string | null = null;
 
   constructor(private fb: FormBuilder,
-              private authApiService: AuthApiService,
+              private authService: AuthService,
               private translate: TranslateService,
               @Optional() public dialogRef?: MatDialogRef<RegisterComponent>) {}
 
@@ -54,28 +54,25 @@ export class RegisterComponent implements OnInit {
     this.isLoading = true; // Set loading
     this.registerForm.disable(); // Disable form
 
-    this.authApiService.register(this.registerForm.value).subscribe({
-      next: (response) => {
-        this.isLoading = false; // Unset loading
-        this.registerForm.enable(); // Enable form
-        if (response.success) {
-          console.log('Registration successful', response.user);
-          if (this.dialogRef) {
-            this.dialogRef.close({ registered: true }); // Close dialog on success
-          } else {
-            // Handle success if it's a standalone page (e.g., navigate to login)
-            // This scenario is less likely if you're using the dialog flow primarily
-          }
+    this.authService.register(this.registerForm.value).subscribe({
+      next: (user) => { // AuthService.register() returns User directly on success
+        this.isLoading = false;
+        this.registerForm.enable();
+        console.log('Registration successful', user);
+        if (this.dialogRef) {
+          this.dialogRef.close({ registered: true, user: user }); // Optionally pass the user back
         } else {
-          this.errorMessage = response.message || this.translate.instant('auth.registrationFailed');
+          // Handle success if it's a standalone page (e.g., navigate to login or dashboard)
         }
       },
       error: (err) => {
-        this.isLoading = false; // Unset loading
-        this.registerForm.enable(); // Enable form
+        this.isLoading = false;
+        this.registerForm.enable();
         console.error('Registration failed', err);
-        // Use the specific error message from the backend if available, otherwise fallback
-        this.errorMessage = err.error?.message || err.message || this.translate.instant('auth.registrationFailed');
+        // AuthService.register() should propagate the error, potentially already formatted
+        // If err.message comes from AuthService's error handling (like 'Registration failed')
+        // or if it's an HttpErrorResponse, err.error.message might be more specific from the API.
+        this.errorMessage = err.message || err.error?.message || this.translate.instant('auth.registrationFailed');
       }
     });
   }
