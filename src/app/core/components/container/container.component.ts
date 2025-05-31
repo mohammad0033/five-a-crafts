@@ -1,5 +1,12 @@
 import {Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
-import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterModule} from '@angular/router';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterModule
+} from '@angular/router';
 import {FooterComponent} from '../footer/footer.component';
 import {NavbarComponent} from '../navbar/navbar.component';
 import {CommonModule, isPlatformBrowser} from '@angular/common';
