@@ -79,7 +79,7 @@ export class ResetPasswordComponent implements OnInit {
     this.authApiService.verifyOtpAndResetPassword(payload).subscribe({ // Use the injected service
       next: (response) => {
         this.isLoading = false;
-        if (response.success) {
+        if (response.status) {
           this.dialogRef.close({ passwordReset: true });
         } else {
           this.errorMessage = response.message || this.translate.instant('auth.passwordResetFailed');

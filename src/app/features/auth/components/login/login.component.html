@@ -21,8 +21,8 @@
     <!-- Username Field -->
     <mat-form-field appearance="outline" class="w-100" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <mat-label>{{ 'form.username' | translate }}</mat-label>
-      <input matInput formControlName="user_name" type="text" required>
-      <mat-error *ngIf="loginForm.get('user_name')?.hasError('required')">
+      <input matInput formControlName="username" type="text" required>
+      <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
         {{ 'form.username' | translate }} {{ 'form.required' | translate }}
       </mat-error>
     </mat-form-field>

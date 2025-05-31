@@ -52,8 +52,10 @@ export class FavoritesApiService {
     }
     this.isLoadingSubject.next(true);
     this.productsApiService.getFavoriteProducts().pipe(
-      tap(products => {
-        this.favoritesSubject.next(products);
+      map(response => {
+        if (response && Array.isArray(response.data)) {
+          this.favoritesSubject.next(response.data);
+        }
       }),
       catchError(err => {
         console.error('Failed to load favorites', err);

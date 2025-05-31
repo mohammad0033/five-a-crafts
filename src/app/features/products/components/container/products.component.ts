@@ -79,7 +79,6 @@ export class ProductsComponent implements OnInit{
   isSmallScreen$: Observable<boolean>;
 
   filterableCategories$: Observable<Category[]> = of([]);
-  filterableColors$: Observable<Color[]> = of([]);
   productsToDisplay$: Observable<Product[]> = of([]); // To hold products for the template
   selectedCategories: number[] = [];
   selectedColors: string[] = [];
@@ -169,7 +168,6 @@ export class ProductsComponent implements OnInit{
 
   loadInitialData(): void {
     this.filterableCategories$ = this.categoriesService.getCategoriesData();
-    this.filterableColors$ = this.productsService.getFilterableColors();
     this.fetchProducts(); // Initial product fetch
   }
 

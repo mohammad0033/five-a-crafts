@@ -1,21 +1,22 @@
 import {Injectable} from '@angular/core';
 import {ProductsApiService} from './products-api.service';
-import {catchError, map, Observable, of} from 'rxjs';
+import {catchError, map, Observable, of, tap} from 'rxjs';
 import {Product} from '../models/product';
 import {PaginatedApiObject} from '../models/paginated-api-object';
 import {CommonApiResponse} from '../models/common-api-response';
 import {ProductDetailsData} from '../../features/product-details/models/product-details-data';
-import {Color} from '../models/color';
 import {SortOption} from '../../features/products/components/container/products.component';
 import {PaginatedProductsResponse} from '../models/paginated-products-response';
 import {Router} from '@angular/router';
+import {ReviewsData} from '../../features/product-details/models/reviews-data';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductsService {
 
-  constructor(private productsApiService: ProductsApiService,private router: Router) { }
+  constructor(private productsApiService: ProductsApiService,
+              private router: Router) { }
 
   getCategoryProducts(categoryId: string): Observable<Product[]> {
     return this.productsApiService.getCategoryProducts(categoryId).pipe(
@@ -55,36 +56,6 @@ export class ProductsService {
     );
   }
 
-  /**
-   * Fetches all filterable product colors.
-   */
-  getFilterableColors(): Observable<Color[]> {
-    return this.productsApiService.getProductFilterColors().pipe(
-      map(response => {
-        if (response && response.data) {
-          // Adjust based on your API response structure.
-          // If response.data is directly Color[]:
-          // return response.data as Color[];
-
-          // If response.data is PaginatedApiObject containing colors:
-          const paginatedData = response.data as PaginatedApiObject; // Or your specific paginated type
-          if (Array.isArray(paginatedData.results)) {
-            return paginatedData.results as Color[];
-          }
-          // If response.data is directly an array (non-paginated)
-          if (Array.isArray(response.data)) {
-            return response.data as Color[];
-          }
-        }
-        console.error('Unexpected API response format for colors:', response);
-        return [];
-      }),
-      catchError(error => {
-        console.error('Error fetching filterable colors in ProductsService:', error);
-        return of([]); // Return empty array on error
-      })
-    );
-  }
 
   getProducts(
     page?: number,
@@ -114,6 +85,35 @@ export class ProductsService {
         console.error('Error fetching products in ProductsService:', error);
         this.router.navigate(['/not-found']);
         return of({ products: [], totalCount: 0 }); // Return a default empty response on error
+      })
+    );
+  }
+
+  getProductReviews(productId: number): Observable<ReviewsData[]> {
+    return this.productsApiService.getProductReviews(productId).pipe(
+      map(response => {
+        if (response && Array.isArray(response.data)) {
+          return response.data as ReviewsData[];
+        }
+        // Handle cases where the response or data is not in the expected format
+        console.error('Unexpected API response format in ProductsService.getProductReviews:', response);
+        return []; // Return a default empty response
+      }),
+      catchError(error => {
+        console.error('Error fetching product reviews in ProductsService:', error);
+        return of([]); // Return a default empty response on error
+      })
+    )
+  }
+
+  addProductReview(productId: number, title: string, score: number, body: string): Observable<CommonApiResponse | null> {
+    return this.productsApiService.addProductReview(productId, title, score, body).pipe(
+      tap(response => {
+        console.log('Product review added successfully:', response);
+      }),
+      catchError(error => {
+        console.error('Error adding product review in ProductsService:', error);
+        return of(null); // Return a default null response on error
       })
     );
   }
