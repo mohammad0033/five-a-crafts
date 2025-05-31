@@ -40,30 +40,13 @@ export class SideCartComponent implements OnInit, OnDestroy {
   constructor(
     private metaService: Meta,
     public cartService: CartService, // Made public for easier access if needed, though direct observable binding is preferred
-    private titleService: Title,
-    private router: Router,
-    private translate: TranslateService
-  ) {
+    private router: Router) {
     this.cartItems$ = this.cartService.cartItems$;
     this.totalAmount$ = this.cartService.totalAmount$;
   }
 
   ngOnInit(): void {
-    this.setPageTitle();
     this.metaService.updateTag({ name: 'robots', content: 'noindex, nofollow' });
-
-    // Update title if language changes
-    this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
-      this.setPageTitle();
-    });
-  }
-
-  private setPageTitle(): void {
-    // Unsubscribe from previous subscription if it exists to avoid memory leaks
-    this.titleSubscription?.unsubscribe();
-    this.titleSubscription = this.translate.get('cart.pageTitle').subscribe((pageTitle: string) => {
-      this.titleService.setTitle(pageTitle);
-    });
   }
 
   closeCart(): void {
