@@ -1,7 +1,7 @@
-import {User} from './user';
+import {AuthData} from './auth-data';
 
 export interface AuthResponse {
-  success: boolean;
-  message?: string;
-  user?: User; // Define a User interface
+  status: boolean;
+  message: string;
+  data?: AuthData; // Make data optional in case of error responses
 }
