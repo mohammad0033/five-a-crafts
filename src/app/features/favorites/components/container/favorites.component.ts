@@ -54,7 +54,7 @@ export class FavoritesComponent implements OnInit, OnDestroy {
     this.favoritesApiService.loadFavorites(); // Trigger initial load or refresh
 
     // get you may also like
-    this.productsYouMayLike$ = this.productsApiService.getProductsYouMayLike();
+    // this.productsYouMayLike$ = this.productsApiService.getProductsYouMayLike();
   }
 
   handleFavoriteToggle(productToToggle: Product): void {
