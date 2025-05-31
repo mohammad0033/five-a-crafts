@@ -1,12 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {
-  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn, Validators
+  Validators
 } from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -15,13 +13,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {NgIf} from '@angular/common';
 import {AuthApiService} from '../../../../core/services/auth-api.service';
-
-// Custom validator for matching passwords
-export const passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const password = control.get('newPassword');
-  const confirmPassword = control.get('confirmPassword');
-  return password && confirmPassword && password.value !== confirmPassword.value ? { passwordMismatch: true } : null;
-};
+import {passwordMatchValidator} from '../../../../shared/validators/password-match.validator';
 
 @Component({
   selector: 'app-reset-password',
@@ -62,8 +54,16 @@ export class ResetPasswordComponent implements OnInit {
       token: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
-    }, { validators: passwordMatchValidator });
+    }, {
+      // Use the shared validator
+      validators: passwordMatchValidator('password', 'confirmPassword')
+    });
   }
+
+  // Convenience getters for template
+  get tokenControl() { return this.resetPasswordForm.get('token'); }
+  get passwordControl() { return this.resetPasswordForm.get('password'); }
+  get confirmPasswordControl() { return this.resetPasswordForm.get('confirmPassword'); }
 
   onSubmit(): void {
     this.errorMessage = null;
