@@ -59,8 +59,8 @@ export class ResetPasswordComponent implements OnInit {
 
   ngOnInit(): void {
     this.resetPasswordForm = this.fb.group({
-      otp: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]], // Assuming 6-digit OTP
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      token: ['', [Validators.required]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: passwordMatchValidator });
   }
@@ -73,12 +73,13 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     this.isLoading = true; // Set loading true
-    const { otp, newPassword } = this.resetPasswordForm.value;
-    const payload = { email: this.email, otp, newPassword };
+    const { token, password } = this.resetPasswordForm.value;
+    const payload = {token, password };
 
     this.authApiService.verifyOtpAndResetPassword(payload).subscribe({ // Use the injected service
       next: (response) => {
         this.isLoading = false;
+        console.log(response);
         if (response.status) {
           this.dialogRef.close({ passwordReset: true });
         } else {
