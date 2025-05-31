@@ -45,7 +45,7 @@ export class AuthService {
     this.currentUserSubject.next(user);
     this.isAuthenticatedSubject.next(isAuthenticated);
     if (isPlatformBrowser(this.platformId)) {
-      if (user && isAuthenticated) { // Only save user if authenticated
+      if (user && isAuthenticated) {
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
       } else {
         localStorage.removeItem(USER_DATA_KEY);
@@ -105,60 +105,17 @@ export class AuthService {
       const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
 
       if (this.isClientSessionExpired()) {
-        // Client-side 30-day expiry policy met.
-        if (accessToken) { // Log if there was a token that's now considered expired by client policy
-          console.log('Client session expired as per 30-day policy during app initialization. Clearing auth state.');
-        }
-        this.performLogoutCleanup(false); // Clear auth data, don't navigate yet
-        return of(undefined);
-      }
-
-      if (accessToken) {
-        // Token exists and client session is not expired by the 30-day rule.
-        // Try to load user data from local storage.
-        const storedUser = localStorage.getItem(USER_DATA_KEY);
-        let user: User | null = null;
-        if (storedUser) {
-          try {
-            user = JSON.parse(storedUser);
-          } catch (e) {
-            console.error("Error parsing stored user data during init", e);
-            localStorage.removeItem(USER_DATA_KEY); // Clear corrupted data
-          }
-        }
-
-        if (user) {
-          // User data found in local storage, assume authenticated for now.
-          // A more robust check might still ping getProfile if token_actual_expiry is near.
-          this.updateAuthState(user, true);
-          return of(undefined); // Auth state determined synchronously
-        } else {
-          // Token exists, client session not expired, but no user data. Fetch profile.
-          // This also validates the token with the server.
-          return this.authApiService.getProfile().pipe(
-            tap(profileUser => this.updateAuthState(profileUser, true)),
-            catchError(() => {
-              // Token might be invalid/expired on server, or other API error
-              console.warn('Failed to get profile during init, token might be invalid. Clearing auth state.');
-              this.performLogoutCleanup(false); // Clear local token and user
-              return of(undefined); // Still resolve, app can continue as logged out
-            }),
-            map(() => undefined) // Ensure the observable chain completes with void
-          );
-        }
+        this.performLogoutCleanup(false);
+      } else if (accessToken) {
+        this.updateAuthState(null, true);
       } else {
-        // No access token found.
         this.updateAuthState(null, false);
-        return of(undefined); // Auth state determined synchronously (logged out)
       }
     } else if (isPlatformServer(this.platformId)) {
-      // Server-side: Tokens are not available from localStorage.
-      // Render as logged out. Client will initialize auth state via APP_INITIALIZER.
       this.updateAuthState(null, false);
-      return of(undefined);
+    } else {
+      this.updateAuthState(null, false);
     }
-    // Fallback, should ideally not be reached if platform is always browser or server
-    this.updateAuthState(null, false);
     return of(undefined);
   }
 
@@ -222,17 +179,10 @@ export class AuthService {
         localStorage.removeItem(REFRESH_TOKEN_KEY);
       }
 
-      // Store backend-provided access token expiry if available and needed for other logic (e.g. proactive refresh)
-      // if (authData.expiry) {
-      //   localStorage.setItem(TOKEN_EXPIRY_KEY, JSON.stringify(authData.expiry));
-      // } else {
-      //   localStorage.removeItem(TOKEN_EXPIRY_KEY);
+      // User data will be set by updateAuthState after successful login/register
+      // if (authData.user) {
+      //   localStorage.setItem(USER_DATA_KEY, JSON.stringify(authData.user));
       // }
-
-      if (authData.user) {
-        // User data will be set by updateAuthState after successful login/register
-        // localStorage.setItem(USER_DATA_KEY, JSON.stringify(authData.user));
-      }
 
       // Set our client-side session expiry for the 30-day rule
       const clientExpiryTime = Date.now() + CLIENT_STORAGE_EXPIRY_DURATION_MS;
