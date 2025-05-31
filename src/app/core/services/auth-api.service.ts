@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {AuthResponse} from '../../features/auth/models/auth-response';
 import {LoginCredentials} from '../../features/auth/models/login-credentials';
 import {catchError, Observable, tap, throwError} from 'rxjs';
@@ -12,7 +12,7 @@ import {User} from '../../features/auth/models/user';
 })
 export class AuthApiService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, ) { }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/login/`, credentials);
@@ -22,9 +22,10 @@ export class AuthApiService {
     return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/register/`, payload);
   }
 
-  logout(): Observable<AuthResponse> {
-    // This endpoint on the backend should clear the HTTP-only cookie
-    return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/logout/`, {});
+  logout(headers: HttpHeaders): Observable<AuthResponse> {
+    console.log('[AuthApiService] Logging out');
+    console.log(headers);
+    return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/logout/`, null ,{ headers: headers });
   }
 
   // Endpoint to get user profile using the token (which an interceptor will add)
@@ -65,10 +66,10 @@ export class AuthApiService {
       );
   }
 
-  changePassword(payload: { old_password: string; new_password: string; confirm_new_password: string }): Observable<{ status: boolean; message?: string; }> {
+  changePassword(payload: { old_password: string; new_password: string; confirm_new_password: string }, headers: HttpHeaders): Observable<{ status: boolean; message?: string; }> {
     // Replace with actual API call
     console.log(`[AuthApiService] Changing password`);
-    return this.http.patch<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/change_password/`, payload)
+    return this.http.patch<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/change_password/`, payload, { headers })
       .pipe(
         tap(response => console.log('[AuthApiService] Change Password Response:', response)),
         catchError(err => {
