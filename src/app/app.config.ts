@@ -27,7 +27,7 @@ import {Url} from './core/constants/base-url'; // Contains the actual base URL s
 import {DatePipe} from '@angular/common';
 import {csrfInterceptor} from './core/interceptors/csrf.interceptor';
 import {AuthService} from './core/services/auth.service';
-import {Observable} from 'rxjs'; // Angular's built-in DatePipe
+import {Observable} from 'rxjs';
 
 // Factory function for creating TranslateHttpLoader
 // This loader fetches translation files (e.g., en.json, ar.json) from the specified path.
@@ -75,7 +75,10 @@ export const appConfig: ApplicationConfig = {
     // Configures the HttpClient.
     provideHttpClient(
       withFetch(), // Enables the use of the `fetch` API for HTTP requests (modern approach).
-      withInterceptors([localizedApiInterceptor, csrfInterceptor]) // Registers custom HTTP interceptors.
+      withInterceptors([
+        localizedApiInterceptor,
+        csrfInterceptor
+      ]) // Registers custom HTTP interceptors.
     ),
     // Provides the API base URL using a custom token.
     {

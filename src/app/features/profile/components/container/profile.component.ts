@@ -3,13 +3,21 @@ import {Meta, Title} from '@angular/platform-browser';
 import {UserWidgetComponent} from '../user-widget/user-widget.component';
 import {ProfileMenuComponent} from '../profile-menu/profile-menu.component';
 import {RouterOutlet} from '@angular/router';
+import {TranslatePipe} from '@ngx-translate/core';
+import {AuthService} from '../../../../core/services/auth.service';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {faSignOut} from '@fortawesome/free-solid-svg-icons';
+import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-profile',
   imports: [
     UserWidgetComponent,
     ProfileMenuComponent,
-    RouterOutlet
+    RouterOutlet,
+    TranslatePipe,
+    FaIconComponent
   ],
   templateUrl: './profile.component.html',
   standalone: true,
@@ -22,7 +30,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   constructor(
     private metaService: Meta,
-    private titleService: Title // Optional: Inject Title if needed
+    private titleService: Title, // Optional: Inject Title if needed
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -39,4 +48,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // This prevents it from potentially persisting if navigation logic changes later.
     this.metaService.removeTag("name='robots'");
   }
+
+  logout() {
+    this.authService.logout().pipe(untilDestroyed(this)).subscribe();
+  }
+
+  protected readonly faSignOut = faSignOut;
 }

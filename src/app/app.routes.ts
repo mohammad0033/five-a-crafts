@@ -159,6 +159,16 @@ export const routes: Routes = [
             // No resolver needed
           },
           {
+            path: 'change-password',
+            loadComponent: () =>
+              import('./features/profile/components/change-password/change-password.component').then(
+                (m) => m.ChangePasswordComponent
+              ),
+            // Add static title for UX
+            title: 'Change Password | Five A Crafts'
+            // No resolver needed
+          },
+          {
           path: 'orders',
           loadComponent: () =>
             import('./features/profile/components/user-orders/user-orders.component').then(

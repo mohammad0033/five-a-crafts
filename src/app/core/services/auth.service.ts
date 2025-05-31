@@ -9,6 +9,7 @@ import {LoginCredentials} from '../../features/auth/models/login-credentials';
 import {RegisterPayload} from '../../features/auth/models/register-payload';
 import {AuthResponse} from '../../features/auth/models/auth-response';
 import {AuthData} from '../../features/auth/models/auth-data';
+import {HttpHeaders} from '@angular/common/http';
 
 // Define a key for storing the user in TransferState
 // const USER_STATE_KEY = makeStateKey<User | null>('currentUser');
@@ -227,6 +228,14 @@ export class AuthService {
     }
   }
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.getAccessToken();
+    if (token) {
+      return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    }
+    return new HttpHeaders(); // Return empty headers if no token
+  }
+
   // --- Authentication Methods ---
   login(credentials: LoginCredentials): Observable<User | null> {
     return this.authApiService.login(credentials).pipe(
@@ -270,7 +279,9 @@ export class AuthService {
   }
 
   logout(navigateToLogin: boolean = true): Observable<void> {
-    return this.authApiService.logout().pipe(
+    console.log('Logging out...');
+    const headers = this.getAuthHeaders();
+    return this.authApiService.logout(headers).pipe(
       tap(() => {
         this.performLogoutCleanup(navigateToLogin);
       }),
@@ -288,9 +299,19 @@ export class AuthService {
     this.updateAuthState(null, false); // This will also clear USER_DATA_KEY from localStorage
     if (navigate && isPlatformBrowser(this.platformId)) {
       this.ngZone.run(() => {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/']);
       });
     }
+  }
+
+  /**
+   * Changes the current user's password.
+   * @param payload Object containing old_password, new_password, and confirm_new_password.
+   * @returns Observable indicating the status and message from the API.
+   */
+  changePassword(payload: { old_password: string; new_password: string; confirm_new_password: string }): Observable<{ status: boolean; message?: string; }> {
+    const headers = this.getAuthHeaders();
+    return this.authApiService.changePassword(payload, headers);
   }
 
   // Synchronous check, useful for guards
