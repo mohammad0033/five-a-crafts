@@ -3,6 +3,10 @@
   <aside class="col-12 col-md-3 d-flex flex-column gap-3 mb-4 mb-md-0">
     <app-user-widget [name]="userName" [phone]="userPhone" [image]="userImage"></app-user-widget>
     <app-profile-menu></app-profile-menu>
+    <button class="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2 p-2" (click)="logout()">
+      <span><fa-icon [icon]="faSignOut"></fa-icon></span>
+      <span>{{ 'profile.logout' | translate }}</span>
+    </button>
   </aside>
 
 <!--  content-->
