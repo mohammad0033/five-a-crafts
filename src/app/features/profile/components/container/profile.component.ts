@@ -28,7 +28,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Optional: Explicitly set title if route title isn't reliable enough
     // this.titleService.setTitle('Your Cart | Five A Crafts');
-
     // Add noindex tag to prevent search engine indexing
     this.metaService.updateTag({ name: 'robots', content: 'noindex, nofollow' });
 
