@@ -52,10 +52,10 @@ export class AuthApiService {
       );
   }
 
-  verifyOtpAndResetPassword(payload: { email: string; otp: string; newPassword: string }): Observable<{ status: boolean; message?: string; }> {
+  verifyOtpAndResetPassword(payload: { token: string; password: string }): Observable<{ status: boolean; message?: string; }> {
     // Replace with actual API call
-    console.log(`[AuthApiService] Resetting password for ${payload.email}`);
-    return this.http.post<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_reset/`, payload)
+    console.log(`[AuthApiService] Resetting password`);
+    return this.http.post<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_reset/confirm/`, payload)
       .pipe(
         tap(response => console.log('[AuthApiService] Reset Password Response:', response)),
         catchError(err => {
@@ -65,10 +65,10 @@ export class AuthApiService {
       );
   }
 
-  changePassword(payload: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<{ status: boolean; message?: string; }> {
+  changePassword(payload: { old_password: string; new_password: string; confirm_new_password: string }): Observable<{ status: boolean; message?: string; }> {
     // Replace with actual API call
     console.log(`[AuthApiService] Changing password`);
-    return this.http.patch<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_change/`, payload)
+    return this.http.patch<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/change_password/`, payload)
       .pipe(
         tap(response => console.log('[AuthApiService] Change Password Response:', response)),
         catchError(err => {
