@@ -1,5 +1,5 @@
 export interface RegisterPayload {
   email: string;
-  user_name: string;
+  username: string;
   password: string;
 }
