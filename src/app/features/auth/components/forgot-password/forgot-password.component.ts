@@ -53,9 +53,9 @@ export class ForgotPasswordComponent implements OnInit {
     const email = this.forgotPasswordForm.value.email;
 
     this.authApiService.requestOtp(email).subscribe({ // Use the injected service
-      next: (response) => {
+      next: (response:{status: boolean; message?: string;}) => {
         this.isLoading = false;
-        if (response.success) {
+        if (response.status) {
           this.dialogRef.close({ emailSent: true, email: email });
         } else {
           this.errorMessage = response.message || this.translate.instant('auth.otpSendFailed');

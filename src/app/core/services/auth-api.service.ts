@@ -15,8 +15,6 @@ export class AuthApiService {
   constructor(private http: HttpClient) { }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    // The browser will automatically send the HTTP-only cookie if it exists
-    // The backend validates it.
     return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/login/`, credentials);
   }
 
@@ -29,47 +27,53 @@ export class AuthApiService {
     return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/logout/`, {});
   }
 
-  // Endpoint to check current authentication status / get user profile
-  // Relies on the cookie being sent by the browser
-  checkStatus(): Observable<User> {
-    return this.http.get<User>(`${Url.baseUrl}/api/user/profile/`); // Or a similar endpoint
+  // Endpoint to get user profile using the token (which an interceptor will add)
+  getProfile(): Observable<User> {
+    // This relies on an HTTP interceptor to add the 'Authorization: Bearer <token>' header
+    return this.http.get<User>(`${Url.baseUrl}/api/user/profile/`);
   }
 
-  requestOtp(email: string): Observable<{ success: boolean; message?: string; }> {
+  // Endpoint to check current authentication status / get user profile
+  // Relies on the cookie being sent by the browser
+  // checkStatus(): Observable<User> {
+  //   return this.http.get<User>(`${Url.baseUrl}/api/user/profile/`); // Or a similar endpoint
+  // }
+
+  requestOtp(email: string): Observable<{ status: boolean; message?: string; }> {
     // Replace with actual API call
     console.log(`[AuthApiService] Requesting OTP for ${email}`);
-    return this.http.post<{ success: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_reset/`, { email })
+    return this.http.post<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_reset/`, { email })
       .pipe(
         tap(response => console.log('[AuthApiService] OTP Response:', response)),
         catchError(err => {
           console.error('[AuthApiService] OTP Error:', err);
-          return throwError(() => ({ success: false, message: 'Failed to send OTP. Please try again.' }));
+          return throwError(() => ({ status: false, message: 'Failed to send OTP. Please try again.' }));
         })
       );
   }
 
-  verifyOtpAndResetPassword(payload: { email: string; otp: string; newPassword: string }): Observable<{ success: boolean; message?: string; }> {
+  verifyOtpAndResetPassword(payload: { email: string; otp: string; newPassword: string }): Observable<{ status: boolean; message?: string; }> {
     // Replace with actual API call
     console.log(`[AuthApiService] Resetting password for ${payload.email}`);
-    return this.http.post<{ success: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_reset/`, payload)
+    return this.http.post<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_reset/`, payload)
       .pipe(
         tap(response => console.log('[AuthApiService] Reset Password Response:', response)),
         catchError(err => {
           console.error('[AuthApiService] Reset Password Error:', err);
-          return throwError(() => ({ success: false, message: 'Failed to reset password. Please try again.' }));
+          return throwError(() => ({ status: false, message: 'Failed to reset password. Please try again.' }));
         })
       );
   }
 
-  changePassword(payload: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<{ success: boolean; message?: string; }> {
+  changePassword(payload: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<{ status: boolean; message?: string; }> {
     // Replace with actual API call
     console.log(`[AuthApiService] Changing password`);
-    return this.http.patch<{ success: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_change/`, payload)
+    return this.http.patch<{ status: boolean; message?: string; }>(`${Url.baseUrl}/api/user/password_change/`, payload)
       .pipe(
         tap(response => console.log('[AuthApiService] Change Password Response:', response)),
         catchError(err => {
           console.error('[AuthApiService] Change Password Error:', err);
-          return throwError(() => ({ success: false, message: 'Failed to change password. Please try again.' }));
+          return throwError(() => ({ status: false, message: 'Failed to change password. Please try again.' }));
         })
       );
   }

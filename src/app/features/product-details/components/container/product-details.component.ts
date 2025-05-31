@@ -24,7 +24,7 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {ReviewsData} from '../../models/reviews-data';
 import {Review} from '../../models/review';
 import {ProductsApiService} from '../../../../core/services/products-api.service';
-import {Observable, timer} from 'rxjs';
+import {Observable, of, timer} from 'rxjs';
 import {Product} from '../../../../core/models/product';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
 import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
@@ -33,6 +33,7 @@ import {Url} from '../../../../core/constants/base-url';
 import {SelectedVariation} from '../../../cart/models/selected-variation';
 import {RecentlyViewedService} from '../../../../core/services/recently-viewed.service';
 import {ProductImageData} from '../../models/product-image-data';
+import {ProductsService} from '../../../../core/services/products.service';
 
 @UntilDestroy()
 @Component({
@@ -125,6 +126,7 @@ export class ProductDetailsComponent implements OnInit {
     private router: Router,
     private translate: TranslateService,
     private productsApiService: ProductsApiService,
+    private productsService: ProductsService,
     private snackBar: MatSnackBar,
     private datePipe: DatePipe,
     private fb: FormBuilder,
@@ -159,7 +161,7 @@ export class ProductDetailsComponent implements OnInit {
       this.initializeVariationsForm(); // Call this after product is set
       this.errorLoading = false;
       // Meta tags, images, stock setup
-      const canonicalUrl = `${Url.baseUrl}/api/oscar/products/${this.product.slug}`;
+      const canonicalUrl = `${Url.baseUrl}/api/oscar/products/${this.product.id}`;
       this.metaTagService.setTags(
         this.product.metaData, this.fallbackMetaData,
         { canonicalUrl, ogType: 'product', twitterHandle: this.twitterHandle }
@@ -196,8 +198,18 @@ export class ProductDetailsComponent implements OnInit {
       }
 
       // Fetch reviews for this product
-      this.loadProductReviews(this.product.slug);
+      this.loadProductReviews(this.product.id);
       // isLoading will be set to false after reviews are also loaded or fail
+
+      // MODIFICATION: Get "You May Like" products from recommended_products
+      if (this.product.recommended_products && this.product.recommended_products.length > 0) {
+        // Assuming items in recommended_products are compatible with the Product type
+        this.productsYouMayLike$ = of(this.product.recommended_products as Product[]);
+      } else {
+        // If no recommended_products, or array is empty, provide an empty observable
+        this.productsYouMayLike$ = of([]);
+      }
+      // END MODIFICATION
 
     } else {
       this.product = null;
@@ -208,9 +220,6 @@ export class ProductDetailsComponent implements OnInit {
       this.router.navigate(['/not-found']); // Or your preferred 404 route
       this.metaTagService.setTags(null, this.fallbackMetaData, { canonicalUrl, ogType: 'website', twitterHandle: this.twitterHandle });
     }
-
-    // get you may also like
-    this.productsYouMayLike$ = this.productsApiService.getProductsYouMayLike();
 
     // get recently viewed
     this.recentlyViewedProducts$ = this.recentlyViewedService.getRecentlyViewedProducts();
@@ -235,7 +244,6 @@ export class ProductDetailsComponent implements OnInit {
         optionType.options = options;
       });
       this.variationsForm = this.fb.group(groupConfig);
-      console.log(this.variationsForm); // <--- Add this line
       this.variationsForm.valueChanges.pipe(untilDestroyed(this)).subscribe(values => {
         this.product?.product_options?.forEach(cat => {
           // Find the selected option based on the form value
@@ -259,13 +267,13 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
-  private loadProductReviews(productSlug: string): void {
-    this.productsApiService.getProductReviews(productSlug)
+  private loadProductReviews(productId: number): void {
+    this.productsService.getProductReviews(productId)
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (reviewsDataFromApi) => {
-          this.reviewsData = reviewsDataFromApi;
-          this.allProductReviews = reviewsDataFromApi.reviewsList || [];
+        next: (reviewsData) => {
+          // this.reviewsData = reviewsData;
+          // this.allProductReviews = reviewsData.reviewsList || [];
           this.initializeReviewDisplay(this.allProductReviews);
           console.log('Product reviews loaded:', this.reviewsData);
           this.isLoading = false; // All product related data loaded
@@ -518,4 +526,6 @@ export class ProductDetailsComponent implements OnInit {
       ...this.snackBarConfig,
     });
   }
+
+  protected readonly length = length;
 }

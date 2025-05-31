@@ -14,6 +14,7 @@ import {ResetPasswordComponent} from '../reset-password/reset-password.component
 import {ForgotPasswordComponent} from '../forgot-password/forgot-password.component';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {RegisterComponent} from '../register/register.component';
+import {User} from '../../models/user';
 
 @UntilDestroy()
 @Component({
@@ -67,7 +68,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      user_name: ['', [Validators.required]],
+      username: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
 
@@ -78,7 +79,7 @@ export class LoginComponent implements OnInit {
   }
 
   submitLogin(): void {
-    this.loginError = null; // Reset error
+    this.loginError = null;
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -88,9 +89,10 @@ export class LoginComponent implements OnInit {
     this.loginForm.disable();
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (user) => {
+      next: (user: User | null) => { // <--- user can now be User or null
         this.isLoading = false;
         this.loginForm.enable();
+        // Navigation logic proceeds even if user is null, as long as the observable completes.
         if (this.isDialog && this.dialogRef) {
           this.dialogRef.close({ loggedIn: true, returnUrl: this.intendedRoute });
         } else {
