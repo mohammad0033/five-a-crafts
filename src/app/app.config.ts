@@ -1,4 +1,9 @@
-import {ApplicationConfig, importProvidersFrom, provideZoneChangeDetection} from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom, inject,
+  provideAppInitializer,
+  provideZoneChangeDetection
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes'; // Defines the application's routes
@@ -19,12 +24,24 @@ import {localizedApiInterceptor} from './core/interceptors/language.interceptor'
 import {API_PREFIX} from './core/tokens/API_PREFIX'; // Token for the base URL of your API
 import {Url} from './core/constants/base-url'; // Contains the actual base URL string
 // --- Utility Pipes ---
-import {DatePipe} from '@angular/common'; // Angular's built-in DatePipe
+import {DatePipe} from '@angular/common';
+import {csrfInterceptor} from './core/interceptors/csrf.interceptor';
+import {AuthService} from './core/services/auth.service';
+import {Observable} from 'rxjs'; // Angular's built-in DatePipe
 
 // Factory function for creating TranslateHttpLoader
 // This loader fetches translation files (e.g., en.json, ar.json) from the specified path.
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
   new TranslateHttpLoader(http, './i18n/', '.json'); // Path to translation files and their extension
+
+// --- Application Initializer Function ---
+// This function will be executed during app initialization.
+// It uses `inject` to get an instance of AuthService and calls its initialization method.
+// It must return an Observable or a Promise.
+function initializeAuthentication(): Observable<void> {
+  const authService = inject(AuthService); // Dependency-inject AuthService
+  return authService.initializeAuthState(); // Call the initialization logic
+}
 
 // Application configuration object
 export const appConfig: ApplicationConfig = {
@@ -58,7 +75,7 @@ export const appConfig: ApplicationConfig = {
     // Configures the HttpClient.
     provideHttpClient(
       withFetch(), // Enables the use of the `fetch` API for HTTP requests (modern approach).
-      withInterceptors([localizedApiInterceptor]) // Registers custom HTTP interceptors.
+      withInterceptors([localizedApiInterceptor, csrfInterceptor]) // Registers custom HTTP interceptors.
     ),
     // Provides the API base URL using a custom token.
     {
@@ -66,6 +83,8 @@ export const appConfig: ApplicationConfig = {
       useValue: Url.baseUrl // The actual base URL string. **Configure your API prefix here!**
     },
     // Provides the DatePipe for formatting dates throughout the application.
-    DatePipe
+    DatePipe,
+    // +++ Add APP_INITIALIZER provider for AuthService +++
+    provideAppInitializer(initializeAuthentication)
   ]
 };
