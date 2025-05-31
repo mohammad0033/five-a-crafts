@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
-import {delay, Observable, of} from 'rxjs';
+import {EMPTY, Observable} from 'rxjs';
 import {Product} from '../models/product';
-import {ReviewsData} from '../../features/product-details/models/reviews-data';
-import {Review} from '../../features/product-details/models/review';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {CommonApiResponse} from '../models/common-api-response';
 import {Url} from '../constants/base-url';
-import {Color} from '../models/color';
 import {SortOption} from '../../features/products/components/container/products.component';
 
 @Injectable({
@@ -44,7 +41,8 @@ export class ProductsApiService {
   }
 
   getFavoriteProducts(): Observable<CommonApiResponse> {
-    return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/product/wish_list/`);
+    // return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/product/wish_list/`);
+    return EMPTY;
   }
 
   getProducts(page?: number,
