@@ -25,25 +25,25 @@ export class LoadingComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    console.log('LoadingComponent: ngOnInit. Current auth state sync:', this.authService.isAuthenticated());
+    // console.log('LoadingComponent: ngOnInit. Current auth state sync:', this.authService.isAuthenticated());
     this.authService.isAuthenticated$.pipe(
       untilDestroyed(this),
       filter(isAuthenticated => isAuthenticated !== null),
       take(1)
     ).subscribe(isAuthenticated => {
       const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-      console.log(`LoadingComponent: Auth state resolved to ${isAuthenticated}. Navigating.`);
+      // console.log(`LoadingComponent: Auth state resolved to ${isAuthenticated}. Navigating.`);
 
       if (isAuthenticated) {
         if (returnUrl === '/loading' || returnUrl === '/') {
-          console.log(`LoadingComponent: Authenticated, returnUrl is trivial, navigating to /`);
+          // console.log(`LoadingComponent: Authenticated, returnUrl is trivial, navigating to /`);
           this.router.navigate(['/']);
         } else {
-          console.log(`LoadingComponent: Authenticated, navigating to returnUrl: ${returnUrl}`);
+          // console.log(`LoadingComponent: Authenticated, navigating to returnUrl: ${returnUrl}`);
           this.router.navigateByUrl(returnUrl);
         }
       } else {
-        console.log(`LoadingComponent: Not authenticated, navigating to /`);
+        // console.log(`LoadingComponent: Not authenticated, navigating to /`);
         this.router.navigate(['/']);
       }
     });
