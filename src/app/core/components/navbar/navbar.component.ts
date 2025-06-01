@@ -79,7 +79,7 @@ export class NavbarComponent implements OnInit{
   totalProducts = 0;
   isLoadingSearchResults: boolean = false;
   isSearchVisible = false;
-  isAuthenticated$: Observable<boolean>;
+  isAuthenticated$: Observable<boolean | null>;
 
     constructor(
       private breakpointObserver: BreakpointObserver,
@@ -94,7 +94,8 @@ export class NavbarComponent implements OnInit{
       private authService: AuthService,
       private dialog: MatDialog,
       private snackBar: MatSnackBar) {
-      this.isAuthenticated$ = this.authService.isAuthenticated$;}
+      this.isAuthenticated$ = this.authService.isAuthenticated$;
+    }
 
     ngOnInit(): void {
       this.trackScreenSize();
