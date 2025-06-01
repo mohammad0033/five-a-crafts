@@ -46,13 +46,6 @@ export class AuthService {
   private updateAuthState(user: User | null, isAuthenticated: boolean): void {
     this.currentUserSubject.next(user);
     this.isAuthenticatedSubject.next(isAuthenticated);
-    if (isPlatformBrowser(this.platformId)) {
-      if (user && isAuthenticated) {
-        localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-      } else {
-        localStorage.removeItem(USER_DATA_KEY);
-      }
-    }
   }
 
   // cookie auth state
@@ -116,13 +109,10 @@ export class AuthService {
           if (this.isClientSessionExpired()) {
             this.performLogoutCleanup(false); // Sets isAuthenticatedSubject to false
           } else if (accessToken) {
-            const storedUser = localStorage.getItem(USER_DATA_KEY);
-            try {
-              this.updateAuthState(storedUser ? JSON.parse(storedUser) : null, true);
-            } catch (e) {
-              console.error("Failed to parse stored user data", e);
-              this.updateAuthState(null, true); // Still authenticated, but user data might be corrupt/missing
-            }
+            // User is authenticated based on token presence.
+            // currentUserSubject will be null initially. It gets populated upon login/registration
+            // or if you implement a separate fetch for user details.
+            this.updateAuthState(null, true);
           } else {
             this.updateAuthState(null, false); // Sets isAuthenticatedSubject to false
           }
@@ -199,10 +189,11 @@ export class AuthService {
       } else {
         localStorage.removeItem(REFRESH_TOKEN_KEY);
       }
-      // Note: authData.expiry is not explicitly saved here unless you add a TOKEN_EXPIRY_KEY logic
       const clientExpiryTime = Date.now() + CLIENT_STORAGE_EXPIRY_DURATION_MS;
       localStorage.setItem(CLIENT_SESSION_EXPIRY_KEY, clientExpiryTime.toString());
       console.log(`Client session expiry set to: ${new Date(clientExpiryTime).toISOString()}`);
+      // Note: authData.user is NOT saved to localStorage here.
+      // The updateAuthState method, typically called after this, handles the in-memory currentUserSubject.
     }
   }
 
@@ -235,9 +226,8 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
-      // localStorage.removeItem(TOKEN_EXPIRY_KEY);
-      localStorage.removeItem(USER_DATA_KEY);
-      localStorage.removeItem(CLIENT_SESSION_EXPIRY_KEY); // Clear our client session expiry
+      localStorage.removeItem(USER_DATA_KEY); // Keep this to clear any old data if it exists
+      localStorage.removeItem(CLIENT_SESSION_EXPIRY_KEY);
       console.log('All client auth data cleared.');
     }
   }
@@ -255,16 +245,14 @@ export class AuthService {
     return this.authApiService.login(credentials).pipe(
       map((response: AuthResponse) => {
         if (response.status && response.data) {
-          // Assuming login response.data is of type AuthData
           const authData = response.data as AuthData;
-          // Basic check for AuthData structure
-          if (authData) {
-            this.saveAuthData(authData);
-            // Ensure authData.user is used, or null if not present
+          if (authData && authData.access) { // Basic check for AuthData structure
+            this.saveAuthData(authData); // Saves tokens to localStorage
+            // updateAuthState will set currentUserSubject in memory but NOT save user to localStorage
             this.updateAuthState(authData.user || null, true);
             return authData.user || null;
           } else {
-            console.error('Login response data is not in the expected AuthData format:', response.data);
+            console.error('Login response data is not in the expected AuthData format or missing access token:', response.data);
             throw new Error('Login successful, but data format is unexpected.');
           }
         }
@@ -284,46 +272,31 @@ export class AuthService {
       map((response: AuthResponse) => {
         console.log('Register API response:', response);
         if (response.status && response.data) {
-          // Check if response.data has the shape of SuccessRegister
-          // by looking for the nested 'token' object and its 'access' property.
-          const potentialSuccessData = response.data as any; // Use 'any' for initial property check
-
+          const potentialSuccessData = response.data as any;
           if (potentialSuccessData && typeof potentialSuccessData.token === 'object' &&
             potentialSuccessData.token !== null && typeof potentialSuccessData.token.access === 'string') {
-
             const successData = potentialSuccessData as SuccessRegister;
-
-            // 1. Construct the User object for application state.
-            //    !! CRITICAL GAP: 'id' is missing in SuccessRegister but required by your User interface.
-            //    The backend should ideally return the user's ID upon registration.
-            //    Using a placeholder for now. This needs to be addressed.
             const registeredUser: User = {
-              id: '', // <<< --- IMPORTANT: Placeholder ID. Resolve this!
+              id: '', // <<< --- IMPORTANT: Placeholder ID. Resolve this with your backend!
               email: successData.email,
               username: successData.username,
               phone_number: successData.phone_number
-              // phone_number from successData.phone_number could be added to User model if needed
             };
-
-            // 2. Construct AuthData for saving tokens and associating the user.
             const authDataToSave: AuthData = {
               access: successData.token.access,
               refresh: successData.token.refresh,
-              expiry: null, // 'expiry' is in AuthData model (as 'any'), but not in SuccessRegister.
-              user: registeredUser // Associate the constructed user object
+              expiry: null,
+              user: registeredUser
             };
-
-            this.saveAuthData(authDataToSave); // Save tokens (and client session expiry)
-            this.updateAuthState(registeredUser, true); // Update app's auth state (sets currentUser, isAuthenticated, saves user to localStorage)
-
-            return registeredUser; // Return the newly registered (and now authenticated) user
+            this.saveAuthData(authDataToSave); // Saves tokens to localStorage
+            // updateAuthState will set currentUserSubject in memory but NOT save user to localStorage
+            this.updateAuthState(registeredUser, true);
+            return registeredUser;
           } else {
-            // This means response.data was present but didn't look like SuccessRegister
             console.error('Registration response data is not in the expected SuccessRegister format:', response.data);
             throw new Error('Registration successful, but data format is unexpected.');
           }
         }
-        // If response.status is false or response.data is missing
         const errorMessage = response.message || 'Registration failed: Invalid response from server.';
         throw new Error(errorMessage);
       }),
@@ -356,8 +329,8 @@ export class AuthService {
   }
 
   private performLogoutCleanup(navigate: boolean = true): void {
-    this.clearAuthData();
-    this.updateAuthState(null, false); // This will also clear USER_DATA_KEY from localStorage
+    this.clearAuthData(); // This will remove tokens and USER_DATA_KEY from localStorage
+    this.updateAuthState(null, false); // This will set currentUserSubject to null in memory
     if (navigate && isPlatformBrowser(this.platformId)) {
       this.ngZone.run(() => {
         this.router.navigate(['/']);
