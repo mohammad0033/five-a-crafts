@@ -8,6 +8,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {NgIf} from '@angular/common';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {AuthService} from '../../../../core/services/auth.service';
+import {Router} from '@angular/router';
+import {User} from '../../models/user';
 
 @Component({
   selector: 'app-register',
@@ -30,10 +32,13 @@ export class RegisterComponent implements OnInit {
   hidePassword = true;
   isLoading: boolean = false;
   errorMessage: string | null = null;
+  intendedRoute?: string;
+  isDialog: boolean = false;
 
   constructor(private fb: FormBuilder,
               private authService: AuthService,
               private translate: TranslateService,
+              private router: Router,
               @Optional() public dialogRef?: MatDialogRef<RegisterComponent>) {}
 
   ngOnInit(): void {
@@ -45,33 +50,38 @@ export class RegisterComponent implements OnInit {
   }
 
   submitRegister(): void {
-    this.errorMessage = null; // Reset error
+    this.errorMessage = null;
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading = true; // Set loading
-    this.registerForm.disable(); // Disable form
+    this.isLoading = true;
+    this.registerForm.disable();
 
     this.authService.register(this.registerForm.value).subscribe({
-      next: (user) => { // AuthService.register() returns User directly on success
+      next: (user: User | null) => {
         this.isLoading = false;
         this.registerForm.enable();
-        console.log('Registration successful', user);
-        if (this.dialogRef) {
-          this.dialogRef.close({ registered: true, user: user }); // Optionally pass the user back
+        console.log('Registration successful and user auto-logged in:', user);
+
+        if (this.isDialog && this.dialogRef) {
+          // If it's a dialog, close and return success and the intended route
+          this.dialogRef.close({
+            registeredAndLoggedIn: true,
+            user: user,
+            returnUrl: this.intendedRoute // Pass back the intended route
+          });
         } else {
-          // Handle success if it's a standalone page (e.g., navigate to login or dashboard)
+          // If it's a standalone page, navigate to the intended route or fallback
+          const navigateTo = this.intendedRoute || '/';
+          this.router.navigateByUrl(navigateTo);
         }
       },
       error: (err) => {
         this.isLoading = false;
         this.registerForm.enable();
         console.error('Registration failed', err);
-        // AuthService.register() should propagate the error, potentially already formatted
-        // If err.message comes from AuthService's error handling (like 'Registration failed')
-        // or if it's an HttpErrorResponse, err.error.message might be more specific from the API.
         this.errorMessage = err.message || err.error?.message || this.translate.instant('auth.registrationFailed');
       }
     });

@@ -57,13 +57,15 @@ export class LoginComponent implements OnInit {
       source?: string,
       preambleMessage?: string
     }) {
-      if (this.dialogRef && this.data) { // Check data as well
-        this.isDialog = true;
+    if (this.dialogRef) { // Simplified check: if dialogRef exists, it's a dialog
+      this.isDialog = true;
+      if (this.data) { // Check if data exists before accessing its properties
         this.intendedRoute = this.data.intendedRoute;
         if (this.data.preambleMessage) {
           this.preambleMessage = this.data.preambleMessage;
         }
       }
+    }
     }
 
   ngOnInit(): void {
@@ -170,38 +172,33 @@ export class LoginComponent implements OnInit {
   }
 
   openRegisterDialog(): void {
-    // If this LoginComponent is already a dialog, close it and signal the parent
     if (this.isDialog && this.dialogRef) {
+      // If LoginComponent is a dialog, close it and signal the parent component
+      // to open the Register dialog, passing along the intendedRoute.
       this.dialogRef.close({ action: 'openRegisterDialog', intendedRoute: this.intendedRoute });
     } else {
-      // If LoginComponent is a standalone page, open the register dialog directly
+      // If LoginComponent is a standalone page, open the RegisterComponent dialog directly.
+      // Determine the intendedRoute: use LoginComponent's own intendedRoute if set (e.g., from its own MAT_DIALOG_DATA if it was opened as a dialog for some reason, though less common for a page),
+      // or from current route query params, or fallback to '/'.
+      const routeForRegister = this.intendedRoute || this.router.routerState.snapshot.root.queryParams['returnUrl'] || '/';
+
       const registerDialogRef = this.dialog.open(RegisterComponent, {
-        width: '450px', // Adjust size as needed
+        width: '450px',
         maxWidth: '90vw',
-        // disableClose: true // Prevent closing by clicking outside or ESC
+        data: { intendedRoute: routeForRegister } // Pass the intendedRoute to RegisterComponent
       });
 
       registerDialogRef.afterClosed().subscribe(result => {
-        if (result?.registered) {
-          this.snackBar.open(this.translate.instant('auth.registrationSuccessMessage'), this.translate.instant('common.dismiss'), { duration: 5000 });
-          // If it was a page, open login dialog after successful registration
-          this.dialog.open(LoginComponent, {
-            width: '450px',
-            maxWidth: '90vw',
-            data: {
-              preambleMessage: this.translate.instant('auth.registrationSuccessLoginPrompt')
-            }
-          });
-        } else if (result?.action === 'backToLogin') {
-          // If it was a page, open login dialog if user wants to go back
-          this.dialog.open(LoginComponent, {
-            width: '450px',
-            maxWidth: '90vw',
-            data: {
-              preambleMessage: this.translate.instant('auth.welcomeBackLoginPrompt')
-            }
-          });
+        if (result?.registeredAndLoggedIn && result?.returnUrl) {
+          // Registration was successful, user is logged in, and RegisterComponent provided a returnUrl.
+          this.router.navigateByUrl(result.returnUrl);
+        } else if (result?.registeredAndLoggedIn) {
+          // Fallback if returnUrl wasn't provided for some reason, though it should be.
+          this.router.navigate(['/']);
         }
+        // No need to re-open login dialog if registration leads to auto-login and navigation.
+        // If result.action === 'backToLogin', the user closed the register dialog to go back to login.
+        // If LoginComponent is a page, it's still there. If it was a dialog, the parent handles it.
       });
     }
   }

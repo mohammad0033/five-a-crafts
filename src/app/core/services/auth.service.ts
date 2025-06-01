@@ -10,6 +10,7 @@ import {RegisterPayload} from '../../features/auth/models/register-payload';
 import {AuthResponse} from '../../features/auth/models/auth-response';
 import {AuthData} from '../../features/auth/models/auth-data';
 import {HttpHeaders} from '@angular/common/http';
+import {SuccessRegister} from '../../features/auth/models/success-register';
 
 // Define a key for storing the user in TransferState
 // const USER_STATE_KEY = makeStateKey<User | null>('currentUser');
@@ -198,13 +199,7 @@ export class AuthService {
       } else {
         localStorage.removeItem(REFRESH_TOKEN_KEY);
       }
-
-      // User data will be set by updateAuthState after successful login/register
-      // if (authData.user) {
-      //   localStorage.setItem(USER_DATA_KEY, JSON.stringify(authData.user));
-      // }
-
-      // Set our client-side session expiry for the 30-day rule
+      // Note: authData.expiry is not explicitly saved here unless you add a TOKEN_EXPIRY_KEY logic
       const clientExpiryTime = Date.now() + CLIENT_STORAGE_EXPIRY_DURATION_MS;
       localStorage.setItem(CLIENT_SESSION_EXPIRY_KEY, clientExpiryTime.toString());
       console.log(`Client session expiry set to: ${new Date(clientExpiryTime).toISOString()}`);
@@ -259,18 +254,25 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<User | null> {
     return this.authApiService.login(credentials).pipe(
       map((response: AuthResponse) => {
-        if (response.status && response.data && response.data.access) { // Ensure access token is present
-          this.saveAuthData(response.data);
-          this.updateAuthState(response.data.user || null, true);
-          return response.data.user || null;
+        if (response.status && response.data) {
+          // Assuming login response.data is of type AuthData
+          const authData = response.data as AuthData;
+          // Basic check for AuthData structure
+          if (authData) {
+            this.saveAuthData(authData);
+            // Ensure authData.user is used, or null if not present
+            this.updateAuthState(authData.user || null, true);
+            return authData.user || null;
+          } else {
+            console.error('Login response data is not in the expected AuthData format:', response.data);
+            throw new Error('Login successful, but data format is unexpected.');
+          }
         }
-        // Use message from response if available, otherwise a generic one
         const errorMessage = response.message || 'Login failed: Invalid response from server.';
         throw new Error(errorMessage);
       }),
       catchError(error => {
-        this.performLogoutCleanup(false); // Clear any partial state, don't navigate
-        // error.message might already be set if thrown from map
+        this.performLogoutCleanup(false);
         const errorMessage = error.message || 'An unknown error occurred during login.';
         return throwError(() => new Error(errorMessage));
       })
@@ -280,17 +282,53 @@ export class AuthService {
   register(payload: RegisterPayload): Observable<User | null> {
     return this.authApiService.register(payload).pipe(
       map((response: AuthResponse) => {
-        if (response.status && response.data && response.data.access) { // Ensure access token is present
-          // Assuming registration also logs the user in and returns tokens
-          this.saveAuthData(response.data);
-          this.updateAuthState(response.data.user || null, true);
-          return response.data.user || null;
+        console.log('Register API response:', response);
+        if (response.status && response.data) {
+          // Check if response.data has the shape of SuccessRegister
+          // by looking for the nested 'token' object and its 'access' property.
+          const potentialSuccessData = response.data as any; // Use 'any' for initial property check
+
+          if (potentialSuccessData && typeof potentialSuccessData.token === 'object' &&
+            potentialSuccessData.token !== null && typeof potentialSuccessData.token.access === 'string') {
+
+            const successData = potentialSuccessData as SuccessRegister;
+
+            // 1. Construct the User object for application state.
+            //    !! CRITICAL GAP: 'id' is missing in SuccessRegister but required by your User interface.
+            //    The backend should ideally return the user's ID upon registration.
+            //    Using a placeholder for now. This needs to be addressed.
+            const registeredUser: User = {
+              id: '', // <<< --- IMPORTANT: Placeholder ID. Resolve this!
+              email: successData.email,
+              username: successData.username,
+              phone_number: successData.phone_number
+              // phone_number from successData.phone_number could be added to User model if needed
+            };
+
+            // 2. Construct AuthData for saving tokens and associating the user.
+            const authDataToSave: AuthData = {
+              access: successData.token.access,
+              refresh: successData.token.refresh,
+              expiry: null, // 'expiry' is in AuthData model (as 'any'), but not in SuccessRegister.
+              user: registeredUser // Associate the constructed user object
+            };
+
+            this.saveAuthData(authDataToSave); // Save tokens (and client session expiry)
+            this.updateAuthState(registeredUser, true); // Update app's auth state (sets currentUser, isAuthenticated, saves user to localStorage)
+
+            return registeredUser; // Return the newly registered (and now authenticated) user
+          } else {
+            // This means response.data was present but didn't look like SuccessRegister
+            console.error('Registration response data is not in the expected SuccessRegister format:', response.data);
+            throw new Error('Registration successful, but data format is unexpected.');
+          }
         }
+        // If response.status is false or response.data is missing
         const errorMessage = response.message || 'Registration failed: Invalid response from server.';
         throw new Error(errorMessage);
       }),
       catchError(error => {
-        this.performLogoutCleanup(false); // Clear any partial state, don't navigate
+        this.performLogoutCleanup(false);
         const errorMessage = error.message || 'An unknown error occurred during registration.';
         return throwError(() => new Error(errorMessage));
       })
