@@ -37,7 +37,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  private isAuthenticatedSubject = new BehaviorSubject<boolean | null>(null);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor() {}
@@ -102,21 +102,40 @@ export class AuthService {
    * This method is intended to be called via APP_INITIALIZER.
    */
   public initializeAuthState(): Observable<void> {
-    if (isPlatformBrowser(this.platformId)) {
-      const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+    // isAuthenticatedSubject is already null by default from its BehaviorSubject initialization.
 
-      if (this.isClientSessionExpired()) {
-        this.performLogoutCleanup(false);
-      } else if (accessToken) {
-        this.updateAuthState(null, true);
-      } else {
-        this.updateAuthState(null, false);
-      }
+    if (isPlatformBrowser(this.platformId)) {
+      // Use setTimeout to schedule a macrotask.
+      // This gives more time for the initial null state to be observed by guards
+      // before the actual auth state is determined from localStorage.
+      setTimeout(() => {
+        this.ngZone.run(() => { // Ensure updates run within Angular's zone
+          console.log('AuthService: setTimeout callback executing - checking auth state.');
+          const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+          if (this.isClientSessionExpired()) {
+            this.performLogoutCleanup(false); // Sets isAuthenticatedSubject to false
+          } else if (accessToken) {
+            const storedUser = localStorage.getItem(USER_DATA_KEY);
+            try {
+              this.updateAuthState(storedUser ? JSON.parse(storedUser) : null, true);
+            } catch (e) {
+              console.error("Failed to parse stored user data", e);
+              this.updateAuthState(null, true); // Still authenticated, but user data might be corrupt/missing
+            }
+          } else {
+            this.updateAuthState(null, false); // Sets isAuthenticatedSubject to false
+          }
+        });
+      }, 0); // A timeout of 0 ms still defers it to the macrotask queue
     } else if (isPlatformServer(this.platformId)) {
+      // For SSR, auth state is typically determined synchronously or passed via TransferState
       this.updateAuthState(null, false);
     } else {
+      // Fallback for other platforms
       this.updateAuthState(null, false);
     }
+
+    // APP_INITIALIZER completes quickly, allowing app bootstrap to proceed.
     return of(undefined);
   }
 
@@ -315,13 +334,13 @@ export class AuthService {
   }
 
   // Synchronous check, useful for guards
-  public isAuthenticatedSync(): boolean {
+  public isAuthenticatedSync(): boolean | null {
     // Consider checking token expiry here if you store and parse it
     return this.isAuthenticatedSubject.value;
   }
 
   // Synchronous check, useful for guards if the state is already known
-  public isAuthenticated(): boolean {
+  public isAuthenticated(): boolean | null {
     return this.isAuthenticatedSubject.value;
   }
 
