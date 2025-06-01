@@ -298,18 +298,22 @@ export class AuthService {
   }
 
   logout(navigateToLogin: boolean = true): Observable<void> {
-    console.log('Logging out...');
-    const headers = this.getAuthHeaders();
-    return this.authApiService.logout(headers).pipe(
+    const refreshToken = this.getRefreshToken(); // Get the refresh token from local storage
+
+    // Call the API service, passing the refresh token.
+    // The refresh token will be included in the request body by AuthApiService.
+    return this.authApiService.logout(refreshToken).pipe(
       tap(() => {
         this.performLogoutCleanup(navigateToLogin);
       }),
       catchError(error => {
-        console.warn('Backend logout failed, clearing client state anyway.', error);
+        console.warn('[AuthService] Backend logout API call failed. Performing client cleanup anyway.', error);
         this.performLogoutCleanup(navigateToLogin);
-        return of(undefined); // Complete the observable chain successfully even if backend fails
+        // It's common to still complete the observable successfully from the client's perspective,
+        // as the client-side state is cleared.
+        return of(undefined);
       }),
-      map(() => undefined) // Ensure it emits void
+      map(() => undefined) // Ensure the observable emits void and completes
     );
   }
 

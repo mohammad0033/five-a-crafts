@@ -22,10 +22,9 @@ export class AuthApiService {
     return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/register/`, payload);
   }
 
-  logout(headers: HttpHeaders): Observable<AuthResponse> {
-    console.log('[AuthApiService] Logging out');
-    console.log(headers);
-    return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/logout/`, null ,{ headers: headers });
+  logout(refreshToken?: string | null): Observable<AuthResponse> {
+    const body = refreshToken ? { refresh: refreshToken } : null;
+    return this.http.post<AuthResponse>(`${Url.baseUrl}/api/user/logout/`, body);
   }
 
   // Endpoint to get user profile using the token (which an interceptor will add)
