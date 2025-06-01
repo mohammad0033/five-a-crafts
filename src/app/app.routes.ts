@@ -32,8 +32,10 @@ export const routes: Routes = [
         data: {
           // Fallback description (can be accessed via route.snapshot.data['description'])
           description: 'Discover Five A Crafts – an e-commerce platform dedicated to artisan-crafted,' +
-            ' sustainable goods.' + ' Shop unique, handcrafted items that bring warmth to your home and heart.'
-        }
+            ' sustainable goods.' + ' Shop unique, handcrafted items that bring warmth to your home and heart.',
+          requiresAuth: false
+        },
+        canActivate: [authGuard] // <<<< APPLY THE GUARD HERE
       },
       {
         path: 'about',
@@ -116,7 +118,10 @@ export const routes: Routes = [
           ),
         // Add static title for UX
         title: 'Your Favorites | Five A Crafts',
-        canActivate: [authGuard]
+        canActivate: [authGuard],
+        data: {
+          requiresAuth: true // Mark this as requiring authentication
+        }
         // No resolver needed
         // No static description needed in data
       },
@@ -132,6 +137,9 @@ export const routes: Routes = [
           profilePageData: profileResolver // Use a descriptive key
         },
         canActivate: [authGuard],
+        data: {
+          requiresAuth: true // Mark this as requiring authentication
+        },
         children: [
           {
             path: '',
@@ -214,6 +222,12 @@ export const routes: Routes = [
         // No resolver needed
       },
     ]
+  },
+  {
+    path: 'loading', // Your loading route
+    loadComponent: () =>
+      import('./core/components/loading/loading.component').then((m) => m.LoadingComponent), // Example path
+    title: 'Loading | Five A Crafts'
   },
   {
     path: 'not-found', // Your 404 route
