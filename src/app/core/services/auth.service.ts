@@ -22,8 +22,8 @@ const REFRESH_TOKEN_KEY = 'five_a_crafts_refresh_token';
 const USER_DATA_KEY = 'five_a_crafts_user_data'; // To store user object
 const CLIENT_SESSION_EXPIRY_KEY = 'five_a_crafts_client_session_expiry'; // For the 30-day client-side cleanup rule
 
-// Client-side session expiry duration (30 days)
-const CLIENT_STORAGE_EXPIRY_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+// Client-side session expiry duration (14 days)
+const CLIENT_STORAGE_EXPIRY_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
 
 @Injectable({
   providedIn: 'root'
@@ -232,7 +232,7 @@ export class AuthService {
     }
   }
 
-  private getAuthHeaders(): HttpHeaders {
+  getAuthHeaders(): HttpHeaders {
     const token = this.getAccessToken();
     if (token) {
       return new HttpHeaders().set('Authorization', `Bearer ${token}`);
