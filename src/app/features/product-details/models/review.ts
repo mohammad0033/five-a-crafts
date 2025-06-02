@@ -1,8 +1,12 @@
 export interface Review {
   id: number;
-  rating: number;
-  date: string; // Or Date
-  userName?: string;
-  comment: string;
-  // Add any other properties your review object has
+  title: string;
+  score: number;
+  body: string;
+  product: number;
+  total_votes: number;
+  num_up_votes: number;
+  num_down_votes: number;
+  user_name: string;
+  date: string;
 }
