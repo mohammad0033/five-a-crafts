@@ -216,9 +216,9 @@ export class ProductDetailsComponent implements OnInit {
       // isLoading will be set to false after reviews are also loaded or fail
 
       // MODIFICATION: Get "You May Like" products from recommended_products
-      if (this.product.recommended_products && this.product.recommended_products.length > 0) {
+      if (this.product.child_products && this.product.child_products.length > 0) {
         // Assuming items in recommended_products are compatible with the Product type
-        this.productsYouMayLike$ = of(this.product.recommended_products as Product[]);
+        this.productsYouMayLike$ = of(this.product.child_products as Product[]);
       } else {
         // If no recommended_products, or array is empty, provide an empty observable
         this.productsYouMayLike$ = of([]);
@@ -419,43 +419,73 @@ export class ProductDetailsComponent implements OnInit {
     return this.product ? `/categories/${this.product.product_class}` : null;
   }
 
-  handleFavoriteToggle(): void { // Removed productToToggle argument
-    if (!this.product) {
-      console.error('ProductDetailsComponent: Product data is not available to toggle favorite.');
+  /**
+   * Handles toggling the favorite status for a product.
+   * Can be called for the main product on the page or for a product from a slider.
+   * @param productArg Optional. The product to toggle. If not provided, toggles the main product.
+   */
+  handleFavoriteToggle(productArg?: Product | ProductDetailsData): void {
+    const isMainProductAction = !productArg;
+    let productToToggle: Product | ProductDetailsData | null = null;
+
+    if (isMainProductAction) {
+      if (!this.product) {
+        console.error('ProductDetailsComponent: Main product data is not available to toggle favorite.');
+        return;
+      }
+      productToToggle = this.product;
+
+      // Optimistic animation for the main product if it's not currently in wishlist (locally)
+      // The FavoritesApiService will determine the actual add/remove action.
+      if (!this.product.in_wishlist) {
+        this.isAnimating = true;
+        setTimeout(() => {
+          this.isAnimating = false; // Animation lasts 500ms
+        }, 500);
+      }
+    } else if (productArg) {
+      productToToggle = productArg;
+      // No animation is managed by ProductDetailsComponent for products from sliders.
+      // The ProductCardComponent within the slider should handle its own UI updates/animations.
+    }
+
+    if (!productToToggle) {
+      console.error('ProductDetailsComponent: No product identified to toggle favorite status.');
       return;
     }
 
-    // To ensure we are working with the current state of this.product
-    const productToToggle = this.product;
+    const productId = productToToggle.id;
+    // Ensure title exists for logging, provide a fallback if necessary.
+    const productTitle = productToToggle.title || 'Unknown Product';
 
-    // Optimistic animation if adding to favorites
-    if (!productToToggle.in_wishlist) {
-      this.isAnimating = true;
-      setTimeout(() => {
-        this.isAnimating = false;
-      }, 500); // Duration of heartbeat animation, adjust as needed
-    }
+    console.log(`ProductDetailsComponent: Attempting to toggle favorite for product ID ${productId} (Title: ${productTitle})`);
 
-    console.log(`ProductDetailsComponent: Toggling favorite for ${productToToggle.title}`);
-    this.favoritesApiService.toggleFavoriteWithAuthPrompt(productToToggle.id)
+    this.favoritesApiService.toggleFavoriteWithAuthPrompt(productId)
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (result: FavoritesToggleResult) => {
-          // Update the local product's in_wishlist status for immediate UI feedback
-          if (this.product) { // Check again in case product becomes null due to other async ops (unlikely here)
-            if (result.action === 'added') {
-              this.product.in_wishlist = true;
-              console.log(`ProductDetailsComponent: ${this.product.title} was added to favorites.`);
-            } else if (result.action === 'removed') {
-              this.product.in_wishlist = false;
-              console.log(`ProductDetailsComponent: ${this.product.title} (ID: ${result.productId}) was removed from favorites.`);
+          // If the toggled product was the main product of this page, update its local state.
+          if (this.product && result.productId === this.product.id) {
+            this.product.in_wishlist = (result.action === 'added');
+            console.log(`ProductDetailsComponent: Main product "${this.product.title}" was ${result.action} favorites.`);
+            // If the action was 'removed', and animation was started optimistically,
+            // it would have already been set to turn off. If it was 'added', the timeout handles it.
+            // If it was 'removed', ensure animation is off if it somehow got stuck (though unlikely with current logic)
+            if (result.action === 'removed') {
+              this.isAnimating = false;
             }
+          } else if (productArg && result.productId === productArg.id) {
+            // Log for the product from slider.
+            // The ProductCardComponent itself should react to the global favorite state change.
+            console.log(`ProductDetailsComponent: Slider product (ID: ${productArg.id}, Title: ${productArg.title}) was ${result.action} favorites.`);
           }
         },
         error: (err) => {
-          console.error(`ProductDetailsComponent: Failed to toggle favorite for ${productToToggle?.title}`, err);
-          // Stop animation on error if it was started
-          this.isAnimating = false;
+          console.error(`ProductDetailsComponent: Failed to toggle favorite for product ID ${productId}`, err);
+          // If an error occurred during the toggle of the main product,
+          // and animation was started, it will turn off via its own setTimeout.
+          // No need to explicitly set this.isAnimating = false here for the main product
+          // unless the animation should stop immediately on error.
         }
       });
   }
