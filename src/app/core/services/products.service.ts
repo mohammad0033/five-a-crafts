@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {ProductsApiService} from './products-api.service';
-import {catchError, map, Observable, of, switchMap, tap, throwError} from 'rxjs';
+import {catchError, map, Observable, of, switchMap, throwError} from 'rxjs';
 import {Product} from '../models/product';
 import {PaginatedApiObject} from '../models/paginated-api-object';
 import {CommonApiResponse} from '../models/common-api-response';
