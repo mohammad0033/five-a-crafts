@@ -19,7 +19,7 @@
     <!-- Product Details -->
     <div class="col-md-6 d-flex flex-column gap-3">
       <header>
-        <p class="mb-1 d-flex gap-2">
+        <p class="mb-1 d-flex gap-2 mt-3 mt-md-0">
           <span class="fw-medium">{{'product.category' | translate}}:</span>
           <!-- Improved category itemprop -->
           <a class="link-dark text-decoration-none" *ngIf="categoryLink; else categoryText" [routerLink]="categoryLink" itemprop="category">{{product?.product_class}}</a>
@@ -291,7 +291,7 @@
 </section>
 
 <!--you may also like-->
-<section class="px-2 px-md-5 py-3">
+<section class="px-3 px-md-5 py-3">
   <div *ngIf="productsYouMayLike$ | async as products">
     <h2 class="zapf-font mb-3">{{'product.youMayLike' | translate}}</h2>
     <app-products-slider [products]="products" *ngIf="(productsYouMayLike$ | async)?.length! > 0" (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-products-slider>
@@ -302,7 +302,7 @@
 </section>
 
 <!--recently viewed-->
-<section class="px-2 px-md-5 py-3">
+<section class="px-3 px-md-5 py-3">
   <div *ngIf="recentlyViewedProducts$ | async as products">
     <h2 class="zapf-font mb-3">{{'product.recentlyViewed' | translate}}</h2>
     <app-products-slider [products]="products" (favoriteToggleRequested)="handleFavoriteToggle($event)"></app-products-slider>
