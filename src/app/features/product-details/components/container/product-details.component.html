@@ -142,7 +142,7 @@
               'favorite': product?.in_wishlist,
               'animate-heartbeat': isAnimating
             }"
-            (click)="toggleFavorite($event)"
+            (click)="handleFavoriteToggle()"
             [title]="(product?.in_wishlist ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))">
           </fa-icon>
           </span>

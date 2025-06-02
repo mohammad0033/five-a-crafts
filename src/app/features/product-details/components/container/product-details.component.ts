@@ -34,6 +34,8 @@ import {SelectedVariation} from '../../../cart/models/selected-variation';
 import {RecentlyViewedService} from '../../../../core/services/recently-viewed.service';
 import {ProductImageData} from '../../models/product-image-data';
 import {ProductsService} from '../../../../core/services/products.service';
+import {FavoritesApiService} from '../../../../core/services/favorites-api.service';
+import {FavoritesToggleResult} from '../../../favorites/models/favorites-toggle-result';
 
 @UntilDestroy()
 @Component({
@@ -131,6 +133,7 @@ export class ProductDetailsComponent implements OnInit {
     private datePipe: DatePipe,
     private fb: FormBuilder,
     private cartService: CartService,
+    private favoritesApiService: FavoritesApiService, // Inject FavoritesService
     private recentlyViewedService: RecentlyViewedService) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.variationsForm = this.fb.group({}); // Initialize an empty group
@@ -170,6 +173,19 @@ export class ProductDetailsComponent implements OnInit {
       this.images = Array.isArray(this.product.images)
         ? this.product.images.map(item => new ImageItem({ src: item.original, thumb: item.original }))
         : [];
+
+      // --- START: Sync favorite status on init ---
+      if (this.product && this.product.id != null) {
+        this.favoritesApiService.isFavorite(this.product.id)
+          .pipe(untilDestroyed(this))
+          .subscribe(isFav => {
+            if (this.product) { // Check again as product might change if navigation happens quickly
+              this.product.in_wishlist = isFav;
+              console.log(`ProductDetailsComponent: Initial favorite status for ${this.product.title} set to ${isFav}`);
+            }
+          });
+      }
+      // --- END: Sync favorite status on init ---
 
       // Add to recently viewed (client-side only)
       if (this.isBrowser && this.product) {
@@ -405,19 +421,45 @@ export class ProductDetailsComponent implements OnInit {
     return this.product ? `/categories/${this.product.product_class}` : null;
   }
 
-  toggleFavorite(event: MouseEvent): void {
-    event.stopPropagation();
-    if (this.product) {
-      this.product.in_wishlist = !this.product.in_wishlist;
-      if (this.product.in_wishlist) {
-        this.isAnimating = true;
-        setTimeout(() => { this.isAnimating = false; }, 500);
-      }
-      this.favoriteToggled.emit(this.product);
-      console.log(`Favorite status for ${this.product.title}: ${this.product.in_wishlist}`);
-    } else {
-      console.error('Product data is null. Cannot toggle favorite.');
+  handleFavoriteToggle(): void { // Removed productToToggle argument
+    if (!this.product) {
+      console.error('ProductDetailsComponent: Product data is not available to toggle favorite.');
+      return;
     }
+
+    // To ensure we are working with the current state of this.product
+    const productToToggle = this.product;
+
+    // Optimistic animation if adding to favorites
+    if (!productToToggle.in_wishlist) {
+      this.isAnimating = true;
+      setTimeout(() => {
+        this.isAnimating = false;
+      }, 500); // Duration of heartbeat animation, adjust as needed
+    }
+
+    console.log(`ProductDetailsComponent: Toggling favorite for ${productToToggle.title}`);
+    this.favoritesApiService.toggleFavoriteWithAuthPrompt(productToToggle.id)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (result: FavoritesToggleResult) => {
+          // Update the local product's in_wishlist status for immediate UI feedback
+          if (this.product) { // Check again in case product becomes null due to other async ops (unlikely here)
+            if (result.action === 'added') {
+              this.product.in_wishlist = true;
+              console.log(`ProductDetailsComponent: ${this.product.title} was added to favorites.`);
+            } else if (result.action === 'removed') {
+              this.product.in_wishlist = false;
+              console.log(`ProductDetailsComponent: ${this.product.title} (ID: ${result.productId}) was removed from favorites.`);
+            }
+          }
+        },
+        error: (err) => {
+          console.error(`ProductDetailsComponent: Failed to toggle favorite for ${productToToggle?.title}`, err);
+          // Stop animation on error if it was started
+          this.isAnimating = false;
+        }
+      });
   }
 
   toggleDir() {
