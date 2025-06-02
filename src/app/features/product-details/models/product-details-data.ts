@@ -1,6 +1,7 @@
 import {ProductImageData} from './product-image-data';
 import {PageMetadata} from '../../../core/models/page-meta-data';
 import {Price} from '../../../core/models/price';
+import {Product} from '../../../core/models/product';
 
 export interface ProductDetailsData {
   id: number;
@@ -18,4 +19,5 @@ export interface ProductDetailsData {
   images: ProductImageData[];
   rating: number | null;
   metaData: PageMetadata;
+  child_products: Product[];
 }
