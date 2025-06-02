@@ -11,7 +11,7 @@ import {FallbackMetaTagData} from '../../../../core/models/fallback-meta-tag-dat
 import {MetaTagService} from '../../../../core/services/meta-tag.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import {AsyncPipe, DatePipe, DecimalPipe, isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, DecimalPipe, isPlatformBrowser, NgClass, NgForOf, NgIf} from '@angular/common';
 import {LightboxModule} from 'ng-gallery/lightbox';
 import {GalleryComponent, GalleryItem, GalleryModule, ImageItem} from 'ng-gallery';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
@@ -23,8 +23,7 @@ import {NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ReviewsData} from '../../models/reviews-data';
 import {Review} from '../../models/review';
-import {ProductsApiService} from '../../../../core/services/products-api.service';
-import {Observable, of, timer} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {Product} from '../../../../core/models/product';
 import {ProductsSliderComponent} from '../../../../shared/components/products-slider/products-slider.component';
 import {MatSnackBar, MatSnackBarConfig, MatSnackBarModule} from '@angular/material/snack-bar';
@@ -36,6 +35,7 @@ import {ProductImageData} from '../../models/product-image-data';
 import {ProductsService} from '../../../../core/services/products.service';
 import {FavoritesApiService} from '../../../../core/services/favorites-api.service';
 import {FavoritesToggleResult} from '../../../favorites/models/favorites-toggle-result';
+import {ReviewPayload} from '../../models/review-payload';
 
 @UntilDestroy()
 @Component({
@@ -57,7 +57,7 @@ import {FavoritesToggleResult} from '../../../favorites/models/favorites-toggle-
     AsyncPipe,
     ProductsSliderComponent,
     MatSnackBarModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './product-details.component.html',
   standalone: true,
@@ -109,9 +109,9 @@ export class ProductDetailsComponent implements OnInit {
   isSubmittingReview: boolean = false;
 
   // --- New/Modified properties for review pagination ---
-  private allProductReviews: Review[] = []; // Holds ALL reviews for the product
+  private allProductReviews: Review[] |null = []; // Holds ALL reviews for the product
   public visibleReviews: Review[] = [];    // Reviews currently displayed (already in your HTML)
-  public canShowMore: boolean = false;     // Controls visibility of "Show More" button (already in your HTML)
+  public canShowMore: boolean | null = false;     // Controls visibility of "Show More" button (already in your HTML)
   private readonly reviewsIncrement: number = 5; // Number of reviews to show per click
   private numReviewsCurrentlyVisible: number = 0; // Counter for visible reviews
 
@@ -127,10 +127,8 @@ export class ProductDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private translate: TranslateService,
-    private productsApiService: ProductsApiService,
     private productsService: ProductsService,
     private snackBar: MatSnackBar,
-    private datePipe: DatePipe,
     private fb: FormBuilder,
     private cartService: CartService,
     private favoritesApiService: FavoritesApiService, // Inject FavoritesService
@@ -277,37 +275,45 @@ export class ProductDetailsComponent implements OnInit {
 
   private initReviewForm(): void {
     this.reviewForm = this.fb.group({
-      // productId: [null], // We'll add productId directly from this.product.id when submitting
-      rating: [0, [Validators.required, Validators.min(1), Validators.max(this.maxRating)]],
-      comment: ['', [Validators.required, Validators.minLength(5)]] // Added minLength for example
+      title: ['review'], // Add title control
+      score: [0, [Validators.required, Validators.min(1), Validators.max(this.maxRating)]],
+      body: ['', [Validators.required, Validators.minLength(5)]]
     });
   }
 
   private loadProductReviews(productId: number): void {
-    this.productsService.getProductReviews(productId)
+    this.productsService.getProductReviews(productId) // Now returns Observable<ReviewsData>
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (reviewsData) => {
-          // this.reviewsData = reviewsData;
-          // this.allProductReviews = reviewsData.reviewsList || [];
+        next: (loadedReviewsData: ReviewsData) => { // Parameter is now ReviewsData (non-nullable from service)
+          // console.log('Processed ReviewsData object received in component:', loadedReviewsData); // Keep for debugging
+
+          this.reviewsData = loadedReviewsData; // Assign the whole ReviewsData object
+
+          // For pagination, specifically extract the list of reviews
+          // Ensure reviewsList is always an array, even if empty, from _calculateReviewsSummary
+          this.allProductReviews = loadedReviewsData.reviewsList || [];
+
           this.initializeReviewDisplay(this.allProductReviews);
-          console.log('Product reviews loaded:', this.reviewsData);
-          this.isLoading = false; // All product related data loaded
+
+          // console.log('Component this.reviewsData (for summary):', this.reviewsData); // Keep for debugging
+          // console.log('Component this.allProductReviewsForPagination:', this.allProductReviewsForPagination); // Keep for debugging
+          this.isLoading = false;
         },
-        error: (err) => {
-          console.error('Error loading product reviews:', err);
-          this.reviewsData = { // Set to a default empty state to avoid errors in template
-            totalReviews: 0, averageRating: 0, ratingDistribution: [], reviewsList: []
-          };
-          this.initializeReviewDisplay([]); // Initialize with empty to hide "show more" etc.
-          this.isLoading = false; // Finished loading attempt (reviews failed)
+        error: (err) => { // Should not be hit if service handles errors by returning default ReviewsData
+          console.error('Critical error in loadProductReviews subscription (should be handled by service):', err);
+          this.reviewsData = { totalReviews: 0, averageRating: 0, ratingDistribution: [], reviewsList: [] };
+          this.allProductReviews = [];
+          this.initializeReviewDisplay([]);
+          this.isLoading = false;
         }
       });
   }
 
   // --- Review Pagination Methods (from your previous implementation) ---
-  private initializeReviewDisplay(allReviews: Review[]): void {
+  private initializeReviewDisplay(allReviews: Review[] | null): void {
     this.allProductReviews = allReviews || []; // Ensure allProductReviews is up-to-date
+    console.log('All product reviews:', this.allProductReviews);
     this.visibleReviews = [];
     this.numReviewsCurrentlyVisible = 0;
     this.loadMoreReviewsLogic();
@@ -318,6 +324,9 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   private loadMoreReviewsLogic(): void {
+    console.log(this.allProductReviews);
+    console.log(this.numReviewsCurrentlyVisible);
+    console.log(this.allProductReviews?.length);
     if (!this.allProductReviews || this.numReviewsCurrentlyVisible >= this.allProductReviews.length) {
       this.updateCanShowMoreState();
       return;
@@ -326,13 +335,17 @@ export class ProductDetailsComponent implements OnInit {
       this.numReviewsCurrentlyVisible,
       this.numReviewsCurrentlyVisible + this.reviewsIncrement
     );
+    console.log(nextBatch);
     this.visibleReviews.push(...nextBatch);
+    console.log(this.visibleReviews);
     this.numReviewsCurrentlyVisible += nextBatch.length;
+    console.log(this.numReviewsCurrentlyVisible);
     this.updateCanShowMoreState();
   }
 
   private updateCanShowMoreState(): void {
     this.canShowMore = this.allProductReviews && this.numReviewsCurrentlyVisible < this.allProductReviews.length;
+    console.log(this.canShowMore);
   }
 
   submitReview(): void {
@@ -341,7 +354,7 @@ export class ProductDetailsComponent implements OnInit {
     if (!this.product) {
       console.error('Product context is missing. Cannot submit review.');
       this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), {
-        ...this.snackBarConfig, verticalPosition: 'top', panelClass: ['snackbar-error']
+        ...this.snackBarConfig, verticalPosition: 'bottom', panelClass: ['snackbar-error']
       });
       return;
     }
@@ -349,7 +362,7 @@ export class ProductDetailsComponent implements OnInit {
     if (this.reviewForm.invalid) {
       const validationMessage = this.translate.instant('product.reviews.validationError'); // Ensure this key exists
       this.snackBar.open(validationMessage, this.translate.instant('common.dismiss'), {
-        ...this.snackBarConfig, verticalPosition: 'top', panelClass: ['snackbar-error']
+        ...this.snackBarConfig, verticalPosition: 'bottom', panelClass: ['snackbar-error']
       });
       return;
     }
@@ -358,63 +371,48 @@ export class ProductDetailsComponent implements OnInit {
     this.reviewForm.disable(); // Disable the form during submission
 
     const formValue = this.reviewForm.value;
-    const newReviewData: Review = {
-      id: Date.now(), // Mock ID
-      // productId: this.product.id, // Add product ID to the review data
-      userName: 'Current User', // Replace with actual user data
-      rating: formValue.rating,
-      comment: formValue.comment.trim(),
-      date: this.datePipe.transform(new Date(), 'dd/MM/yyyy') as string
+    const reviewPayload: ReviewPayload = { // Use ReviewSubmissionPayload
+      product: this.product.id,
+      title: formValue.title,
+      score: formValue.score,
+      body: formValue.body
     };
 
-    console.log('Submitting review:', newReviewData);
+    console.log('Submitting review:', reviewPayload);
 
-    // Simulate API call delay
-    timer(1500).pipe(untilDestroyed(this)).subscribe(() => {
-      this.allProductReviews.unshift(newReviewData);
-
-      if (this.reviewsData) {
-        this.reviewsData.reviewsList = [...this.allProductReviews];
-        this.reviewsData.totalReviews = this.allProductReviews.length;
-        // Recalculate average and distribution
-        let sumOfRatings = 0;
-        const ratingDistributionMap = new Map<number, number>();
-        for (let i = 5; i >= 1; i--) ratingDistributionMap.set(i, 0);
-        this.allProductReviews.forEach(review => {
-          sumOfRatings += review.rating;
-          ratingDistributionMap.set(review.rating, (ratingDistributionMap.get(review.rating) || 0) + 1);
-        });
-        this.reviewsData.averageRating = this.allProductReviews.length > 0 ? parseFloat((sumOfRatings / this.allProductReviews.length).toFixed(1)) : 0;
-        this.reviewsData.ratingDistribution = Array.from(ratingDistributionMap.entries())
-          .map(([stars, count]) => ({ stars, count }))
-          .sort((a, b) => b.stars - a.stars);
-      } else {
-        this.reviewsData = {
-          totalReviews: 1, averageRating: newReviewData.rating,
-          ratingDistribution: [{stars: newReviewData.rating, count: 1}],
-          reviewsList: [newReviewData]
-        };
+    this.productsService.addReviewWithAuthPrompt(this.product.id, reviewPayload).pipe(untilDestroyed(this)).subscribe({
+      next: (review) => {
+        console.log('Review added successfully:', review);
+        this.isSubmittingReview = false;
+        this.reviewForm.enable(); // Re-enable the form after successful submission
+        if (this.product) {
+          this.loadProductReviews(this.product.id); // Refresh reviews after successful submission
+        }
+      },
+      error: (err) => {
+        console.error('Error adding review:', err);
+        this.isSubmittingReview = false;
+        this.reviewForm.enable(); // Re-enable the form after submission failure
+        if (err.status === 401) {
+          this.snackBar.open(this.translate.instant('common.loginRequired'), this.translate.instant('common.dismiss'), {
+            ...this.snackBarConfig, verticalPosition: 'bottom', panelClass: ['snackbar-error']
+          });
+        } else {
+          this.snackBar.open(this.translate.instant(err.message || err.error.message || 'common.unknownError'), this.translate.instant('common.dismiss'), {
+            ...this.snackBarConfig, verticalPosition: 'bottom', panelClass: ['snackbar-error']
+          });
       }
-
-      this.initializeReviewDisplay(this.allProductReviews);
-      this.reviewForm.reset({ rating: 0, comment: '' }); // Reset form to initial values
-      this.reviewForm.enable(); // Re-enable the form
-      this.isSubmittingReview = false;
-
-      const successMessage = this.translate.instant('product.reviewSubmittedSuccessfully');
-      this.snackBar.open(successMessage, this.translate.instant('common.dismiss'), {
-        ...this.snackBarConfig, panelClass: ['snackbar-success']
-      });
-    });
+      }
+    })
   }
 
   // --- Getters for easy access to form controls in the template (optional but helpful for validation messages) ---
   get ratingCtrl() {
-    return this.reviewForm.get('rating');
+    return this.reviewForm.get('score');
   }
 
   get commentCtrl() {
-    return this.reviewForm.get('comment');
+    return this.reviewForm.get('body');
   }
 
   get categoryLink(): string | null {
@@ -493,7 +491,7 @@ export class ProductDetailsComponent implements OnInit {
       if (this.variationsForm.invalid) {
         this.snackBar.open(this.translate.instant('product.selectVariationsError'), this.translate.instant('common.dismiss'), {
           ...this.snackBarConfig,
-          verticalPosition: 'top',
+          verticalPosition: 'bottom',
           panelClass: ['snackbar-error']
         });
         this.variationsForm.markAllAsTouched(); // Show errors on variation form
@@ -541,7 +539,7 @@ export class ProductDetailsComponent implements OnInit {
       console.error('Add to Cart: Product data is not available.');
       this.snackBar.open(this.translate.instant('product.productNotAvailableError'), this.translate.instant('common.dismiss'), {
         ...this.snackBarConfig,
-        verticalPosition: 'top',
+        verticalPosition: 'bottom',
         panelClass: ['snackbar-error']
       });
       return;
