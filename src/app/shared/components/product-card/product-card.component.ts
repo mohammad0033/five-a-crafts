@@ -40,10 +40,11 @@ export class ProductCardComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.product && this.product.id != null) {
+      console.log(`Card [${this.product.id} - ${this.product.title}]: ngOnInit called.`);
       // console.log(`Card [${this.product.id} - ${this.product.name}]: ngOnInit - Subscribing to in_wishlist.`);
-      this.favoritesApiService.in_wishlist(this.product.id)
+      this.favoritesApiService.isFavorite(this.product.id)
         .pipe(untilDestroyed(this))
-        .subscribe(isFav => {
+        .subscribe((isFav:any) => {
           console.log(`Card [${this.product.id} - ${this.product.title}]: Received isFav = ${isFav}. Current isActuallyFavorite = ${this.isActuallyFavorite}`);
           if (this.isActuallyFavorite !== isFav) {
             console.log(`Card [${this.product.id} - ${this.product.title}]: Updating isActuallyFavorite from ${this.isActuallyFavorite} to ${isFav}`);

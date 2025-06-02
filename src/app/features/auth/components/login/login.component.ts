@@ -94,6 +94,16 @@ export class LoginComponent implements OnInit {
       next: (user: User | null) => { // <--- user can now be User or null
         this.isLoading = false;
         this.loginForm.enable();
+
+        // Display success snackbar
+        const successMessage = this.translate.instant('auth.loginSuccessMessage');
+        const dismissAction = this.translate.instant('common.dismiss'); // Assuming you have a common.dismiss key
+        this.snackBar.open(successMessage, dismissAction, {
+          duration: 3000, // Duration in milliseconds
+          horizontalPosition: 'center', // Optional: 'start' | 'center' | 'end' | 'left' | 'right'
+          verticalPosition: 'top', // Optional: 'top' | 'bottom'
+        });
+
         // Navigation logic proceeds even if user is null, as long as the observable completes.
         if (this.isDialog && this.dialogRef) {
           this.dialogRef.close({ loggedIn: true, returnUrl: this.intendedRoute });
@@ -113,63 +123,56 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  navigateToRegister(): void {
-    // If this LoginComponent is already a dialog, close it first
-    if (this.isDialog && this.dialogRef) {
-      this.dialogRef.close({ action: 'openRegisterDialog' }); // Signal the parent to open register
-    } else {
-      // If LoginComponent is a standalone page, open the register dialog directly
-      const registerDialogRef = this.dialog.open(RegisterComponent, {
-        width: '450px', // Adjust size as needed
-        maxWidth: '90vw',
-        disableClose: true // Prevent closing by clicking outside or ESC
-      });
-
-      registerDialogRef.afterClosed().subscribe(result => {
-        if (result?.registered) {
-          // Registration successful, show success message and potentially open login again
-          this.snackBar.open(this.translate.instant('auth.registrationSuccessMessage'), this.translate.instant('common.dismiss'), { duration: 5000 });
-          // Optionally, re-open the login dialog or navigate to login page
-          // If it was a page, maybe just clear the form or stay on the page
-          // If it was a dialog opened from somewhere else (like Navbar), that component
-          // would handle re-opening the login dialog based on the 'action' result.
-          // Since we closed the login dialog above if it was a dialog,
-          // the component that opened the *original* login dialog needs to handle this.
-          // However, if LoginComponent was a page, we might want to open the login dialog here:
-          if (!this.isDialog) { // If LoginComponent was a page
-            this.dialog.open(LoginComponent, {
-              width: '450px',
-              maxWidth: '90vw',
-              data: {
-                preambleMessage: this.translate.instant('auth.registrationSuccessLoginPrompt')
-              }
-            });
-          }
-        } else if (result?.action === 'backToLogin') {
-          // User clicked "Back to Login" in the register dialog
-          // If LoginComponent was a page, open the login dialog
-          if (!this.isDialog) {
-            this.dialog.open(LoginComponent, {
-              width: '450px',
-              maxWidth: '90vw',
-              data: {
-                preambleMessage: this.translate.instant('auth.welcomeBackLoginPrompt') // Optional message
-              }
-            });
-          }
-          // If LoginComponent was already a dialog, the parent (e.g., Navbar)
-          // would handle re-opening it based on the 'action' result.
-          // We already closed the login dialog if it was a dialog, so the parent
-          // needs to catch the 'openRegisterDialog' action and then potentially
-          // catch the 'backToLogin' action from the register dialog.
-          // This suggests a slightly different flow: if LoginComponent is a dialog,
-          // it should *not* open the Register dialog itself, but rather close
-          // and signal the parent to open the Register dialog.
-          // Let's refine this logic.
-        }
-      });
-    }
-  }
+  // navigateToRegister(): void {
+  //   // If this LoginComponent is already a dialog, close it first
+  //   if (this.isDialog && this.dialogRef) {
+  //     this.dialogRef.close({ action: 'openRegisterDialog' }); // Signal the parent to open register
+  //   } else {
+  //     // If LoginComponent is a standalone page, open the register dialog directly
+  //     const registerDialogRef = this.dialog.open(RegisterComponent, {
+  //       width: '450px', // Adjust size as needed
+  //       maxWidth: '90vw',
+  //       disableClose: true // Prevent closing by clicking outside or ESC
+  //     });
+  //
+  //     registerDialogRef.afterClosed().subscribe(result => {
+  //       if (result?.registered) {
+  //         // Registration successful, show success message and potentially open login again
+  //         this.snackBar.open(this.translate.instant('auth.registrationSuccessMessage'), this.translate.instant('common.dismiss'), { duration: 5000 });
+  //         if (!this.isDialog) { // If LoginComponent was a page
+  //           this.dialog.open(LoginComponent, {
+  //             width: '450px',
+  //             maxWidth: '90vw',
+  //             data: {
+  //               preambleMessage: this.translate.instant('auth.registrationSuccessLoginPrompt')
+  //             }
+  //           });
+  //         }
+  //       } else if (result?.action === 'backToLogin') {
+  //         // User clicked "Back to Login" in the register dialog
+  //         // If LoginComponent was a page, open the login dialog
+  //         if (!this.isDialog) {
+  //           this.dialog.open(LoginComponent, {
+  //             width: '450px',
+  //             maxWidth: '90vw',
+  //             data: {
+  //               preambleMessage: this.translate.instant('auth.welcomeBackLoginPrompt') // Optional message
+  //             }
+  //           });
+  //         }
+  //         // If LoginComponent was already a dialog, the parent (e.g., Navbar)
+  //         // would handle re-opening it based on the 'action' result.
+  //         // We already closed the login dialog if it was a dialog, so the parent
+  //         // needs to catch the 'openRegisterDialog' action and then potentially
+  //         // catch the 'backToLogin' action from the register dialog.
+  //         // This suggests a slightly different flow: if LoginComponent is a dialog,
+  //         // it should *not* open the Register dialog itself, but rather close
+  //         // and signal the parent to open the Register dialog.
+  //         // Let's refine this logic.
+  //       }
+  //     });
+  //   }
+  // }
 
   openRegisterDialog(): void {
     if (this.isDialog && this.dialogRef) {
@@ -196,9 +199,6 @@ export class LoginComponent implements OnInit {
           // Fallback if returnUrl wasn't provided for some reason, though it should be.
           this.router.navigate(['/']);
         }
-        // No need to re-open login dialog if registration leads to auto-login and navigation.
-        // If result.action === 'backToLogin', the user closed the register dialog to go back to login.
-        // If LoginComponent is a page, it's still there. If it was a dialog, the parent handles it.
       });
     }
   }

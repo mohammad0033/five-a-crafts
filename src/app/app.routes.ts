@@ -33,9 +33,7 @@ export const routes: Routes = [
           // Fallback description (can be accessed via route.snapshot.data['description'])
           description: 'Discover Five A Crafts – an e-commerce platform dedicated to artisan-crafted,' +
             ' sustainable goods.' + ' Shop unique, handcrafted items that bring warmth to your home and heart.',
-          requiresAuth: false
         },
-        canActivate: [authGuard] // <<<< APPLY THE GUARD HERE
       },
       {
         path: 'about',
