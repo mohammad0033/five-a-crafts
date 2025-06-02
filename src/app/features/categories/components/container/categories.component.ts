@@ -170,21 +170,19 @@ export class CategoriesComponent implements OnInit {
   }
 
   handleFavoriteToggle(productToToggle: Product): void {
-    console.log(`Component: Toggling favorite for ${productToToggle.title}`);
-    this.favoritesApiService.toggleFavorite(productToToggle.id)
-      .pipe(untilDestroyed(this)) // Component subscribes to the toggle action
+    console.log(`OurProductsComponent: Toggling favorite for ${productToToggle.title}`);
+    this.favoritesApiService.toggleFavoriteWithAuthPrompt(productToToggle.id) // Use the new method
+      .pipe(untilDestroyed(this))
       .subscribe({
         next: (result) => {
           if (result.action === 'added' && result.product) {
-            console.log(`${result.product.title} was added to favorites. List will refresh via service.`);
+            console.log(`OurProductsComponent: ${result.product.title} was added to favorites.`);
           } else if (result.action === 'removed') {
-            // Using productToToggle.title here as the removed product object isn't always returned by remove ops
-            console.log(`${productToToggle.title} (ID: ${result.productId}) was removed from favorites. List will refresh via service.`);
+            console.log(`OurProductsComponent: ${productToToggle.title} (ID: ${result.productId}) was removed from favorites.`);
           }
-          // The favorites list (products$) will update automatically because
-          // toggleFavorite calls addFavorite/removeFavorite, which in turn call loadFavorites.
         },
-        error: (err) => console.error(`Component: Failed to toggle favorite for ${productToToggle.title}`, err)
+        error: (err) => console.error(`OurProductsComponent: Failed to toggle favorite for ${productToToggle.title}`, err)
+        // No need to handle EMPTY case explicitly here unless specific UI feedback is needed for cancelled login
       });
   }
 }
