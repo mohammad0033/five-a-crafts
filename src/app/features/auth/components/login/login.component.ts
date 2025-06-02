@@ -101,7 +101,7 @@ export class LoginComponent implements OnInit {
         this.snackBar.open(successMessage, dismissAction, {
           duration: 3000, // Duration in milliseconds
           horizontalPosition: 'center', // Optional: 'start' | 'center' | 'end' | 'left' | 'right'
-          verticalPosition: 'top', // Optional: 'top' | 'bottom'
+          verticalPosition: 'bottom', // Optional: 'top' | 'bottom'
         });
 
         // Navigation logic proceeds even if user is null, as long as the observable completes.

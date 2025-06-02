@@ -216,6 +216,7 @@
   "auth.registrationSuccessMessage": "Registration successful! You can now log in with your new account.",
   "auth.registrationSuccessLoginPrompt": "Would you like to log in now?",
   "auth.loginToFavoritePrompt": "Would you like to log in to add your favorite products to your wishlist?",
+  "auth.loginToReviewPrompt": "Would you like to log in to write a review?",
   "auth.otp": "OTP",
   "common.dismiss": "Dismiss",
   "common.close": "Close",
@@ -225,5 +226,6 @@
   "common.cancel": "Cancel",
   "common.loading": "Loading...",
   "common.notProvided": "Not provided",
-  "common.noImage": "No image"
+  "common.noImage": "No image",
+  "common.unknownError": "An unknown error occurred. Please try again."
 }

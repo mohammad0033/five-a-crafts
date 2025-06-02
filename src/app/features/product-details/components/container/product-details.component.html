@@ -142,7 +142,7 @@
               'favorite': product?.in_wishlist,
               'animate-heartbeat': isAnimating
             }"
-            (click)="toggleFavorite($event)"
+            (click)="handleFavoriteToggle()"
             [title]="(product?.in_wishlist ? ('product.removeFromFavorites' | translate) : ('product.addToFavorites' | translate))">
           </fa-icon>
           </span>
@@ -207,7 +207,7 @@
               <label for="reviewRating" class="form-label visually-hidden">{{ 'product.yourRating' | translate }}</label>
               <ngb-rating
                 class="user-rating"
-                formControlName="rating"
+                formControlName="score"
                 [max]="maxRating"
                 [starTemplate]="star"
                 id="reviewRating"
@@ -225,7 +225,7 @@
               <label for="reviewComment" class="form-label">{{ 'product.addComment' | translate }}</label>
               <textarea class="form-control comment-entry"
                         id="reviewComment"
-                        formControlName="comment"
+                        formControlName="body"
                         [attr.aria-label]="'product.yourComment' | translate"
                         [placeholder]="'product.commentPlaceholder' | translate"
                         [class.is-invalid]="commentCtrl?.invalid && (commentCtrl?.dirty || commentCtrl?.touched)"></textarea>
@@ -238,7 +238,8 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-secondary p-3 text-white d-flex align-items-center gap-2" [disabled]="isSubmittingReview || reviewForm.invalid && reviewForm.touched">
+            <button type="submit" class="btn btn-secondary p-3 text-white d-flex align-items-center gap-2"
+                    [disabled]="isSubmittingReview || reviewForm.invalid && reviewForm.touched">
               <span *ngIf="isSubmittingReview" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               <span *ngIf="isSubmittingReview" class="visually-hidden">{{ 'common.loading' | translate }}</span>
               <span>{{ 'product.addReview' | translate }}</span>
@@ -257,21 +258,21 @@
             <meta itemprop="itemReviewed" [content]="product?.title" />
             <header class="d-flex flex-column gap-2 mb-2">
               <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating">
-                <meta itemprop="ratingValue" [content]="review.rating.toString()">
+                <meta itemprop="ratingValue" [content]="review.score.toString()">
                 <meta itemprop="bestRating" [content]="maxRating.toString()">
-                <ngb-rating [rate]="review.rating"
+                <ngb-rating [rate]="review.score"
                             [max]="maxRating"
                             [readonly]="true"
                             [starTemplate]="star"
-                            [attr.aria-label]="getReviewRatingLabel(review.rating)"></ngb-rating>
+                            [attr.aria-label]="getReviewRatingLabel(review.score)"></ngb-rating>
               </div>
-              <time class="text-secondary fs-08" [attr.datetime]="review.date" itemprop="datePublished">{{ review.date }}</time>
+              <time *ngIf="review.date" class="text-secondary fs-08" [attr.datetime]="review.date" itemprop="datePublished">{{ review.date }}</time>
             </header>
             <!-- Visually hidden author for SEO purposes -->
             <p class="mb-1 fw-medium visually-hidden" itemprop="author" itemscope itemtype="https://schema.org/Person">
-              <span itemprop="name">{{ review.userName || ('product.customer' | translate) }}</span> <!-- Fallback to generic "Customer" -->
+              <span itemprop="name">{{ review.user_name || ('product.customer' | translate) }}</span> <!-- Fallback to generic "Customer" -->
             </p>
-            <p class="m-0 fs-08 review-comment-text" itemprop="reviewBody">{{ review.comment }}</p>
+            <p class="m-0 fs-08 review-comment-text" itemprop="reviewBody">{{ review.body }}</p>
           </article>
 
           <div *ngIf="canShowMore" class="mt-4">

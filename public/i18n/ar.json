@@ -216,6 +216,7 @@
   "auth.registrationSuccessMessage": "تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول مع حسابك الجديد.",
   "auth.registrationSuccessLoginPrompt": "هل ترغب في تسجيل الدخول الآن؟",
   "auth.loginToFavoritePrompt": "اذا كنت ترغب في اضافة المنتجات الخاصة بك إلى قائمة المفضلة، يرجى تسجيل الدخول أولاً.",
+  "auth.loginToReviewPrompt": "اذا كنت ترغب في اضافة تعليقك، يرجى تسجيل الدخول أولاً.",
   "auth.otp": "OTP",
   "common.dismiss": "اغلاق",
   "common.close": "اغلاق",
@@ -225,5 +226,6 @@
   "common.cancel": "إلغاء",
   "common.loading": "تحميل...",
   "common.notProvided": "غير موجود",
-  "common.noImage": "لا يوجد صورة"
+  "common.noImage": "لا يوجد صورة",
+  "common.unknownError": "خطأ غير معروف"
 }

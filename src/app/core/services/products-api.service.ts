@@ -1,19 +1,18 @@
-import { Injectable } from '@angular/core';
-import {EMPTY, Observable} from 'rxjs';
-import {Product} from '../models/product';
+import {inject, Injectable} from '@angular/core';
+import {catchError, map, Observable, throwError} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {CommonApiResponse} from '../models/common-api-response';
 import {Url} from '../constants/base-url';
 import {SortOption} from '../../features/products/components/container/products.component';
+import {AuthService} from './auth.service';
+import {Review} from '../../features/product-details/models/review';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductsApiService {
-
-  allMockProducts: Product[] = [];
-
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
+  private authService = inject(AuthService); // Injected if needed for addReview headers
 
   getBestSellingProducts(): Observable<CommonApiResponse> {
     let params = new HttpParams().set('category', 6); // category id 6 represents best-selling products
@@ -35,14 +34,23 @@ export class ProductsApiService {
     return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/product/review/`, { params: params });
   }
 
-  addProductReview(productId: number, title: string, score: number, body: string): Observable<CommonApiResponse> {
-    let review = { product: productId, title: title, score: score, body: body };
-    return this.http.post<CommonApiResponse>(`${Url.baseUrl}/api/product/review/`, review);
-  }
+  addProductReview(productId: number, title: string, score: number, body: string): Observable<Review> {
+    const reviewPayload = { product: productId, title: title, score: score, body: body };
+    const headers = this.authService.getAuthHeaders(); // Assuming reviews require authentication
 
-  getFavoriteProducts(): Observable<CommonApiResponse> {
-    // return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/product/wish_list/`);
-    return EMPTY;
+    return this.http.post<any>(`${Url.baseUrl}/api/product/review/`, reviewPayload, { headers }).pipe(
+      map(response => {
+        if (response && response.status && response.data) {
+          return response.data; // Extract the Review object
+        }
+        throw new Error(response?.message || 'Failed to add review or API response format incorrect.');
+      }),
+      catchError(err => {
+        const errorMessage = err.error?.message || err.message || 'An unknown error occurred while adding the review.';
+        console.error(`[ProductsApiService] API Error: Failed to add review for product ${productId}:`, errorMessage, err);
+        return throwError(() => new Error(errorMessage));
+      })
+    );
   }
 
   getProducts(page?: number,
