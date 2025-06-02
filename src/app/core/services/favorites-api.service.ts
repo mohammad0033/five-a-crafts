@@ -1,85 +1,215 @@
-// C:/Ongoing projects/five-a-crafts/src/app/core/services/favorites-api.service.ts
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError, of } from 'rxjs'; // 'of' might be needed if not already imported
-import { catchError, tap, finalize, map, delay } from 'rxjs/operators'; // 'delay' might be needed
+import {inject, Injectable} from '@angular/core';
+import {BehaviorSubject, EMPTY, Observable, switchMap, throwError} from 'rxjs';
+import { catchError, tap, finalize, map } from 'rxjs/operators';
 import { Product } from '../models/product';
-import { ProductsApiService } from './products-api.service';
+import {AuthService} from './auth.service';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {CommonApiResponse} from '../models/common-api-response';
+import {Url} from '../constants/base-url';
+import {Wishlist} from '../../features/favorites/models/wishlist';
+import {WishlistProduct} from '../../features/favorites/models/wishlist-product';
+import {TranslateService} from '@ngx-translate/core';
+import {MatDialog} from '@angular/material/dialog';
+import {LoginComponent} from '../../features/auth/components/login/login.component';
+import {FavoritesToggleResult} from '../../features/favorites/models/favorites-toggle-result';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FavoritesApiService {
-  private favoritesSubject = new BehaviorSubject<Product[]>([]);
-  public favorites$: Observable<Product[]> = this.favoritesSubject.asObservable();
+  private http = inject(HttpClient);
+  private authService = inject(AuthService); // Inject AuthService
+  private dialog = inject(MatDialog); // Inject MatDialog
+  private translate = inject(TranslateService); // Inject TranslateService
+
+  private favoritesSubject = new BehaviorSubject<WishlistProduct[]>([]);
+  public favorites$: Observable<WishlistProduct[]> = this.favoritesSubject.asObservable();
   public favoritesCount$!: Observable<number>;
+  wishlist!: Wishlist | undefined; // Initialize wishlist arrays
 
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   public isLoading$: Observable<boolean> = this.isLoadingSubject.asObservable();
 
-  constructor(private productsApiService: ProductsApiService) {
-    // Derive favoritesCount$ from favorites$
+  private WISH_LIST_BASE_URL = '/api/product/wish_list/';
+  private REMOVE_FROM_WISH_LIST_URL = '/api/product/wish_line/';
+
+  constructor() {
     this.favoritesCount$ = this.favorites$.pipe(
-      map(favorites => favorites.length)
+      map(favorites => (favorites ? favorites.length : 0))
     );
-  }
 
-  // These methods simulate direct interaction with a backend or data source
-  // In your current setup, they modify the mock product list in ProductsApiService
-  private _backendAddFavorite(productId: number | string): Observable<Product> {
-    const product = this.productsApiService.allMockProducts.find(p => p.id === productId);
-    if (product) {
-      product.in_wishlist = true; // Update mock data source
-      return of({ ...product, in_wishlist: true }).pipe(delay(500)); // Return a copy
-    }
-    return throwError(() => new Error('Product not found for favoriting (backend sim)'));
-  }
-
-  private _backendRemoveFavorite(productId: number | string): Observable<void> {
-    const product = this.productsApiService.allMockProducts.find(p => p.id === productId);
-    if (product) {
-      product.in_wishlist = false; // Update mock data source
-      return of(undefined).pipe(delay(500)); // Simulate success
-    }
-    return throwError(() => new Error('Product not found for unfavoriting (backend sim)'));
+    // Automatically load favorites if the user is authenticated
+    this.authService.isAuthenticated$.subscribe(isAuthenticated => {
+      if (isAuthenticated) {
+        this.loadFavorites();
+      } else {
+        this.favoritesSubject.next([]); // Clear favorites if user logs out
+        this.wishlist = undefined;
+      }
+    });
   }
 
   // Method to load/refresh the list of favorite products
   public loadFavorites(): void {
+    const callId = Math.random().toString(36).substring(7); // Unique ID for this call
+    console.log(`[FavoritesApiService - ${callId}] Entering loadFavorites. Current isLoading: ${this.isLoadingSubject.value}`);
+
     if (this.isLoadingSubject.value) {
-      // Avoid multiple simultaneous loads if one is already in progress
-      // console.log('Favorites loading already in progress.');
-      return;
+      console.warn(`[FavoritesApiService - ${callId}] loadFavorites returning early because isLoading is true.`);
+      return; // Avoid multiple simultaneous loads
     }
     this.isLoadingSubject.next(true);
-    this.productsApiService.getFavoriteProducts().pipe(
+    console.log(`[FavoritesApiService - ${callId}] loadFavorites set isLoading to true.`);
+
+    const constructedUrl = Url.baseUrl + this.WISH_LIST_BASE_URL;
+    console.log(`[FavoritesApiService - ${callId}] loadFavorites URL: ${constructedUrl}`);
+    if (!Url.baseUrl) {
+      console.error(`[FavoritesApiService - ${callId}] CRITICAL: Url.baseUrl is undefined!`);
+      this.isLoadingSubject.next(false); // Attempt to reset
+      return;
+    }
+
+    const headers = this.authService.getAuthHeaders();
+    if (!headers.has('Authorization')) {
+      console.warn(`[FavoritesApiService - ${callId}] No authorization token. Clearing favorites.`);
+      this.favoritesSubject.next([]);
+      this.isLoadingSubject.next(false);
+      console.log(`[FavoritesApiService - ${callId}] loadFavorites (no auth) set isLoading to false.`);
+      return;
+    }
+
+    this.http.get<any>(Url.baseUrl + this.WISH_LIST_BASE_URL, { headers }).pipe(
       map(response => {
-        if (response && Array.isArray(response.data)) {
-          this.favoritesSubject.next(response.data);
+        console.log(`[FavoritesApiService - ${callId}] loadFavorites received API response.`);
+        // ... your existing map logic ...
+        if (response && response.status && Array.isArray(response.data)) {
+          let wishlistArray = response.data as Wishlist[]; // Renamed for clarity
+          if (wishlistArray.length > 0) {
+            let currentWishlist = wishlistArray[0];
+            this.wishlist = currentWishlist;
+            this.favoritesSubject.next(currentWishlist.lines || []); // Ensure lines is an array
+          } else {
+            this.wishlist = undefined; // Clear if no wishlist
+            this.favoritesSubject.next([]);
+            console.log(`[FavoritesApiService - ${callId}] No wishlist object in response. Emitting empty.`);
+          }
+        } else {
+          this.wishlist = undefined; // Clear on bad response
+          this.favoritesSubject.next([]);
+          console.warn(`[FavoritesApiService - ${callId}] Failed to load favorites or bad format.`);
         }
       }),
       catchError(err => {
-        console.error('Failed to load favorites', err);
-        this.favoritesSubject.next([]); // Emit empty array on error to clear list
-        return throwError(() => err); // Re-throw error for subscribers to handle
+        console.error(`[FavoritesApiService - ${callId}] loadFavorites API Error:`, err);
+        this.favoritesSubject.next([]);
+        this.wishlist = undefined; // Clear on error
+        return throwError(() => new Error('Failed to load favorites from API.'));
       }),
       finalize(() => {
         this.isLoadingSubject.next(false);
+        console.log(`[FavoritesApiService - ${callId}] loadFavorites FINALIZED. isLoading set to false. Current: ${this.isLoadingSubject.value}`);
       })
-    ).subscribe(); // This subscription is for the service to perform the load.
-                   // Components will subscribe to favorites$ or isLoading$.
+    ).subscribe({
+      next: () => console.log(`[FavoritesApiService - ${callId}] loadFavorites subscription: next`),
+      error: (err) => console.error(`[FavoritesApiService - ${callId}] loadFavorites subscription: error:`, err)
+    });
+  }
+
+  // Add a product to the wishlist
+  private _backendAddFavorite(productId: number | string): Observable<WishlistProduct> {
+    const callId = Math.random().toString(36).substring(7);
+    console.log(`[FavoritesApiService - ${callId}] Entering _backendAddFavorite(${productId}). Current isLoading: ${this.isLoadingSubject.value}`);
+    this.isLoadingSubject.next(true);
+    console.log(`[FavoritesApiService - ${callId}] _backendAddFavorite set isLoading to true.`);
+    const headers = this.authService.getAuthHeaders();
+
+    if (!headers.has('Authorization')) {
+      this.isLoadingSubject.next(false);
+      return throwError(() => new Error('User not authenticated. Cannot add to favorites.'));
+    }
+
+    // API expects { "product_id": productId } in the body for the WISH_LIST_BASE_URL
+    const body = { product: productId };
+
+    return this.http.post<any>( Url.baseUrl + this.WISH_LIST_BASE_URL, body, { headers }).pipe(
+      map(response => {
+        console.log('[FavoritesApiService] Received add favorite response:', response);
+        if (response && response.status && response.data) {
+          this.isLoadingSubject.next(false);
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to add product to wishlist via API.');
+      }),
+      catchError(err => {
+        console.error(`[FavoritesApiService] API Error: Failed to add product ${productId} to favorites`, err);
+        return throwError(() => err);
+      }),
+      finalize(() => {
+        this.isLoadingSubject.next(false);
+        console.log(`[FavoritesApiService - ${callId}] _backendAddFavorite FINALIZED. isLoading set to false. Current: ${this.isLoadingSubject.value}`);
+      })
+    );
+  }
+
+  // Remove a product from the wishlist
+  private _backendRemoveFavorite(productId: number | string): Observable<void> {
+    const callId = Math.random().toString(36).substring(7);
+    console.log(`[FavoritesApiService - ${callId}] Entering _backendRemoveFavorite(${productId}). Current isLoading: ${this.isLoadingSubject.value}`);
+    this.isLoadingSubject.next(true);
+    console.log(`[FavoritesApiService - ${callId}] _backendRemoveFavorite set isLoading to true.`);
+    const headers = this.authService.getAuthHeaders();
+
+    if (!headers.has('Authorization')) {
+      this.isLoadingSubject.next(false);
+      return throwError(() => new Error('User not authenticated. Cannot remove from favorites.'));
+    }
+
+    // Defensive checks for wishlist data
+    if (!this.wishlist || typeof this.wishlist.id === 'undefined') {
+      console.error(`[FavoritesApiService - ${callId}] _backendRemoveFavorite: Wishlist data or ID is missing.`);
+      this.isLoadingSubject.next(false); // Reset loading state
+      return throwError(() => new Error('Wishlist data not available for removal.'));
+    }
+
+    let wishlistId = this.wishlist?.id
+    let lineToRemove = this.wishlist?.lines.find(line => line.product === productId);
+    if (!lineToRemove || typeof lineToRemove.id === 'undefined') {
+      console.error(`[FavoritesApiService - ${callId}] _backendRemoveFavorite: Product line or line ID for product ${productId} not found.`);
+      this.isLoadingSubject.next(false); // Reset loading state
+      return throwError(() => new Error('Product line not found in wishlist for removal.'));
+    }
+    const lineToRemoveId = lineToRemove.id;
+
+    let params = new HttpParams().set('wishlist', wishlistId.toString());
+
+    return this.http.delete<CommonApiResponse>( Url.baseUrl + this.REMOVE_FROM_WISH_LIST_URL + lineToRemoveId, { params :params, headers:headers }).pipe(
+      map(response => {
+        console.log('[FavoritesApiService] Received remove favorite response:', response);
+        if (response && response.status) {
+          this.isLoadingSubject.next(false);
+          return; // Success
+        }
+        throw new Error(response.message || 'Failed to remove product from wishlist via API.');
+      }),
+      catchError(err => {
+        console.error(`[FavoritesApiService] API Error: Failed to remove product ${productId} from favorites`, err);
+        return throwError(() => err);
+      }),
+      finalize(() => {
+        this.isLoadingSubject.next(false);
+        console.log(`[FavoritesApiService - ${callId}] _backendRemoveFavorite FINALIZED. isLoading set to false. Current: ${this.isLoadingSubject.value}`);
+      })
+    );
   }
 
   // Public method for components to add a product to favorites
-  public addFavorite(productId: number | string): Observable<Product> {
-    // This observable is for the outcome of the "add" operation itself.
+  public addFavorite(productId: number | string): Observable<WishlistProduct> {
+    console.log(`[FavoritesApiService] addFavorite(${productId})`);
     return this._backendAddFavorite(productId).pipe(
-      tap(() => {
-        // After successful "backend" addition, refresh the favorites list
-        this.loadFavorites();
+      tap((addedWishlistProduct) => {
+        this.loadFavorites(); // Reloads the entire list from the server
       }),
       catchError(err => {
-        console.error(`Service: Failed to add product ${productId} to favorites`, err);
-        // Do not call loadFavorites() on error.
         return throwError(() => err);
       })
     );
@@ -87,45 +217,72 @@ export class FavoritesApiService {
 
   // Public method for components to remove a product from favorites
   public removeFavorite(productId: number | string): Observable<void> {
-    // This observable is for the outcome of the "remove" operation itself.
     return this._backendRemoveFavorite(productId).pipe(
       tap(() => {
-        // After successful "backend" removal, refresh the favorites list
-        this.loadFavorites();
+        this.loadFavorites(); // Reloads the entire list from the server
       }),
       catchError(err => {
-        console.error(`Service: Failed to remove product ${productId} from favorites`, err);
-        // Do not call loadFavorites() on error.
         return throwError(() => err);
       })
     );
   }
 
-  // Helper to check if a product is a favorite, useful for individual cards
-  public in_wishlist(productId: number | string): Observable<boolean> {
+  /// Helper to check if a product is a favorite (renamed from in_wishlist)
+  public isFavorite(productId: number | string): Observable<boolean> {
     return this.favorites$.pipe(
-      map(favorites => favorites.some(p => p.id === productId))
+      map(favorites => favorites.some(p => p.product_detail.id === productId))
     );
+  }
+
+  public toggleFavorite(productId: number | string): Observable<{ action: 'added' | 'removed', product?: Product, productId: number | string }> {
+    console.log(`[FavoritesApiService] toggleFavorite(${productId})`);
+    const isCurrentlyFavorite = this.favoritesSubject.getValue().some(wp => wp.product_detail.id === productId);
+
+    if (isCurrentlyFavorite) {
+      return this.removeFavorite(productId).pipe(
+        map(() => ({ action: 'removed' as const, productId }))
+      );
+    } else {
+      return this.addFavorite(productId).pipe( // This now returns Observable<WishlistProduct>
+        map(addedWishlistProduct => ({ // addedWishlistProduct is WishlistProduct
+          action: 'added' as const,
+          product: addedWishlistProduct.product_detail, // Extract Product from WishlistProduct
+          wishlistProduct: addedWishlistProduct,
+          productId
+        }))
+      );
+    }
   }
 
   /**
    * Toggles the favorite status of a product.
-   * If it's a favorite, it will be removed. If not, it will be added.
-   * The underlying addFavorite/removeFavorite methods will trigger loadFavorites.
+   * If the user is not authenticated, it prompts them to log in.
+   * After successful login, it re-attempts the toggle action.
    * @param productId The ID of the product to toggle.
-   * @returns An observable emitting an object indicating the action performed and product details.
+   * @returns An Observable emitting the result of the toggle action.
    */
-  public toggleFavorite(productId: number | string): Observable<{ action: 'added' | 'removed', product?: Product, productId: number | string }> {
-    const currentFavorites = this.favoritesSubject.getValue(); // Get current state synchronously
-    const isCurrentlyFavorite = currentFavorites.some(p => p.id === productId);
-
-    if (isCurrentlyFavorite) {
-      return this.removeFavorite(productId).pipe( // Calls public removeFavorite
-        map(() => ({ action: 'removed' as const, productId }))
-      );
+  public toggleFavoriteWithAuthPrompt(productId: number | string): Observable<FavoritesToggleResult> {
+    if (this.authService.isAuthenticatedSync()) {
+      return this.toggleFavorite(productId);
     } else {
-      return this.addFavorite(productId).pipe( // Calls public addFavorite
-        map(addedProduct => ({ action: 'added' as const, product: addedProduct, productId }))
+      const dialogRef = this.dialog.open(LoginComponent, {
+        width: '450px',
+        maxWidth: '90vw',
+        data: {
+          preambleMessage: this.translate.instant('auth.loginToFavoritePrompt')
+        }
+      });
+
+      return dialogRef.afterClosed().pipe(
+        switchMap(loginResult => {
+          if (loginResult?.loggedIn) {
+            // Login successful, now attempt to toggle favorite
+            return this.toggleFavorite(productId);
+          } else {
+            // Login cancelled or failed
+            return EMPTY; // Completes the observable chain without further action
+          }
+        })
       );
     }
   }
