@@ -3,7 +3,6 @@ import {BehaviorSubject, catchError, delay, map, Observable, of, tap, throwError
 import {UserInfo} from '../models/user-info';
 import {Order} from '../models/order';
 import {HttpClient} from '@angular/common/http';
-import {CommonApiResponse} from '../../../core/models/common-api-response';
 import {Url} from '../../../core/constants/base-url';
 import {AuthService} from '../../../core/services/auth.service';
 

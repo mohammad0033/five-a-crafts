@@ -11,7 +11,6 @@ import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {ProfileService} from '../../services/profile.service';
 import {ProfileResolvedData} from '../../resolvers/profile.resolver';
 import {map} from 'rxjs';
-import {UserInfo} from '../../models/user-info';
 
 @UntilDestroy()
 @Component({
