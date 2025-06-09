@@ -1,24 +1,18 @@
 import { Injectable } from '@angular/core';
-import {delay, Observable, of, tap} from 'rxjs';
+import {BehaviorSubject, catchError, delay, map, Observable, of, tap, throwError} from 'rxjs';
 import {UserInfo} from '../models/user-info';
 import {Order} from '../models/order';
+import {HttpClient} from '@angular/common/http';
+import {CommonApiResponse} from '../../../core/models/common-api-response';
+import {Url} from '../../../core/constants/base-url';
+import {AuthService} from '../../../core/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-
-  // Mock Data
-  private mockUserInfo: UserInfo = {
-    name: 'Current User Name',
-    company: 'User Company Inc.',
-    address: '456 Park Ave',
-    apartment: 'Suite 101',
-    city: 'Metropolis',
-    governorate: 'Region',
-    phone: '555-0000',
-    email: 'user@example.com'
-  };
+  private userInfoSubject = new BehaviorSubject<UserInfo | null>(null);
+  public userInfo$: Observable<UserInfo | null> = this.userInfoSubject.asObservable();
 
   private mockOrders: Order[] = [
     {
@@ -69,40 +63,84 @@ export class ProfileService {
     },
   ];
 
-  constructor() { }
+  constructor(private http: HttpClient,
+              private authService: AuthService) { }
 
   /**
-   * Simulates fetching user information.
-   * @returns An Observable resolving with user info after a delay.
+   * Fetches the current user's profile information from the backend.
+   * @returns An Observable of UserInfo.
    */
-  getUserInfo(): Observable<UserInfo> {
-    console.log('ProfileService: Fetching user info...');
-    // Use `of` to create an observable from the mock data
-    // Use `delay` to simulate network latency
-    // Use `tap` to log before returning
-    return of(this.mockUserInfo).pipe(
-      delay(1000), // Simulate 1 second delay
-      tap(() => console.log('ProfileService: User info fetched.'))
-      // Example of simulating an error:
-      // return throwError(() => new Error('Failed to fetch user info')).pipe(delay(1000));
+  getUserInfo(): Observable<UserInfo | null> { // Added this method
+    const headers = this.authService.getAuthHeaders()
+    // Replace with your actual API endpoint for fetching user profile
+    return this.http.get<any>(`${Url.baseUrl}/api/user/properties/` , { headers }).pipe(
+      map(response => {
+        if (response && response.status && response.data) {
+          return response.data;
+        }
+        // If status is false or data is missing, but the request itself didn't fail http-wise
+        console.warn('ProfileService: getUserInfo API call successful but data not as expected.', response);
+        return null; // Or throw an error if this case should be treated as a failure
+      }),
+      catchError(error => {
+        console.error('ProfileService: Error fetching user info via API', error);
+        // It's often better for the resolver to get a null than to fail the entire navigation,
+        // unless user info is absolutely critical for the route to function.
+        return of(null);
+      })
     );
   }
 
   /**
-   * Simulates updating user information.
-   * @param updatedInfo The new user information.
-   * @returns An Observable resolving with the updated user info after a delay.
+   * Loads the initial user information into the BehaviorSubject.
+   * This is typically called once when the profile section is loaded,
+   * often with data from a route resolver.
+   * @param userInfo The initial user information.
    */
-  updateUserInfo(updatedInfo: UserInfo): Observable<UserInfo> {
-    console.log('ProfileService: Saving user info...', updatedInfo);
-    // In a real service, you'd make an HTTP PUT/POST request here.
-    // For the mock, we'll update the local mock data and return it.
-    this.mockUserInfo = { ...this.mockUserInfo, ...updatedInfo }; // Simple merge
-    return of(this.mockUserInfo).pipe(
-      delay(1500), // Simulate 1.5 second delay for saving
-      tap(() => console.log('ProfileService: User info saved.', this.mockUserInfo))
-      // Example of simulating a save error:
-      // return throwError(() => new Error('Failed to save user info')).pipe(delay(1500));
+  loadInitialUserInfo(userInfo: UserInfo[] | null): void {
+    if (!userInfo || userInfo.length === 0) {
+      this.userInfoSubject.next(null);
+      return;
+    }
+    this.userInfoSubject.next(userInfo[0]);
+  }
+
+  /**
+   * Updates the shared user information state.
+   * This should be called after a successful API update.
+   * @param updatedUserInfo The new user information.
+   */
+  private updateSharedUserInfo(updatedUserInfo: UserInfo): void {
+    this.userInfoSubject.next(updatedUserInfo);
+  }
+
+  /**
+   * Gets the current value of UserInfo from the BehaviorSubject.
+   * Useful for components that need a snapshot and aren't subscribing.
+   */
+  getCurrentUserInfo(): UserInfo | null {
+    return this.userInfoSubject.getValue();
+  }
+
+  /**
+   * Makes an API call to update user information on the backend.
+   * On success, it updates the shared UserInfo state.
+   * @param userData The user data to update.
+   */
+  updateUserInfo(userData: Partial<UserInfo>): Observable<UserInfo> {
+    const headers = this.authService.getAuthHeaders()
+    return this.http.patch<any>(`${Url.baseUrl}/api/user/properties/0/`, userData, { headers } ).pipe( // Changed to CommonApiResponse<UserInfo>
+      map(response => {
+        if (response && response.status && response.data) {
+          this.updateSharedUserInfo(response.data);
+          return response.data;
+        }
+        throw new Error(response?.message || 'Failed to update user info or API response format incorrect.');
+      }),
+      catchError(error => {
+        console.error('Error updating user info via API:', error);
+        return throwError(() => new Error(error.error?.message || error.message || 'API error during user info update.'));
+      })
     );
   }
 
