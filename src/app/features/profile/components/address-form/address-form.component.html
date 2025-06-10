@@ -1,0 +1,36 @@
+<form class="p-3" [formGroup]="addressForm" (ngSubmit)="onSave()">
+  <h2 mat-dialog-title>
+    {{ (isEditMode ? 'profile.editAddressTitle' : 'profile.addAddressTitle') | translate }}
+  </h2>
+
+  <mat-dialog-content class="d-flex flex-column gap-3 py-3">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'profile.titleLabel' | translate }}</mat-label>
+      <input matInput formControlName="title" required>
+      <mat-error *ngIf="addressForm.get('title')?.hasError('required')">
+        {{ 'profile.titleRequired' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'profile.detailsLabel' | translate }}</mat-label>
+      <textarea matInput formControlName="details" rows="3" required></textarea>
+      <mat-error *ngIf="addressForm.get('details')?.hasError('required')">
+        {{ 'profile.detailsRequired' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="isDefault" color="primary">
+      {{ 'profile.setDefault' | translate }}
+    </mat-checkbox>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="onCancel()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="addressForm.invalid">
+      {{ 'common.saveChanges' | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

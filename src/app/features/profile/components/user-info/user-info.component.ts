@@ -11,6 +11,7 @@ import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {finalize} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import {ProfileResolvedData} from '../../resolvers/profile.resolver';
+import {UserInfo} from '../../models/user-info';
 
 @UntilDestroy()
 @Component({
@@ -45,40 +46,42 @@ export class UserInfoComponent implements OnInit {
 
   ngOnInit(): void {
     this.userInfoForm = this.fb.group({
-      name: ['', Validators.required],
-      company: [''],
-      address: ['', Validators.required],
-      apartment: [''],
-      city: ['', Validators.required],
-      governorate: [''],
-      phone: ['', Validators.required],
+      name: [''],
+      phone_number: [''],
       email: ['', [Validators.required, Validators.email]]
     });
 
-    this.loadUserInfo();
+    this.loadInitialFormValues();
   }
 
-  loadUserInfo(): void { // Changed to void as it's handled by subscription
+  loadInitialFormValues(): void {
     this.isLoading = true;
-    this.isLoadingSave = false; // Ensure this is false when loading initially
-
+    // Option 1: Use data from resolver (if ProfileService isn't populated yet by ProfileComponent)
     this.route.parent?.data.pipe(
-      finalize(() => {
-        this.isLoading = false;
-      }),
       untilDestroyed(this)
     ).subscribe(data => {
       const resolvedData = data['profilePageData'] as ProfileResolvedData;
+      console.log('UserInfoComponent resolved data:', resolvedData);
       if (resolvedData && resolvedData.userInfo) {
-        this.userInfoForm.patchValue(resolvedData.userInfo);
-        this.initialFormValue = this.userInfoForm.value;
-        // ...
-        this.isLoading = false; // Data is pre-loaded
-      } else {
-        // Handle case where userInfo might be null due to resolver error
-        this.isLoading = false;
+        let userInfo = Array.isArray(resolvedData.userInfo) ? resolvedData.userInfo : [resolvedData.userInfo];
+        this.patchForm(userInfo[0]);
       }
+      this.isLoading = false;
     });
+
+    // Option 2: Or, if ProfileService is guaranteed to be populated by ProfileComponent first,
+    // you could subscribe to profileService.userInfo$ here for initial values.
+    // However, resolver data is often more direct for initial child component setup.
+  }
+
+  private patchForm(userInfo: UserInfo | null): void {
+    if (userInfo) {
+      console.log('Patching form with initial user info:', userInfo);
+      this.userInfoForm.patchValue(userInfo);
+      console.log('Patched form value:', this.userInfoForm.value);
+      this.initialFormValue = this.userInfoForm.value;
+      console.log('Initial form value:', this.initialFormValue);
+    }
   }
 
   enterEditMode(): void {
@@ -87,35 +90,44 @@ export class UserInfoComponent implements OnInit {
     // setTimeout(() => document.getElementById('edit-first-name')?.focus(), 0);
   }
 
-  saveUserInfo(): void { // Changed to void
+  saveUserInfo(): void {
     if (this.userInfoForm.invalid || !this.userInfoForm.dirty) {
-      // Optionally mark all fields as touched to show validation errors
       this.userInfoForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading = true; // Use main loading flag for saving state
-    this.isLoadingSave = true; // Use specific flag for text
-    const formData = this.userInfoForm.value;
+    this.isLoadingSave = true;
+    let formData = this.userInfoForm.value as Partial<UserInfo>;
+    if (formData.phone_number?.length === 0) {
+      formData.phone_number = undefined
+    } else {
+      if (formData.phone_number?.startsWith('+2')) {
+        formData.phone_number = formData.phone_number.slice(2)
+      }
+      formData.phone_number = '+2' + formData.phone_number
+    }
+    this.userInfoForm.disable()
 
+    // The profileService.updateUserInfo method now handles updating the BehaviorSubject internally
     this.profileService.updateUserInfo(formData).pipe(
-      untilDestroyed(this)
+      untilDestroyed(this),
+      finalize(() => {
+        this.isLoadingSave = false
+        this.userInfoForm.enable()
+      })
     ).subscribe({
       next: (updatedUserData) => {
-        this.initialFormValue = updatedUserData;
+        // The BehaviorSubject is already updated by the service.
+        // We just need to reset the form's state and UI.
+        this.initialFormValue = updatedUserData; // Use the fresh data from API
         this.userInfoForm.reset(this.initialFormValue);
         this.isEditMode = false;
-        // this.notificationService.showSuccess('User information saved successfully!'); // Optional
-        console.log('User info saved:', updatedUserData);
+        console.log('User info saved and shared state updated:', updatedUserData);
+        // Optional: Show success notification
       },
       error: (error) => {
         console.error('Error saving user info:', error);
-        // this.notificationService.showError('Failed to save user information.'); // Optional
-        // Keep in edit mode on error, form retains unsaved values
-      },
-      complete: () => {
-        this.isLoading = false;
-        this.isLoadingSave = false;
+        // Optional: Show error notification
       }
     });
   }

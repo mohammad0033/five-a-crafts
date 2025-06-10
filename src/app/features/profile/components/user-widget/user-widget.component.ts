@@ -2,9 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {NgClass, NgIf} from '@angular/common';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 import {faUser} from '@fortawesome/free-regular-svg-icons';
-import {TranslateService} from '@ngx-translate/core';
-// import {TranslatePipe} from '@ngx-translate/core';
-// import {faEdit} from '@fortawesome/free-solid-svg-icons';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-user-widget',
@@ -12,6 +10,7 @@ import {TranslateService} from '@ngx-translate/core';
     NgIf,
     FaIconComponent,
     NgClass,
+    TranslatePipe,
     // TranslatePipe
   ],
   templateUrl: './user-widget.component.html',
@@ -19,7 +18,7 @@ import {TranslateService} from '@ngx-translate/core';
   styleUrl: './user-widget.component.scss'
 })
 export class UserWidgetComponent implements OnInit {
-  @Input() image!:string
+  @Input() image!:string | null
   @Input() name!:string
   @Input() phone!:string
   protected readonly faUser = faUser;

@@ -5,6 +5,7 @@ export interface UserInfo {
   apartment?: string;
   city: string;
   governorate?: string;
-  phone: string;
+  phone_number: string;
   email: string;
+  image_url?: string | null;
 }

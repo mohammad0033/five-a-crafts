@@ -1,1 +1,15 @@
-<p>user-addresses works!</p>
+<div class="d-flex flex-column gap-3">
+  <h2>{{ 'profile.addresses' | translate }}</h2>
+  <button type="button" class="btn btn-main-primary col-12 col-sm-4" (click)="addAddress()">{{ 'profile.addAddress' | translate }}</button>
+  <ng-container *ngIf="(addresses$ | async) as addresses; else noAddressesTemplate">
+    <ng-container *ngIf="addresses.length > 0; else noAddressesTemplate">
+      <app-user-address-card *ngFor="let address of addresses"
+                             [address]="address"
+                             (editAddress)="editAddress($event)"
+                             (deleteAddress)="deleteAddress($event)"></app-user-address-card>
+    </ng-container>
+  </ng-container>
+  <ng-template #noAddressesTemplate>
+    <p>{{ 'profile.noAddresses' | translate }}</p>
+  </ng-template>
+</div>

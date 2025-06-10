@@ -1,1 +1,25 @@
-<p>user-address-card works!</p>
+<div class="d-flex flex-column gap-2 p-3 border border-1 border-secondary-subtle rounded-3 col-12 col-md-8 col-lg-6">
+  <div class="d-flex justify-content-between">
+    <h3 class="fs-5 fw-medium text-main-primary">{{address.title}}</h3>
+    <div>
+      <button mat-icon-button [matMenuTriggerFor]="addressMenu" aria-label="Address actions menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #addressMenu="matMenu">
+        <button mat-menu-item (click)="handleEditAddress(address)">
+          <mat-icon>edit</mat-icon>
+          <span>{{ 'common.edit' | translate }}</span>
+        </button>
+        <button mat-menu-item (click)="handleDeleteAddress(address)">
+          <mat-icon>delete</mat-icon>
+          <span>{{ 'common.delete' | translate }}</span> <!-- Assuming you'll add 'common.delete' to your i18n files -->
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+<!--  <p>{{address.details | slice:0:30}} {{address.details.length > 30 ? '...' : ''}}</p>-->
+  <p class="mb-0 text-muted">{{address.details}}</p>
+  <div *ngIf="address.isDefault" class="mt-1">
+    <span class="badge bg-success-subtle text-success-emphasis">{{ 'profile.defaultAddress' | translate }}</span> <!-- Assuming 'profile.defaultAddress' for translation -->
+  </div>
+</div>
