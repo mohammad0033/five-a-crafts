@@ -5,6 +5,8 @@ import {Order} from '../models/order';
 import {HttpClient} from '@angular/common/http';
 import {Url} from '../../../core/constants/base-url';
 import {AuthService} from '../../../core/services/auth.service';
+import {UserAddress} from '../models/user-address';
+import {CommonApiResponse} from '../../../core/models/common-api-response';
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +63,23 @@ export class ProfileService {
       ]
     },
   ];
+
+  // --- NEW MOCK ADDRESS DATA ---
+  private mockUserAddresses: UserAddress[] = [
+    {
+      id: 'addr_home_123',
+      title: 'Home Address',
+      details: '123 Sunshine Avenue, Apt 4B, Springfield, IL 62704, USA',
+      isDefault: true
+    },
+    {
+      id: 'addr_work_456',
+      title: 'Work Address',
+      details: '456 Corporate Plaza, Suite 700, Metropolis, IL 60601, USA',
+      isDefault: false
+    }
+  ];
+  // --- END NEW MOCK ADDRESS DATA ---
 
   constructor(private http: HttpClient,
               private authService: AuthService) { }
@@ -184,4 +203,73 @@ export class ProfileService {
       // })
     );
   }
+
+  // --- NEW ADDRESS METHODS ---
+  /**
+   * Simulates fetching user addresses.
+   * @returns An Observable resolving with a list of user addresses.
+   */
+  getUserAddresses(): Observable<UserAddress[]> {
+    let headers = this.authService.getAuthHeaders()
+    return this.http.get<CommonApiResponse>(`${Url.baseUrl}/api/oscar/useraddresses/`, { headers }).pipe(
+      map((response:CommonApiResponse) => {
+        console.log('ProfileService: Received user addresses response:', response);
+        if (response.data && Array.isArray(response.data)) {
+          return response.data;
+        } else {
+          console.error('ProfileService: Invalid response data format');
+          return [];
+        }
+      })
+    )
+  }
+
+  /**
+   * Simulates adding a new user address.
+   * @param addressData The data for the new address.
+   * @returns An Observable resolving with the newly added address (including an ID).
+   */
+  addUserAddress(addressData: Omit<UserAddress, 'id'>): Observable<UserAddress> {
+    console.log('ProfileService: Adding new address...', addressData);
+    const newAddress: UserAddress = {
+      ...addressData,
+      id: `addr_${Date.now()}` // Simple unique ID generation for mock
+    };
+    this.mockUserAddresses.push(newAddress);
+    // In a real app, you'd likely want to update a BehaviorSubject here
+    // and return the response from the server.
+    return of(newAddress).pipe(delay(300));
+  }
+
+  /**
+   * Simulates updating an existing user address.
+   * @param addressId The ID of the address to update.
+   * @param updatedData The new data for the address.
+   * @returns An Observable resolving with the updated address.
+   */
+  updateUserAddress(addressId: string, updatedData: Partial<UserAddress>): Observable<UserAddress | null> {
+    console.log(`ProfileService: Updating address ${addressId}...`, updatedData);
+    const addressIndex = this.mockUserAddresses.findIndex(addr => addr.id === addressId);
+    if (addressIndex > -1) {
+      this.mockUserAddresses[addressIndex] = { ...this.mockUserAddresses[addressIndex], ...updatedData };
+      // In a real app, update BehaviorSubject.
+      return of({...this.mockUserAddresses[addressIndex]}).pipe(delay(300));
+    }
+    return of(null).pipe(delay(300)); // Address not found
+  }
+
+  /**
+   * Simulates deleting a user address.
+   * @param addressId The ID of the address to delete.
+   * @returns An Observable resolving with a boolean indicating success.
+   */
+  deleteUserAddress(addressId: string): Observable<boolean> {
+    console.log(`ProfileService: Deleting address ${addressId}...`);
+    const initialLength = this.mockUserAddresses.length;
+    this.mockUserAddresses = this.mockUserAddresses.filter(addr => addr.id !== addressId);
+    // In a real app, update BehaviorSubject.
+    const success = this.mockUserAddresses.length < initialLength;
+    return of(success).pipe(delay(300));
+  }
+  // --- END NEW ADDRESS METHODS ---
 }
